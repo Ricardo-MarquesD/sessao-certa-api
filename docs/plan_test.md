@@ -197,14 +197,15 @@ Organizados por módulo/endpoint, mapeados a RF/UC/RNF. Cada caso inclui: ID, De
 | TC_REP_03 | Acesso negado (employee) | Logado employee. | 1. GET /reports/financial. | 403. | RNF003. |
 | TC_REP_04 | Edge: Período sem dados | Logado. | 1. GET com datas vazias. | 200, zeros/ vazio. | RF008. |
 
-### 10. Mensagens Customizáveis (/marketing)
-- Mapeamento: RF009, RF021, UC009, RN03-04 (Prata/Ouro).
+### ~~10. Mensagens Customizáveis (/marketing)~~
+- ~~Mapeamento: RF009, RF021, UC009, RN03-04 (Prata/Ouro).~~
 
-| ID | Descrição | Pré-condições | Passos | Resultado Esperado | Critério |
-|----|-----------|----------------|--------|---------------------|----------|
-| TC_MKT_01 | Enviar mensagem | Logado Prata/Ouro. | 1. POST /marketing/messages. | 201, enviadas via WhatsApp. | RF009. |
-| TC_MKT_02 | Plano negado (Bronze) | Logado Bronze. | 1. POST /marketing/messages. | 403 Plano não permite. | RN02. |
-| TC_MKT_03 | Edge: Segmento vazio | Logado. | 1. POST sem usuários. | 400 Inválido. | RF021. |
+| ~~ID~~ | ~~Descrição~~ | ~~Pré-condições~~ | ~~Passos~~ | ~~Resultado Esperado~~ | ~~Critério~~ |
+|--------|----------------|-------------------|------------|-------------------------|--------------|
+| ~~TC_MKT_01~~ | ~~Enviar mensagem~~ | ~~Logado Prata/Ouro.~~ | ~~1. POST /marketing/messages.~~ | ~~201, enviadas via WhatsApp.~~ | ~~RF009.~~ |
+| ~~TC_MKT_02~~ | ~~Plano negado (Bronze)~~ | ~~Logado Bronze.~~ | ~~1. POST /marketing/messages.~~ | ~~403 Plano não permite.~~ | ~~RN02.~~ |
+| ~~TC_MKT_03~~ | ~~Edge: Segmento vazio~~ | ~~Logado.~~ | ~~1. POST sem usuários.~~ | ~~400 Inválido.~~ | ~~RF021.~~ |
+
 
 ### 11. Notificações (/notifications)
 - Mapeamento: RF010, UC010.

@@ -2,7 +2,7 @@
 
 ## Introdução
 
-Este documento descreve os endpoints da API RESTful para o produto Sessão Certa, um SaaS de gerenciamento de agendamentos para pequenos comerciantes (ex.: barbeiros, salões de beleza, etc). A API é projetada para suportar as funcionalidades descritas nos requisitos funcionais (RF001 a RF025) e casos de uso (UC001 a UC015), incluindo autenticação, gerenciamento de agendamentos, funcionários, clientes finais, estoque, relatórios contábeis, mensagens customizáveis e integrações externas (ex.: WhatsApp, pagamentos).
+Este documento descreve os endpoints da API RESTful para o produto Sessão Certa, um SaaS de gerenciamento de agendamentos para pequenos comerciantes (ex.: barbeiros, salões de beleza, etc). A API é projetada para suportar as funcionalidades descritas nos requisitos funcionais (RF001 a RF025) e casos de uso (UC001 a UC015), incluindo autenticação, gerenciamento de agendamentos, funcionários, clientes finais, estoque, relatórios contábeis, ~~mensagens customizáveis~~ e integrações externas (ex.: WhatsApp, pagamentos).
 
 A API segue o padrão REST, utiliza JSON para requisições e respostas, e é implementada com FastAPI (Python). Autenticação é baseada em JWT, com roles: `admin` (administrador), `client` (cliente/dono do estabelecimento) e `employee` (funcionário). Endpoints sensíveis requerem autorização.
 
@@ -96,11 +96,12 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | GET | /reports/financial | Gera relatório financeiro (rendimentos por período, atendimentos) (RF008, RF016, UC008). Requer role `client`. | `period` (daily/weekly/monthly/annual), `start_date`, `end_date` | - | 200: `{ "total_revenue": "decimal", "appointments_count": "int", "details": "json" }` |
 | GET | /reports/export | Exporta relatório (CSV/PDF) (RF016). Requer role `client`. | `format` (csv/pdf), `period` | - | 200: Arquivo binário |
 
-## Mensagens Customizáveis (Marketing - Planos Prata/Ouro)
+## ~~Mensagens Customizáveis (Marketing - Planos Prata/Ouro)~~
 
-| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
-|--------|---------|-----------|---------------------|---------------------|----------|
-| POST | /marketing/messages | Cria e envia mensagem customizável via WhatsApp (RF009, RF021, UC009). Requer role `client` e plano Prata/Ouro. | `segment` (filtro de usuários) | `{ "content": "string" }` | 201: `{ "id": "uuid", "sent_count": "int" }` <br> 403: Plano não permite |
+| ~~Método~~ | ~~Caminho~~ | ~~Descrição~~ | ~~Parâmetros de Query~~ | ~~Corpo da Requisição~~ | ~~Resposta~~ |
+|------------|-------------|---------------|---------------------------|---------------------------|--------------|
+| ~~POST~~ | ~~\/marketing\/messages~~ | ~~Cria e envia mensagem customizável via WhatsApp (RF009, RF021, UC009). Requer role `client` e plano Prata/Ouro.~~ | ~~`segment` (filtro de usuários)~~ | ~~`{ "content": "string" }`~~ | ~~201: `{ "id": "uuid", "sent_count": "int" }` <br> 403: Plano não permite~~ |
+
 
 ## Notificações
 
