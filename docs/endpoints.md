@@ -103,11 +103,11 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | ~~POST~~ | ~~\/marketing\/messages~~ | ~~Cria e envia mensagem customizável via WhatsApp (RF009, RF021, UC009). Requer role `client` e plano Prata/Ouro.~~ | ~~`segment` (filtro de usuários)~~ | ~~`{ "content": "string" }`~~ | ~~201: `{ "id": "uuid", "sent_count": "int" }` <br> 403: Plano não permite~~ |
 
 
-## Notificações
+## ~~Notificações~~
 
-| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+| ~~Método~~ | ~~Caminho~~ | ~~Descrição~~ | ~~Parâmetros de Query~~ | ~~Corpo da Requisição~~ | ~~Resposta~~ |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| POST | /notifications/reminders | Envia lembrete manual para agendamento (RF010, UC010). Requer role `client` ou `employee`. | `appointment_id` (obrigatório) | - | 200: `{ "message": "Lembrete enviado" }` |
+| ~~POST~~ | ~~/notifications/reminders~~ | ~~Envia lembrete manual para agendamento (RF010, UC010). Requer role `client` ou `employee`.~~ | ~~`appointment_id` (obrigatório)~~ | - | ~~200: `{ "message": "Lembrete enviado" }`~~ |
 
 ## Integrações Externas (Internal/Admin)
 
