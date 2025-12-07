@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from config import connection_test
-from config import db
+from config import engine
 
 app = FastAPI()
-connection_test(db)
+connection_test(engine)
 
 @app.get("/")
 def root():
