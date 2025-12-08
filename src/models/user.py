@@ -21,7 +21,7 @@ class User(Base):
     update_in = Column(DateTime, nullable = False, server_default = func.current_timestamp(), onupdate = func.current_timestamp())
 
     __mapper_args__ = {
-        "polymorphic_identity": "user",
+        "polymorphic_identity": "user", '''<--- Adicionar um na client e em employee'''
         "polymorphic_on": role
     }
 
