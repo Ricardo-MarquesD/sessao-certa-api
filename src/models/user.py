@@ -3,9 +3,9 @@ from ...config import Base
 from enum import Enum as enum
 
 class UserRole(enum):
-    CLIENT = 0
-    EMPLOYEE = 1
-    ADMIN = 2
+    CLIENT = "CLIENT"
+    EMPLOYEE = "EMPLOYEE"
+    ADMIN = "ADMIN"
 
 class User(Base):
     __tablename__ = "users"
@@ -30,7 +30,7 @@ class User(Base):
         update_str = self.update_in.strftime("%Y-%m-%d %H:%M:%S") if self.update_in else None
         return (
             f"<User(id={self.id}, name='{self.user_name}', email='{self.email}', "
-            f"role='{self.role.name}', active_status={self.active_status}, "
+            f"role='{self.role.value}', active_status={self.active_status}, "
             f"create_in={create_str}, update_in={update_str})>"
         )
     def to_dict(self):
@@ -39,7 +39,7 @@ class User(Base):
             "name": self.name,
             "phone_number": self.phone_number,
             "email": self.email,
-            "role": self.role.name,
+            "role": self.role.value,
             "active_status": self.active_status,
             "create_in": self.create_in.strftime("%Y-%m-%d %H:%M:%S") if self.create_in else None,
             "update_in": self.update_in.strftime("%Y-%m-%d %H:%M:%S") if self.update_in else None

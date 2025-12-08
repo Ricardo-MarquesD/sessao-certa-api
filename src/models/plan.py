@@ -3,9 +3,9 @@ from ...config import Base
 from enum import Enum as enum
 
 class TypePlan(enum):
-    BRONZE = 0
-    SILVER = 1
-    GOLD = 2
+    BRONZE = "BRONZE"
+    SILVER = "SILVER"
+    GOLD = "GOLD"
 
 class Plan(Base):
     __tablename__ = "plans"
@@ -19,14 +19,14 @@ class Plan(Base):
 
     def __repr__(self):
         return (
-            f"<Plan(id={self.id}, type_plan='{self.type_plan.name}', basic_price={self.basic_price}, "
+            f"<Plan(id={self.id}, type_plan='{self.type_plan.value}', basic_price={self.basic_price}, "
             f"max_employee={self.max_employee}, allow_stock={self.allow_stock}, allow_advanced_analysis={self.allow_advanced_analysis})>"   
         )
     
     def to_dict(self):
         return {
             "id": self.id,
-            "type_plan": self.type_plan.name,
+            "type_plan": self.type_plan.value,
             "basic_price": self.basic_price,
             "max_employee": self.max_employee,
             "allow_stock": self.allow_stock,
