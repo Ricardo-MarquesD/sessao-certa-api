@@ -5,3 +5,5 @@ from .plan import TypePlan
 from .client import Client
 from .establishment import Establishment
 from .costumer import Costumer
+from .employee import Employee
+from .marketing_menssage import MarketingMenssage
