@@ -10,7 +10,7 @@ class TypePlan(enum):
 class Plan(Base):
     __tablename__ = "plans"
 
-    id = Column(Integer, primary_key = True, nullable = False)
+    id = Column(Integer, primary_key = True, autoincrement = True,nullable = False)
     type_plan = Column(Enum(TypePlan), nullable = False)
     basic_price = Column(Numeric(10,2), nullable = False)
     max_employee = Column(Integer, nullable = False)

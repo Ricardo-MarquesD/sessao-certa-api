@@ -10,7 +10,7 @@ class UserRole(enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key = True, nullable = False)
+    id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     user_name = Column(String(150), nullable = False)
     password_hash = Column(String(255), nullable = False)
     phone_number = Column(String(30), nullable = False)
