@@ -7,7 +7,7 @@ class PaymentStatus(enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REFUSED = "REFUSED"
-    REFUND = "REFUNDED"
+    REFUND = "REFUND"
 
 class PaymentType(enum):
     MONTHLY_SUBSCRIPTION = "MONTHLY_SUBSCRIPTION"
