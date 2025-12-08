@@ -4,6 +4,7 @@ from .user import User
 
 class Client(User):
     __tablename__ = "clients"
+    
     id = Column(Integer, primary_key = True, autoincrement = True, nullable= False)
     users_id = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     plans_id = Column(Integer, ForeignKey("plans.id", ondelete = "RESTRICT", onupdate = "CASCADE"), nullable = False)
