@@ -4,3 +4,4 @@ from .plan import Plan
 from .plan import TypePlan
 from .client import Client
 from .establishment import Establishment
+from .costumer import Costumer
