@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, Enum, ForeignKey, func
 from sqlalchemy.orm import relationship
-from ...config import Base
+from config import Base
 from enum import Enum as enum
 
 class AppointmentStatus(enum):
@@ -22,7 +22,6 @@ class Scheduling(Base):
     appointment_date = Column(DateTime, nullable=False)
     appointment_status = Column(Enum(AppointmentStatus), nullable=False)
     notification_sent = Column(Boolean, nullable=False)
-
     establishment = relationship("Establishment", backref="schedulings", foreign_keys=[establishments_id])
     employee = relationship("Employee", backref="schedulings", foreign_keys=[employees_id])
     customer = relationship("Customer", backref="schedulings", foreign_keys=[customers_id])

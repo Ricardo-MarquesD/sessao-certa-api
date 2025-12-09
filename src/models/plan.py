@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Boolean, Numeric, Enum
-from ...config import Base
+from config import Base
 from enum import Enum as enum
 
 class TypePlan(enum):

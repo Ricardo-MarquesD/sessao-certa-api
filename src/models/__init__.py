@@ -4,10 +4,15 @@ from .plan import Plan
 from .plan import TypePlan
 from .client import Client
 from .establishment import Establishment
-from .costumer import Costumer
+from .customer import Customer
 from .employee import Employee
-from .marketing_menssage import MarketingMenssage
+from .marketing_message import MarketingMessage
 from .payment import Payment
 from .payment import PaymentType
 from .payment import PaymentStatus
 from .service import Service
+from .scheduling import Scheduling
+from .scheduling import AppointmentStatus
+from .stock_product import StockProduct
+from .stock_movement import StockMovement
+from .stock_movement import MovementType

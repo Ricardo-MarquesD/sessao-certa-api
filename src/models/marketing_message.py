@@ -1,19 +1,19 @@
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from ...config import Base
+from config import Base
 
-class MarketingMenssage(Base):
-    __tablename__ = "marketing_menssages"
+class MarketingMessage(Base):
+    __tablename__ = "marketing_messages"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     establishments_id = Column(Integer, ForeignKey("establishments.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     title = Column(String(150), nullable = False)
     content = Column(Text, nullable = False)
-    establishment = relationship("Establishment", backref = "marketing_menssages", foreign_keys = [establishments_id])
+    establishment = relationship("Establishment", backref = "marketing_messages", foreign_keys = [establishments_id])
 
     def __repr__(self):
         return (
-            f"<MarketingMenssage(id={self.id}, establishments_id={self.establishments_id}, "
+            f"<MarketingMessage(id={self.id}, establishments_id={self.establishments_id}, "
             f"title='{self.title}', content='{self.content}')>"
         )
     

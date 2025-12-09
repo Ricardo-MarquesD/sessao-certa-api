@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, func
-from ...config import Base
+from config import Base
 from enum import Enum as enum
 
 class UserRole(enum):
@@ -20,11 +20,6 @@ class User(Base):
     create_in = Column(DateTime, server_default = func.current_timestamp())
     update_in = Column(DateTime, server_default = func.current_timestamp(), onupdate = func.current_timestamp())
 
-    __mapper_args__ = {
-        "polymorphic_identity": "user", '''<--- Adicionar um na client e em employee'''
-        "polymorphic_on": role
-    }
-
     def __repr__(self):
         create_str = self.create_in.strftime("%Y-%m-%d %H:%M:%S") if self.create_in else None
         update_str = self.update_in.strftime("%Y-%m-%d %H:%M:%S") if self.update_in else None
@@ -36,7 +31,7 @@ class User(Base):
     def to_dict(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "name": self.user_name,
             "phone_number": self.phone_number,
             "email": self.email,
             "role": self.role.value,

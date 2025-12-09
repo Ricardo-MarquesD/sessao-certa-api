@@ -3,7 +3,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from config.settings import settings
 
 url_conn = f"mysql+pymysql://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_database}"
-print(url_conn)
 engine = create_engine(url_conn)
 
 Session = sessionmaker(bind=engine)

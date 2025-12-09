@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Numeric, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-from ...config import Base
+from config import Base
 from enum import Enum as enum
 
 class PaymentStatus(enum):
