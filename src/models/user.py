@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, func
-from config import Base
 from enum import Enum as enum
+from config import Base
 
 class UserRole(enum):
     CLIENT = "CLIENT"
@@ -16,7 +16,7 @@ class User(Base):
     phone_number = Column(String(30), nullable = False)
     email = Column(String(320), nullable = False)
     role = Column(Enum(UserRole), nullable = False)
-    active_status = Column(Boolean, nullable = False)
+    active_status = Column(Boolean, nullable = False, server_default = "False")
     create_in = Column(DateTime, server_default = func.current_timestamp())
     update_in = Column(DateTime, server_default = func.current_timestamp(), onupdate = func.current_timestamp())
 
