@@ -18,21 +18,23 @@ def test_user_table(db_session):
     result = db_session.query(User).filter_by(user_name = "Test User").first()
     assert result is not None
     assert result.user_name == "Test User"
+    assert result.role == UserRole.ADMIN
 
 def test_plan_table(db_session):
     plans = db_session.query(Plan).all()
+    assert len(plans) > 0
     for plan in plans:
         assert plan.type_plan in TypePlan
 
 def test_client_table(db_session):
     user = User(
-            user_name="Client User",
-            password_hash="hashed",
-            phone_number="987654321",
-            email="client@example.com",
-            role=UserRole.CLIENT,
-            active_status=True
-        )
+        user_name="Client User",
+        password_hash="hashed",
+        phone_number="987654321",
+        email="client@example.com",
+        role=UserRole.CLIENT,
+        active_status=True
+    )
     db_session.add(user)
     db_session.commit()
 
@@ -44,3 +46,42 @@ def test_client_table(db_session):
     client_result = db_session.query(Client).filter_by(users_id = client.users_id).first()
     assert client_result.plans_id == 1
     assert client_result.users_id == user_result.id
+
+def test_establishment_table(db_session):
+    user = User(
+        user_name="Client Establishment",
+        password_hash="hashed",
+        phone_number="987494321",
+        email="establishment@example.com",
+        role=UserRole.CLIENT,
+        active_status=True
+    )
+    db_session.add(user)
+    db_session.commit()
+    user_result = db_session.query(User).filter_by(user_name = "Client Establishment").first()
+
+    client = Client(
+        users_id = user_result.id,
+        plans_id = 1
+    )
+    db_session.add(client)
+    db_session.commit()
+    client_result = db_session.query(Client).filter_by(users_id = client.users_id).first()
+
+    establishment = Establishment(
+        clients_id = client_result.id,
+        establishment_name = "Test Establishment",
+        cnpj = "12345678000199",
+        chatbot_phone_number = "1122334455",
+        address = "123 Test St",
+        due_date = datetime(2024, 12, 31),
+        trial_active = True
+    )
+    db_session.add(establishment)
+    db_session.commit()
+    
+    establishment_result = db_session.query(Establishment).filter_by(establishment_name = "Test Establishment").first()
+    assert establishment_result is not None
+    assert establishment_result.cnpj == "12345678000199"
+    assert establishment_result.clients_id == client_result.id
+    
