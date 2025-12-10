@@ -84,4 +84,46 @@ def test_establishment_table(db_session):
     assert establishment_result is not None
     assert establishment_result.cnpj == "12345678000199"
     assert establishment_result.clients_id == client_result.id
-    
+
+def test_customer_table(db_session):
+    user = User(
+        user_name="Customer Line Test",
+        password_hash="hashed",
+        phone_number="555666777",
+        email="customerlinetest@example.com",
+        role=UserRole.CLIENT,
+        active_status=True
+    )
+    db_session.add(user)
+    db_session.commit()
+    user_result = db_session.query(User).filter_by(user_name = "Customer Line Test").first()
+    client = Client(
+        users_id = user_result.id,
+        plans_id = 1
+    )
+    db_session.add(client)
+    db_session.commit()
+    client_result = db_session.query(Client).filter_by(users_id = client.users_id).first()
+    establishment = Establishment(
+        clients_id = client_result.id,
+        establishment_name = "Customer Line Establishment",
+        cnpj = "98765432000188",
+        chatbot_phone_number = "9988776655",
+        address = "456 Customer St",
+        due_date = datetime(2024, 11, 30),
+        trial_active = True
+    )
+    db_session.add(establishment)
+    db_session.commit()
+    establishment_result = db_session.query(Establishment).filter_by(establishment_name = "Customer Line Establishment").first()
+    customer = Customer(
+        establishments_id = establishment_result.id,
+        customer_name = "Test Customer",
+        phone_number = "555666777"
+    )
+    db_session.add(customer)
+    db_session.commit()
+    customer_result = db_session.query(Customer).filter_by(customer_name = "Test Customer").first()
+    assert customer_result is not None
+    assert customer_result.phone_number == "555666777"
+    assert customer_result.establishments_id == establishment_result.id
