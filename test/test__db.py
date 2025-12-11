@@ -1,8 +1,21 @@
 from datetime import datetime
 from models import (
-    User, UserRole, Plan, TypePlan, Client, Establishment, Customer, Employee,
-    MarketingMessage, Payment, PaymentType, PaymentStatus, Service, Scheduling,
-    AppointmentStatus, StockProduct, StockMovement, MovementType
+    Client,
+    Customer,
+    Employee,
+    Establishment,
+    MarketingMessage,
+    Payment,
+    PaymentStatus,
+    PaymentType,
+    Plan,
+    Scheduling,
+    Service,
+    StockMovement,
+    StockProduct,
+    TypePlan,
+    User,
+    UserRole,
 )
 
 def test_user_model(db_session, user_db):
@@ -110,4 +123,115 @@ def test_establishment_model(db_session, establishment_db):
     result = db_session.query(Establishment).filter_by(id=establishment.id).first()
     assert result is None
 
-    
+def test_customer_model(db_session, customer_db):
+    customer, establishment = customer_db
+
+    # Create
+    db_session.add(customer)
+    db_session.flush()
+    assert customer.id is not None
+    assert customer.customer_name == "Test Customer"
+    assert customer.phone_number == "5511980657662"
+    assert customer.establishments_id == establishment.id
+
+    # Read
+    read = db_session.query(Customer).filter_by(id=customer.id).first()
+    assert read is not None
+    assert read.id == customer.id
+
+    # Update
+    db_session.query(Customer).filter_by(id=customer.id).update({"customer_name": "Test Customer Updated"})
+    db_session.flush()
+    assert customer.customer_name == "Test Customer Updated"
+
+    # Delete
+    db_session.delete(customer)
+    db_session.flush()
+    result = db_session.query(Customer).filter_by(id=customer.id).first()
+    assert result is None
+
+def test_employee_model(db_session, employee_db):
+    employee, user, establishment = employee_db
+
+    # Create
+    db_session.add(employee)
+    db_session.flush()
+    assert employee.id is not None
+    assert employee.users_id == user.id
+    assert employee.establishments_id == establishment.id
+    assert employee.percentage_commission == 0.07
+    assert employee.available_hours == {"hour_able": "10:00am - 4:00pm", "days_able": "Monday - Friday"}
+
+    # Read
+    read = db_session.query(Employee).filter_by(id=employee.id).first()
+    assert read is not None
+    assert read.id == employee.id
+
+    # Update
+    db_session.query(Employee).filter_by(id=employee.id).update({"percentage_commission": 0.10})
+    db_session.flush()
+    assert employee.percentage_commission == 0.10
+
+    # Delete
+    db_session.delete(employee)
+    db_session.flush()
+    result = db_session.query(Employee).filter_by(id=employee.id).first()
+    assert result is None
+
+def test_marketing_model(db_session, marketing_db):
+    marketing_message, establishment = marketing_db
+
+    # Create
+    db_session.add(marketing_message)
+    db_session.flush()
+    assert marketing_message.id is not None
+    assert marketing_message.establishments_id == establishment.id
+    assert marketing_message.title == "Tittle Test"
+    assert marketing_message.content == "Content Test"
+
+    # Read
+    read = db_session.query(MarketingMessage).filter_by(id=marketing_message.id).first()
+    assert read is not None
+    assert read.id == marketing_message.id
+
+    # Update
+    db_session.query(MarketingMessage).filter_by(id=marketing_message.id).update({"title": "Tittle Test Updated"})
+    db_session.flush()
+    assert marketing_message.title == "Tittle Test Updated"
+
+    # Delete
+    db_session.delete(marketing_message)
+    db_session.flush()
+    result = db_session.query(MarketingMessage).filter_by(id=marketing_message.id).first()
+    assert result is None
+
+def test_payment_model(db_session, payment_db):
+    payment, establishment = payment_db
+
+    # Create
+    db_session.add(payment)
+    db_session.flush()
+    assert payment.id is not None
+    assert payment.establishments_id == establishment.id
+    assert float(payment.valor) == 99.90
+    assert payment.payment_day == datetime(2030, 1, 1, 10, 0, 0)
+    assert payment.payment_status == PaymentStatus.PENDING
+    assert payment.payment_type == PaymentType.MONTHLY_SUBSCRIPTION
+    assert payment.employee_quantity == 5
+    assert payment.gateway_transaction_id == "GTX123456"
+
+    # Read
+    read = db_session.query(Payment).filter_by(id=payment.id).first()
+    assert read is not None
+    assert read.id == payment.id
+
+    # Update
+    db_session.query(Payment).filter_by(id=payment.id).update({"payment_status": PaymentStatus.APPROVED})
+    db_session.flush()
+    assert payment.payment_status == PaymentStatus.APPROVED
+
+    # Delete
+    db_session.delete(payment)
+    db_session.flush()
+    result = db_session.query(Payment).filter_by(id=payment.id).first()
+    assert result is None

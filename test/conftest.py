@@ -3,8 +3,22 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import (
-    User, UserRole, Plan, TypePlan, Client, Establishment, Customer, Employee, MarketingMessage, Payment, 
-    Service, Scheduling,StockProduct, StockMovement
+    Client,
+    Customer,
+    Employee,
+    Establishment,
+    MarketingMessage,
+    Payment,
+    PaymentStatus,
+    PaymentType,
+    Plan,
+    Scheduling,
+    Service,
+    StockMovement,
+    StockProduct,
+    TypePlan,
+    User,
+    UserRole,
 )
 
 @pytest.fixture(scope="function")
@@ -68,3 +82,61 @@ def establishment_db(db_session, client_db):
         trial_active = False
     )
     yield establishment, client
+
+@pytest.fixture(scope="function")
+def customer_db(db_session, establishment_db):
+    establishment, _ = establishment_db
+    db_session.add(establishment)
+    db_session.flush()
+
+    customer = Customer(
+        customer_name = "Test Customer",
+        phone_number = "5511980657662",
+        establishments_id = establishment.id
+    )
+    yield customer, establishment
+
+@pytest.fixture(scope="function")
+def employee_db(db_session, user_db, establishment_db):
+    establishment, _ = establishment_db
+    db_session.add(user_db)
+    db_session.add(establishment)
+    db_session.flush()
+
+    employee = Employee(
+        users_id = user_db.id,
+        establishments_id = establishment.id,
+        percentage_commission = 0.07,
+        available_hours = {"hour_able": "10:00am - 4:00pm", "days_able": "Monday - Friday"}
+    )
+    yield employee, user_db, establishment
+
+@pytest.fixture(scope="function")
+def marketing_db(db_session, establishment_db):
+    establishment, _ = establishment_db
+    db_session.add(establishment)
+    db_session.flush()
+
+    marketing_message = MarketingMessage(
+        establishments_id = establishment.id,
+        title = "Tittle Test",
+        content = "Content Test"
+    )
+    yield marketing_message, establishment
+
+@pytest.fixture(scope="function")
+def payment_db(db_session, establishment_db):
+    establishment, _ = establishment_db
+    db_session.add(establishment)
+    db_session.flush()
+
+    payment = Payment(
+        establishments_id = establishment.id,
+        valor = 99.90,
+        payment_day = datetime(2030, 1, 1, 10, 0, 0),
+        payment_status = PaymentStatus.PENDING,
+        payment_type = PaymentType.MONTHLY_SUBSCRIPTION,
+        employee_quantity = 5,
+        gateway_transaction_id = "GTX123456"
+    )
+    yield payment, establishment
