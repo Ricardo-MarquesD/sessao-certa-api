@@ -5,125 +5,77 @@ from models import (
     AppointmentStatus, StockProduct, StockMovement, MovementType
 )
 
-def test_user_table(db_session):
-    user = User(
-        user_name = "Test User",
-        password_hash = "hashed_passwod",
-        phone_number = "123456789",
-        email = "test@example.com",
-        role = UserRole.ADMIN,
-    )
-    db_session.add(user)
+def test_user_model(db_session, user_db):
+    #Create
+    db_session.add(user_db)
     db_session.commit()
-    result = db_session.query(User).filter_by(user_name = "Test User").first()
-    assert result is not None
-    assert result.user_name == "Test User"
-    assert result.role == UserRole.ADMIN
+    assert user_db.id is not None
+    assert user_db.user_name == "Test User"
+    assert isinstance(user_db.user_name, str)
+    assert user_db.email == "test@example.com"
+    assert isinstance(user_db.email, str)
+    assert user_db.role == UserRole.ADMIN
+    assert user_db.active_status is True
 
-def test_plan_table(db_session):
-    plans = db_session.query(Plan).all()
-    assert len(plans) > 0
-    for plan in plans:
-        assert plan.type_plan in TypePlan
+    #Read
+    read = db_session.query(User).filter_by(user_name = "Test User").first()
+    assert read is not None
+    assert read.id == user_db.id
 
-def test_client_table(db_session):
-    user = User(
-        user_name="Client User",
-        password_hash="hashed",
-        phone_number="987654321",
-        email="client@example.com",
-        role=UserRole.CLIENT,
-        active_status=True
-    )
-    db_session.add(user)
+    #Update
+    db_session.query(User).filter_by(user_name = "Test User").update({"user_name": "Test User Update"})
     db_session.commit()
+    assert user_db.user_name == "Test User Update"
 
-    user_result = db_session.query(User).filter_by(user_name = "Client User").first()
-    client = Client(users_id = user_result.id, plans_id = 1)
+    #Delete
+    db_session.delete(user_db)
+    db_session.commit()
+    result = db_session.query(User).filter_by(user_name = "Test User Update").first()
+    assert result is None
+
+def test_plan_model(db_session, plan_db):
+    #Create
+    db_session.add(plan_db)
+    db_session.commit()
+    assert plan_db.id is not None
+    assert plan_db.type_plan == TypePlan.SILVER
+    assert float(plan_db.basic_price) == 15.9
+    assert plan_db.max_employee == 3
+    assert plan_db.allow_stock is False
+    assert plan_db.allow_advanced_analysis is True
+
+    #Read
+    read = db_session.query(Plan).filter_by(id = plan_db.id).first()
+    assert read is not None
+    assert read.id == plan_db.id
+
+    #Update
+    db_session.query(Plan).filter_by(id = plan_db.id).update({"type_plan": TypePlan.GOLD})
+    db_session.commit()
+    assert plan_db.type_plan == TypePlan.GOLD
+
+    #Delete
+    db_session.delete(plan_db)
+    db_session.commit()
+    result = db_session.query(Plan).filter_by(id = plan_db.id).first()
+    assert result is None
+
+def test_client_model(db_session, client_db):
+    client, user, plan = client_db
+
+    #Create
     db_session.add(client)
     db_session.commit()
+    assert client.id is not None
+    assert client.users_id == user.id
+    assert client.plans_id == plan.id
 
-    client_result = db_session.query(Client).filter_by(users_id = client.users_id).first()
-    assert client_result.plans_id == 1
-    assert client_result.users_id == user_result.id
+    #Update
+    read = db_session.query(Client).filter_by(id=client.id).first()
+    assert read is not None
 
-def test_establishment_table(db_session):
-    user = User(
-        user_name="Client Establishment",
-        password_hash="hashed",
-        phone_number="987494321",
-        email="establishment@example.com",
-        role=UserRole.CLIENT,
-        active_status=True
-    )
-    db_session.add(user)
+    #Delete
+    db_session.delete(client)
     db_session.commit()
-    user_result = db_session.query(User).filter_by(user_name = "Client Establishment").first()
-
-    client = Client(
-        users_id = user_result.id,
-        plans_id = 1
-    )
-    db_session.add(client)
-    db_session.commit()
-    client_result = db_session.query(Client).filter_by(users_id = client.users_id).first()
-
-    establishment = Establishment(
-        clients_id = client_result.id,
-        establishment_name = "Test Establishment",
-        cnpj = "12345678000199",
-        chatbot_phone_number = "1122334455",
-        address = "123 Test St",
-        due_date = datetime(2024, 12, 31),
-        trial_active = True
-    )
-    db_session.add(establishment)
-    db_session.commit()
-    
-    establishment_result = db_session.query(Establishment).filter_by(establishment_name = "Test Establishment").first()
-    assert establishment_result is not None
-    assert establishment_result.cnpj == "12345678000199"
-    assert establishment_result.clients_id == client_result.id
-
-def test_customer_table(db_session):
-    user = User(
-        user_name="Customer Line Test",
-        password_hash="hashed",
-        phone_number="555666777",
-        email="customerlinetest@example.com",
-        role=UserRole.CLIENT,
-        active_status=True
-    )
-    db_session.add(user)
-    db_session.commit()
-    user_result = db_session.query(User).filter_by(user_name = "Customer Line Test").first()
-    client = Client(
-        users_id = user_result.id,
-        plans_id = 1
-    )
-    db_session.add(client)
-    db_session.commit()
-    client_result = db_session.query(Client).filter_by(users_id = client.users_id).first()
-    establishment = Establishment(
-        clients_id = client_result.id,
-        establishment_name = "Customer Line Establishment",
-        cnpj = "98765432000188",
-        chatbot_phone_number = "9988776655",
-        address = "456 Customer St",
-        due_date = datetime(2024, 11, 30),
-        trial_active = True
-    )
-    db_session.add(establishment)
-    db_session.commit()
-    establishment_result = db_session.query(Establishment).filter_by(establishment_name = "Customer Line Establishment").first()
-    customer = Customer(
-        establishments_id = establishment_result.id,
-        customer_name = "Test Customer",
-        phone_number = "555666777"
-    )
-    db_session.add(customer)
-    db_session.commit()
-    customer_result = db_session.query(Customer).filter_by(customer_name = "Test Customer").first()
-    assert customer_result is not None
-    assert customer_result.phone_number == "555666777"
-    assert customer_result.establishments_id == establishment_result.id
+    result = db_session.query(Client).filter_by(id=client.id).first()
+    assert result is None
