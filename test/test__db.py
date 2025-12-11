@@ -1,5 +1,6 @@
 from datetime import datetime
 from models import (
+    AppointmentStatus,
     Client,
     Customer,
     Employee,
@@ -291,4 +292,65 @@ def test_movement_product_model(db_session, stock_movement_db):
     db_session.delete(stock_movement)
     db_session.flush()
     result = db_session.query(StockMovement).filter_by(id=stock_movement.id).first()
+    assert result is None
+
+def test_service_model(db_session, service_db):
+    service, establishment = service_db
+
+    # Create
+    db_session.add(service)
+    db_session.flush()
+    assert service.id is not None
+    assert service.establishments_id == establishment.id
+    assert service.service_name == "Test Service"
+    assert service.description_service == "Test Description"
+    assert service.time_duration == 30
+    assert float(service.price) == 50.00
+    assert service.active is True
+
+    # Read
+    read = db_session.query(Service).filter_by(id=service.id).first()
+    assert read is not None
+    assert read.id == service.id
+
+    # Update
+    db_session.query(Service).filter_by(id=service.id).update({"service_name": "Test Service Update"})
+    db_session.flush()
+    assert service.service_name == "Test Service Update"
+
+    # Delete
+    db_session.delete(service)
+    db_session.flush()
+    result = db_session.query(Service).filter_by(id=service.id).first()
+    assert result is None
+
+def test_scheduling_model(db_session, scheduling_db):
+    scheduling, establishment, employee, customer, service = scheduling_db
+
+    # Create
+    db_session.add(scheduling)
+    db_session.flush()
+    assert scheduling.id is not None
+    assert scheduling.establishments_id == establishment.id
+    assert scheduling.employees_id == employee.id
+    assert scheduling.customers_id == customer.id
+    assert scheduling.services_id == service.id
+    assert scheduling.appointment_date == datetime(2030, 3, 10, 14, 0, 0)
+    assert scheduling.appointment_status == AppointmentStatus.SCHEDULED
+    assert scheduling.notification_sent is False
+
+    # Read
+    read = db_session.query(Scheduling).filter_by(id=scheduling.id).first()
+    assert read is not None
+    assert read.id == scheduling.id
+
+    # Update
+    db_session.query(Scheduling).filter_by(id=scheduling.id).update({"appointment_status": AppointmentStatus.CONFIRMED})
+    db_session.flush()
+    assert scheduling.appointment_status == AppointmentStatus.CONFIRMED
+
+    # Delete
+    db_session.delete(scheduling)
+    db_session.flush()
+    result = db_session.query(Scheduling).filter_by(id=scheduling.id).first()
     assert result is None

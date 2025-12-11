@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import (
+    AppointmentStatus,
     Client,
     Customer,
     Employee,
@@ -169,3 +170,39 @@ def stock_movement_db(db_session, stock_product_db):
         date=datetime(2030, 1, 2, 15, 0, 0)
     )
     yield stock_movement, stock_product, establishment
+
+@pytest.fixture(scope="function")
+def service_db(db_session, establishment_db):
+    establishment, _ = establishment_db
+    db_session.add(establishment)
+    db_session.flush()
+
+    service = Service(
+        establishments_id=establishment.id,
+        service_name="Test Service",
+        description_service="Test Description",
+        time_duration=30,
+        price=50.00,
+        active=True
+    )
+    yield service, establishment
+
+@pytest.fixture(scope="function")
+def scheduling_db(db_session, establishment_db, employee_db, customer_db, service_db):
+    establishment, _ = establishment_db
+    employee, _, _ = employee_db
+    customer, _ = customer_db
+    service, _ = service_db
+    db_session.add_all([establishment, employee, customer, service])
+    db_session.flush()
+
+    scheduling = Scheduling(
+        establishments_id=establishment.id,
+        employees_id=employee.id,
+        customers_id=customer.id,
+        services_id=service.id,
+        appointment_date=datetime(2030, 3, 10, 14, 0, 0),
+        appointment_status=AppointmentStatus.SCHEDULED,
+        notification_sent=False
+    )
+    yield scheduling, establishment, employee, customer, service
