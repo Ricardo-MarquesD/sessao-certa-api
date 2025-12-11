@@ -8,7 +8,7 @@ class Establishment(Base):
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     clients_id = Column(Integer, ForeignKey("clients.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     establishment_name = Column(String(150), nullable = False)
-    cnpj = Column(String(14), nullable = False)
+    cnpj = Column(String(18), nullable = False)
     chatbot_phone_number = Column(String(30), nullable = False)
     address = Column(String(255), nullable = False)
     subscription_date = Column(DateTime, server_default = func.current_timestamp())

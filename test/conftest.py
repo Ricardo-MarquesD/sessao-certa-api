@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import (
@@ -6,7 +7,7 @@ from models import (
     Service, Scheduling,StockProduct, StockMovement
 )
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db_session():
     connection = create_engine("mysql+pymysql://root:datachato@localhost:3306/sessao_certa_db")
     Session = sessionmaker(bind=connection)
@@ -14,6 +15,7 @@ def db_session():
 
     yield session
 
+    session.rollback()
     session.close()
 
 @pytest.fixture(scope="function")
@@ -43,26 +45,26 @@ def plan_db():
 def client_db(db_session ,user_db, plan_db):
     db_session.add(user_db)
     db_session.add(plan_db)
-    db_session.commit()
+    db_session.flush()
     client = Client(
         users_id = user_db.id,
         plans_id = plan_db.id
     )
     yield client, user_db, plan_db
 
-@pytest.fixture(autouse=True)
-def clean_db(db_session):
-    yield
-    db_session.query(Scheduling).delete()
-    db_session.query(Customer).delete()
-    db_session.query(Service).delete()
-    db_session.query(Payment).delete()
-    db_session.query(StockMovement).delete()
-    db_session.query(StockProduct).delete()
-    db_session.query(Payment).delete()
-    db_session.query(MarketingMessage).delete()
-    db_session.query(Employee).delete()
-    db_session.query(Establishment).delete()
-    db_session.query(Client).delete()
-    db_session.query(User).delete()
-    db_session.commit()
+@pytest.fixture(scope="function")
+def establishment_db(db_session, client_db):
+    client, _, _ = client_db
+    db_session.add(client)
+    db_session.flush()
+
+    establishment = Establishment(
+        clients_id = client.id,
+        establishment_name = "Test Establishment",
+        cnpj = "12123123000122",
+        chatbot_phone_number = "5521990032455",
+        address = "Avenida Test Rua Test 1",
+        due_date = datetime(2030, 2, 11),
+        trial_active = False
+    )
+    yield establishment, client
