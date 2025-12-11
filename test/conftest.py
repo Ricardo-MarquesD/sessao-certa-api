@@ -8,6 +8,7 @@ from models import (
     Employee,
     Establishment,
     MarketingMessage,
+    MovementType,
     Payment,
     PaymentStatus,
     PaymentType,
@@ -140,3 +141,31 @@ def payment_db(db_session, establishment_db):
         gateway_transaction_id = "GTX123456"
     )
     yield payment, establishment
+
+@pytest.fixture(scope="function")
+def stock_product_db(db_session, establishment_db):
+    establishment, _ = establishment_db
+    db_session.add(establishment)
+    db_session.flush()
+
+    stock_product = StockProduct(
+        establishments_id=establishment.id,
+        product_name="Test Product",
+        quantity=100,
+        price=25.50
+    )
+    yield stock_product, establishment
+
+@pytest.fixture(scope="function")
+def stock_movement_db(db_session, stock_product_db):
+    stock_product, establishment = stock_product_db
+    db_session.add(stock_product)
+    db_session.flush()
+
+    stock_movement = StockMovement(
+        stock_products_id=stock_product.id,
+        movement_type=MovementType.INPUT,
+        quantity=50,
+        date=datetime(2030, 1, 2, 15, 0, 0)
+    )
+    yield stock_movement, stock_product, establishment

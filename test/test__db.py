@@ -5,6 +5,7 @@ from models import (
     Employee,
     Establishment,
     MarketingMessage,
+    MovementType,
     Payment,
     PaymentStatus,
     PaymentType,
@@ -234,4 +235,60 @@ def test_payment_model(db_session, payment_db):
     db_session.delete(payment)
     db_session.flush()
     result = db_session.query(Payment).filter_by(id=payment.id).first()
+    assert result is None
+
+def test_product_model(db_session, stock_product_db):
+    stock_product, establishment = stock_product_db
+
+    # Create
+    db_session.add(stock_product)
+    db_session.flush()
+    assert stock_product.id is not None
+    assert stock_product.establishments_id == establishment.id
+    assert stock_product.product_name == "Test Product"
+    assert stock_product.quantity == 100
+    assert float(stock_product.price) == 25.50
+
+    # Read
+    read = db_session.query(StockProduct).filter_by(id=stock_product.id).first()
+    assert read is not None
+    assert read.id == stock_product.id
+
+    # Update
+    db_session.query(StockProduct).filter_by(id=stock_product.id).update({"product_name": "Test Product Updated"})
+    db_session.flush()
+    assert stock_product.product_name == "Test Product Updated"
+
+    # Delete
+    db_session.delete(stock_product)
+    db_session.flush()
+    result = db_session.query(StockProduct).filter_by(id=stock_product.id).first()
+    assert result is None
+
+def test_movement_product_model(db_session, stock_movement_db):
+    stock_movement, stock_product, establishment = stock_movement_db
+
+    # Create
+    db_session.add(stock_movement)
+    db_session.flush()
+    assert stock_movement.id is not None
+    assert stock_movement.stock_products_id == stock_product.id
+    assert stock_movement.movement_type == MovementType.INPUT
+    assert stock_movement.quantity == 50
+    assert stock_movement.date == datetime(2030, 1, 2, 15, 0, 0)
+
+    # Read
+    read = db_session.query(StockMovement).filter_by(id=stock_movement.id).first()
+    assert read is not None
+    assert read.id == stock_movement.id
+
+    # Update
+    db_session.query(StockMovement).filter_by(id=stock_movement.id).update({"quantity": 75})
+    db_session.flush()
+    assert stock_movement.quantity == 75
+
+    # Delete
+    db_session.delete(stock_movement)
+    db_session.flush()
+    result = db_session.query(StockMovement).filter_by(id=stock_movement.id).first()
     assert result is None
