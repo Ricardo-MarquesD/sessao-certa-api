@@ -267,7 +267,7 @@ def test_product_model(db_session, stock_product_db):
     assert result is None
 
 def test_movement_product_model(db_session, stock_movement_db):
-    stock_movement, stock_product, establishment = stock_movement_db
+    stock_movement, stock_product, _ = stock_movement_db
 
     # Create
     db_session.add(stock_movement)

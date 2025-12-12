@@ -13,6 +13,6 @@ from .payment import PaymentStatus
 from .service import Service
 from .scheduling import Scheduling
 from .scheduling import AppointmentStatus
-from .stock_product import StockProduct
-from .stock_movement import StockMovement
-from .stock_movement import MovementType
+from .stock import StockProduct
+from .stock import StockMovement
+from .stock import MovementType
