@@ -1,11 +1,14 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.mysql import CHAR
 from config import Base
+import uuid
 
 class Establishment(Base):
     __tablename__ = "establishments"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
+    uuid = Column(CHAR(36), unique=True, default=lambda: str(uuid.uuid4()), nullable=False)
     clients_id = Column(Integer, ForeignKey("clients.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     establishment_name = Column(String(150), nullable = False)
     cnpj = Column(String(18), nullable = False)
@@ -18,14 +21,14 @@ class Establishment(Base):
 
     def __repr__(self):
         return (
-            f"<Establishment(id={self.id}, establishment_name='{self.establishment_name}', cnpj='{self.cnpj}', "
+            f"<Establishment(id={self.uuid}, establishment_name='{self.establishment_name}', cnpj='{self.cnpj}', "
             f"chatbot_phone_number={self.chatbot_phone_number}, address={self.address}, subscription_date={self.subscription_date}, "
             f"due_date={self.due_date}, trial_active={self.trial_active})>"
         )
     
     def to_dict(self):
         return {
-            "id": self.id,
+            "id": self.uuid,
             "clients_id": self.clients_id,
             "establishment_name": self.establishment_name,
             "cnpj": self.cnpj,

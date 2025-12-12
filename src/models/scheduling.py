@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, Enum, ForeignKey, func
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 from enum import Enum as enum
+import uuid
 
 class AppointmentStatus(enum):
     SCHEDULED = "SCHEDULED"
@@ -14,6 +16,7 @@ class Scheduling(Base):
     __tablename__ = "schedulings"
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    uuid = Column(CHAR(36), unique=True, default=lambda: str(uuid.uuid4()), nullable=False)
     establishments_id = Column(Integer, ForeignKey("establishments.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     employees_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
     customers_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
@@ -29,13 +32,13 @@ class Scheduling(Base):
 
     def __repr__(self):
         return (
-            f"<Scheduling(id={self.id}, appointment_date={self.appointment_date}, "
+            f"<Scheduling(id={self.uuid}, appointment_date={self.appointment_date}, "
             f"status={self.appointment_status.value}, notification_sent={self.notification_sent})>"
         )
 
     def to_dict(self):
         return {
-            "id": self.id,
+            "id": self.uuid,
             "establishments_id": self.establishments_id,
             "employees_id": self.employees_id,
             "customers_id": self.customers_id,
