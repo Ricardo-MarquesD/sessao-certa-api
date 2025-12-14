@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Numeric, JSON, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
@@ -31,3 +31,15 @@ class Employee(Base):
             "user": self.user.to_dict() if self.user else None,
             "establishment": self.establishment.to_dict() if self.establishment else None
         }
+    
+    @validates('percentage_commission')
+    def validate_percentage_commission(self, key, value):
+        if value is not None and (value < 0 or value > 100):
+            raise ValueError("Percentage commission must be between 0 and 100")
+        return value
+    
+    @validates('available_hours')
+    def validate_available_hours(self, key, hours):
+        if not isinstance(hours, dict):
+            raise ValueError("Available hours must be a dictionary")
+        return hours

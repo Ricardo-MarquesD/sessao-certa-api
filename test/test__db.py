@@ -104,7 +104,7 @@ def test_establishment_model(db_session, establishment_db):
     assert establishment.clients_id == client.id
     assert establishment.establishment_name == "Test Establishment"
     assert establishment.cnpj == "12123123000122"
-    assert establishment.chatbot_phone_number == "5521990032455"
+    assert establishment.chatbot_phone_number == "+5521990032455"
     assert establishment.address == "Avenida Test Rua Test 1"
     assert establishment.due_date == datetime(2030, 2, 11)
     assert establishment.trial_active == False

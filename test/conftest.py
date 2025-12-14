@@ -39,7 +39,7 @@ def user_db():
     user = User(
         user_name = "Test User",
         password_hash = "hash password",
-        phone_number = "5561912341234",
+        phone_number = "+5561912341234",
         email = "test@example.com",
         role = UserRole.ADMIN,
         active_status = True
@@ -78,7 +78,7 @@ def establishment_db(db_session, client_db):
         clients_id = client.id,
         establishment_name = "Test Establishment",
         cnpj = "12123123000122",
-        chatbot_phone_number = "5521990032455",
+        chatbot_phone_number = "+5521990032455",
         address = "Avenida Test Rua Test 1",
         due_date = datetime(2030, 2, 11),
         trial_active = False

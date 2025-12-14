@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
@@ -35,3 +35,27 @@ class Service(Base):
             "active": self.active,
             "establishment": self.establishment.to_dict() if self.establishment else None
         }
+    
+    @validates('service_name')
+    def validate_service_name(self, key, name):
+        if not name:
+            raise ValueError("Service name cannot be empty")
+        return name
+    
+    @validates('time_duration')
+    def validate_time_duration(self, key, duration):
+        if duration <= 0:
+            raise ValueError("Time duration must be positive")
+        return duration
+    
+    @validates('price')
+    def validate_price(self, key, price_value):
+        if price_value < 0:
+            raise ValueError("Price cannot be negative")
+        return price_value
+    
+    @validates('description_service')
+    def validate_description_service(self, key, description):
+        if not description:
+            raise ValueError("Description cannot be empty")
+        return description

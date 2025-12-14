@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
@@ -39,3 +39,21 @@ class Establishment(Base):
             "trial_active": self.trial_active,
             "client": self.client.to_dict() if self.client else None
         }
+    
+    @validates('cnpj')
+    def validate_cnpj(self, key, cnpj_value):
+        if len(cnpj_value) != 14:
+            raise ValueError("Invalid CNPJ")
+        return cnpj_value
+    
+    @validates('chatbot_phone_number')
+    def validate_phone(self, key, number):
+        if len(number) < 8:
+            raise ValueError("Invalid phone number")
+        return number
+    
+    @validates('address')
+    def validate_address(self, key, address_value):
+        if not address_value:
+            raise ValueError("Address cannot be empty")
+        return address_value

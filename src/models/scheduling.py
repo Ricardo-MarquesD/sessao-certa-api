@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, Enum, ForeignKey, func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 from enum import Enum as enum
+from datetime import datetime
 import uuid
 
 class AppointmentStatus(enum):
@@ -48,3 +49,21 @@ class Scheduling(Base):
             "appointment_status": self.appointment_status.value,
             "notification_sent": self.notification_sent
         }
+    
+    @validates('appointment_date')
+    def validate_appointment_date(self, key, appointment_date):
+        if appointment_date < datetime.now():
+            raise ValueError("Appointment date must be in the future")
+        return appointment_date
+    
+    @validates('notification_sent')
+    def validate_notification_sent(self, key, notification_sent):
+        if not isinstance(notification_sent, bool):
+            raise ValueError("Notification sent must be a boolean value")
+        return notification_sent
+    
+    @validates('appointment_status')
+    def validate_appointment_status(self, key, status):
+        if status not in AppointmentStatus:
+            raise ValueError(f"Appointment status must be one of {[s.value for s in AppointmentStatus]}")
+        return status

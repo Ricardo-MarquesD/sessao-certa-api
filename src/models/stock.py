@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Numeric, Enum, DateTime, ForeignKey, func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from enum import Enum as enum
 from config import Base
 
@@ -57,3 +57,21 @@ class StockMovement(Base):
             "date": self.date.strftime("%Y-%m-%d %H:%M:%S") if self.date else None,
             "stock_product": self.stock_product.to_dict() if self.stock_product else None
         }
+    
+    @validates('quantity')
+    def validate_quantity(self, key, quantity):
+        if quantity <= 0:
+            raise ValueError("Quantity must be positive")
+        return quantity
+    
+    @validates('movement_type')
+    def validate_movement_type(self, key, movement_type):
+        if movement_type not in MovementType:
+            raise ValueError(f"Movement type must be one of {[mt.value for mt in MovementType]}")
+        return movement_type
+    
+    @validates('stock_products_id')
+    def validate_stock_products_id(self, key, stock_products_id):
+        if stock_products_id is None:
+            raise ValueError("Stock product ID cannot be None")
+        return stock_products_id

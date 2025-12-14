@@ -17,7 +17,7 @@ def connection_test(engine):
     except Exception as e:
         print(f"Falha ao conectar banco de dados: {e}")
 
-def get_db_session():
+def get_session():
     session = Session()
     try:
         yield session

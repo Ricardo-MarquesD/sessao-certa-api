@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from config import Base
 
 class MarketingMessage(Base):
@@ -25,3 +25,15 @@ class MarketingMessage(Base):
             "content": self.content,
             "establishment": self.establishment.to_dict() if self.establishment else None
         }
+    
+    @validates('title')
+    def validate_title(self, key, title_value):
+        if not title_value:
+            raise ValueError("Title cannot be empty")
+        return title_value
+    
+    @validates('content')
+    def validate_content(self, key, content_value):
+        if not content_value:
+            raise ValueError("Content cannot be empty")
+        return content_value

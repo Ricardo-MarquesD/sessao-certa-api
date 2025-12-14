@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
@@ -27,3 +27,9 @@ class Customer(Base):
             "establishments_id": self.establishments_id,
             "establishment": self.establishment.to_dict() if self.establishment else None
         }
+    
+    @validates('phone_number')
+    def validate_phone(self, key, number):
+        if len(number) < 8:
+            raise ValueError("Invalid phone number")
+        return number

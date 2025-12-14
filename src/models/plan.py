@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Boolean, Numeric, Enum
-from config import Base
+from sqlalchemy.orm import validates
 from enum import Enum as enum
+from config import Base
 
 class TypePlan(enum):
     BRONZE = "BRONZE"
@@ -32,3 +33,21 @@ class Plan(Base):
             "allow_stock": self.allow_stock,
             "allow_advanced_analysis": self.allow_advanced_analysis
         }
+    
+    @validates('basic_price')
+    def validate_basic_price(self, key, price):
+        if price < 0:
+            raise ValueError("Basic price must be non-negative")
+        return price
+    
+    @validates('max_employee')
+    def validate_max_employee(self, key, max_emp):
+        if max_emp < 1:
+            raise ValueError("Max employee must be at least 1")
+        return max_emp
+    
+    @validates('type_plan')
+    def validate_type_plan(self, key, plan_type):
+        if plan_type not in TypePlan:
+            raise ValueError("Invalid plan type, type must be BRONZE, SILVER, or GOLD")
+        return plan_type
