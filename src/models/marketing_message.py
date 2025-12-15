@@ -2,14 +2,14 @@ from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Foreign
 from sqlalchemy.orm import relationship, validates
 from config import Base
 
-class MarketingMessage(Base):
+class MarketingMessageModel(Base):
     __tablename__ = "marketing_messages"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
     establishments_id = Column(Integer, ForeignKey("establishments.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     title = Column(String(150), nullable = False)
     content = Column(Text, nullable = False)
-    establishment = relationship("Establishment", backref = "marketing_messages", foreign_keys = [establishments_id])
+    establishment = relationship("EstablishmentModel", backref = "marketing_messages", foreign_keys = [establishments_id])
 
     def __repr__(self):
         return (

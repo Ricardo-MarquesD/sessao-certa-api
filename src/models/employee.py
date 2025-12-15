@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
 
-class Employee(Base):
+class EmployeeModel(Base):
     __tablename__ = "employees"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable= False)
@@ -13,8 +13,8 @@ class Employee(Base):
     establishments_id = Column(Integer, ForeignKey("establishments.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     percentage_commission = Column(Numeric(5, 2), nullable = True)
     available_hours = Column(JSON, nullable = False)
-    user = relationship("User", backref = "employees", uselist = False, foreign_keys = [users_id])
-    establishment = relationship("Establishment", backref = "employees", foreign_keys = [establishments_id])
+    user = relationship("UserModel", backref = "employees", uselist = False, foreign_keys = [users_id])
+    establishment = relationship("EstablishmentModel", backref = "employees", foreign_keys = [establishments_id])
     def __repr__(self):
         return (
             f"<Employee(id={self.uuid}, users_id={self.users_id}, establishments_id={self.establishments_id}, "

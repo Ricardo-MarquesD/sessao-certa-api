@@ -13,7 +13,7 @@ class AppointmentStatus(enum):
     COMPLETED = "COMPLETED"
     NO_SHOW = "NO_SHOW"
 
-class Scheduling(Base):
+class SchedulingModel(Base):
     __tablename__ = "schedulings"
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
@@ -26,10 +26,10 @@ class Scheduling(Base):
     appointment_date = Column(DateTime, nullable=False)
     appointment_status = Column(Enum(AppointmentStatus), nullable=False)
     notification_sent = Column(Boolean, nullable=False)
-    establishment = relationship("Establishment", backref="schedulings", foreign_keys=[establishments_id])
-    employee = relationship("Employee", backref="schedulings", foreign_keys=[employees_id])
-    customer = relationship("Customer", backref="schedulings", foreign_keys=[customers_id])
-    service = relationship("Service", backref="schedulings", foreign_keys=[services_id])
+    establishment = relationship("EstablishmentModel", backref="schedulings", foreign_keys=[establishments_id])
+    employee = relationship("EmployeeModel", backref="schedulings", foreign_keys=[employees_id])
+    customer = relationship("CustomerModel", backref="schedulings", foreign_keys=[customers_id])
+    service = relationship("ServiceModel", backref="schedulings", foreign_keys=[services_id])
 
     def __repr__(self):
         return (

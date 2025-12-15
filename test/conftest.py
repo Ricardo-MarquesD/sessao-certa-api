@@ -4,22 +4,22 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import (
     AppointmentStatus,
-    Client,
-    Customer,
-    Employee,
-    Establishment,
-    MarketingMessage,
+    ClientModel,
+    CustomerModel,
+    EmployeeModel,
+    EstablishmentModel,
+    MarketingMessageModel,
     MovementType,
-    Payment,
+    PaymentModel,
     PaymentStatus,
     PaymentType,
-    Plan,
-    Scheduling,
-    Service,
-    StockMovement,
-    StockProduct,
+    PlanModel,
+    SchedulingModel,
+    ServiceModel,
+    StockMovementModel,
+    StockProductModel,
     TypePlan,
-    User,
+    UserModel,
     UserRole,
 )
 
@@ -36,7 +36,7 @@ def db_session():
 
 @pytest.fixture(scope="function")
 def user_db():
-    user = User(
+    user = UserModel(
         user_name = "Test User",
         password_hash = "hash password",
         phone_number = "+5561912341234",
@@ -48,7 +48,7 @@ def user_db():
 
 @pytest.fixture(scope="function")
 def plan_db():
-    plan = Plan(
+    plan = PlanModel(
         type_plan = TypePlan.SILVER,
         basic_price = 15.90,
         max_employee = 3,
@@ -62,7 +62,7 @@ def client_db(db_session ,user_db, plan_db):
     db_session.add(user_db)
     db_session.add(plan_db)
     db_session.flush()
-    client = Client(
+    client = ClientModel(
         users_id = user_db.id,
         plans_id = plan_db.id
     )
@@ -74,7 +74,7 @@ def establishment_db(db_session, client_db):
     db_session.add(client)
     db_session.flush()
 
-    establishment = Establishment(
+    establishment = EstablishmentModel(
         clients_id = client.id,
         establishment_name = "Test Establishment",
         cnpj = "12123123000122",
@@ -91,7 +91,7 @@ def customer_db(db_session, establishment_db):
     db_session.add(establishment)
     db_session.flush()
 
-    customer = Customer(
+    customer = CustomerModel(
         customer_name = "Test Customer",
         phone_number = "5511980657662",
         establishments_id = establishment.id
@@ -105,7 +105,7 @@ def employee_db(db_session, user_db, establishment_db):
     db_session.add(establishment)
     db_session.flush()
 
-    employee = Employee(
+    employee = EmployeeModel(
         users_id = user_db.id,
         establishments_id = establishment.id,
         percentage_commission = 0.07,
@@ -119,7 +119,7 @@ def marketing_db(db_session, establishment_db):
     db_session.add(establishment)
     db_session.flush()
 
-    marketing_message = MarketingMessage(
+    marketing_message = MarketingMessageModel(
         establishments_id = establishment.id,
         title = "Tittle Test",
         content = "Content Test"
@@ -132,7 +132,7 @@ def payment_db(db_session, establishment_db):
     db_session.add(establishment)
     db_session.flush()
 
-    payment = Payment(
+    payment = PaymentModel(
         establishments_id = establishment.id,
         valor = 99.90,
         payment_day = datetime(2030, 1, 1, 10, 0, 0),
@@ -149,7 +149,7 @@ def stock_product_db(db_session, establishment_db):
     db_session.add(establishment)
     db_session.flush()
 
-    stock_product = StockProduct(
+    stock_product = StockProductModel(
         establishments_id=establishment.id,
         product_name="Test Product",
         quantity=100,
@@ -163,7 +163,7 @@ def stock_movement_db(db_session, stock_product_db):
     db_session.add(stock_product)
     db_session.flush()
 
-    stock_movement = StockMovement(
+    stock_movement = StockMovementModel(
         stock_products_id=stock_product.id,
         movement_type=MovementType.INPUT,
         quantity=50,
@@ -177,7 +177,7 @@ def service_db(db_session, establishment_db):
     db_session.add(establishment)
     db_session.flush()
 
-    service = Service(
+    service = ServiceModel(
         establishments_id=establishment.id,
         service_name="Test Service",
         description_service="Test Description",
@@ -196,7 +196,7 @@ def scheduling_db(db_session, establishment_db, employee_db, customer_db, servic
     db_session.add_all([establishment, employee, customer, service])
     db_session.flush()
 
-    scheduling = Scheduling(
+    scheduling = SchedulingModel(
         establishments_id=establishment.id,
         employees_id=employee.id,
         customers_id=customer.id,

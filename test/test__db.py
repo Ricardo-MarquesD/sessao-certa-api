@@ -1,22 +1,22 @@
 from datetime import datetime
 from models import (
     AppointmentStatus,
-    Client,
-    Customer,
-    Employee,
-    Establishment,
-    MarketingMessage,
+    ClientModel,
+    CustomerModel,
+    EmployeeModel,
+    EstablishmentModel,
+    MarketingMessageModel,
     MovementType,
-    Payment,
+    PaymentModel,
     PaymentStatus,
     PaymentType,
-    Plan,
-    Scheduling,
-    Service,
-    StockMovement,
-    StockProduct,
+    PlanModel,
+    SchedulingModel,
+    ServiceModel,
+    StockMovementModel,
+    StockProductModel,
     TypePlan,
-    User,
+    UserModel,
     UserRole,
 )
 
@@ -31,19 +31,19 @@ def test_user_model(db_session, user_db):
     assert user_db.active_status is True
 
     #Read
-    read = db_session.query(User).filter_by(user_name = "Test User").first()
+    read = db_session.query(UserModel).filter_by(user_name = "Test User").first()
     assert read is not None
     assert read.id == user_db.id
 
     #Update
-    db_session.query(User).filter_by(user_name = "Test User").update({"user_name": "Test User Update"})
+    db_session.query(UserModel).filter_by(user_name = "Test User").update({"user_name": "Test User Update"})
     db_session.flush()
     assert user_db.user_name == "Test User Update"
 
     #Delete
     db_session.delete(user_db)
     db_session.flush()
-    result = db_session.query(User).filter_by(user_name = "Test User Update").first()
+    result = db_session.query(UserModel).filter_by(user_name = "Test User Update").first()
     assert result is None
 
 def test_plan_model(db_session, plan_db):
@@ -58,19 +58,19 @@ def test_plan_model(db_session, plan_db):
     assert plan_db.allow_advanced_analysis is True
 
     #Read
-    read = db_session.query(Plan).filter_by(id = plan_db.id).first()
+    read = db_session.query(PlanModel).filter_by(id = plan_db.id).first()
     assert read is not None
     assert read.id == plan_db.id
 
     #Update
-    db_session.query(Plan).filter_by(id = plan_db.id).update({"type_plan": TypePlan.GOLD})
+    db_session.query(PlanModel).filter_by(id = plan_db.id).update({"type_plan": TypePlan.GOLD})
     db_session.flush()
     assert plan_db.type_plan == TypePlan.GOLD
 
     #Delete
     db_session.delete(plan_db)
     db_session.flush()
-    result = db_session.query(Plan).filter_by(id = plan_db.id).first()
+    result = db_session.query(PlanModel).filter_by(id = plan_db.id).first()
     assert result is None
 
 def test_client_model(db_session, client_db):
@@ -84,14 +84,14 @@ def test_client_model(db_session, client_db):
     assert client.plans_id == plan.id
 
     #Read
-    read = db_session.query(Client).filter_by(id=client.id).first()
+    read = db_session.query(ClientModel).filter_by(id=client.id).first()
     assert read is not None
     assert read.id == client.id
 
     #Delete
     db_session.delete(client)
     db_session.flush()
-    result = db_session.query(Client).filter_by(id=client.id).first()
+    result = db_session.query(ClientModel).filter_by(id=client.id).first()
     assert result is None
 
 def test_establishment_model(db_session, establishment_db):
@@ -110,19 +110,19 @@ def test_establishment_model(db_session, establishment_db):
     assert establishment.trial_active == False
 
     #Read
-    read = db_session.query(Establishment).filter_by(id=establishment.id).first()
+    read = db_session.query(EstablishmentModel).filter_by(id=establishment.id).first()
     assert read is not None
     assert read.id == establishment.id
 
     #Update
-    db_session.query(Establishment).filter_by(id=establishment.id).update({"establishment_name": "Test Establishment Updated"})
+    db_session.query(EstablishmentModel).filter_by(id=establishment.id).update({"establishment_name": "Test Establishment Updated"})
     db_session.flush()
     assert establishment.establishment_name == "Test Establishment Updated"
 
     #Delete
     db_session.delete(establishment)
     db_session.flush()
-    result = db_session.query(Establishment).filter_by(id=establishment.id).first()
+    result = db_session.query(EstablishmentModel).filter_by(id=establishment.id).first()
     assert result is None
 
 def test_customer_model(db_session, customer_db):
@@ -137,19 +137,19 @@ def test_customer_model(db_session, customer_db):
     assert customer.establishments_id == establishment.id
 
     # Read
-    read = db_session.query(Customer).filter_by(id=customer.id).first()
+    read = db_session.query(CustomerModel).filter_by(id=customer.id).first()
     assert read is not None
     assert read.id == customer.id
 
     # Update
-    db_session.query(Customer).filter_by(id=customer.id).update({"customer_name": "Test Customer Updated"})
+    db_session.query(CustomerModel).filter_by(id=customer.id).update({"customer_name": "Test Customer Updated"})
     db_session.flush()
     assert customer.customer_name == "Test Customer Updated"
 
     # Delete
     db_session.delete(customer)
     db_session.flush()
-    result = db_session.query(Customer).filter_by(id=customer.id).first()
+    result = db_session.query(CustomerModel).filter_by(id=customer.id).first()
     assert result is None
 
 def test_employee_model(db_session, employee_db):
@@ -165,19 +165,19 @@ def test_employee_model(db_session, employee_db):
     assert employee.available_hours == {"hour_able": "10:00am - 4:00pm", "days_able": "Monday - Friday"}
 
     # Read
-    read = db_session.query(Employee).filter_by(id=employee.id).first()
+    read = db_session.query(EmployeeModel).filter_by(id=employee.id).first()
     assert read is not None
     assert read.id == employee.id
 
     # Update
-    db_session.query(Employee).filter_by(id=employee.id).update({"percentage_commission": 0.10})
+    db_session.query(EmployeeModel).filter_by(id=employee.id).update({"percentage_commission": 0.10})
     db_session.flush()
     assert employee.percentage_commission == 0.10
 
     # Delete
     db_session.delete(employee)
     db_session.flush()
-    result = db_session.query(Employee).filter_by(id=employee.id).first()
+    result = db_session.query(EmployeeModel).filter_by(id=employee.id).first()
     assert result is None
 
 def test_marketing_model(db_session, marketing_db):
@@ -192,19 +192,19 @@ def test_marketing_model(db_session, marketing_db):
     assert marketing_message.content == "Content Test"
 
     # Read
-    read = db_session.query(MarketingMessage).filter_by(id=marketing_message.id).first()
+    read = db_session.query(MarketingMessageModel).filter_by(id=marketing_message.id).first()
     assert read is not None
     assert read.id == marketing_message.id
 
     # Update
-    db_session.query(MarketingMessage).filter_by(id=marketing_message.id).update({"title": "Tittle Test Updated"})
+    db_session.query(MarketingMessageModel).filter_by(id=marketing_message.id).update({"title": "Tittle Test Updated"})
     db_session.flush()
     assert marketing_message.title == "Tittle Test Updated"
 
     # Delete
     db_session.delete(marketing_message)
     db_session.flush()
-    result = db_session.query(MarketingMessage).filter_by(id=marketing_message.id).first()
+    result = db_session.query(MarketingMessageModel).filter_by(id=marketing_message.id).first()
     assert result is None
 
 def test_payment_model(db_session, payment_db):
@@ -223,19 +223,19 @@ def test_payment_model(db_session, payment_db):
     assert payment.gateway_transaction_id == "GTX123456"
 
     # Read
-    read = db_session.query(Payment).filter_by(id=payment.id).first()
+    read = db_session.query(PaymentModel).filter_by(id=payment.id).first()
     assert read is not None
     assert read.id == payment.id
 
     # Update
-    db_session.query(Payment).filter_by(id=payment.id).update({"payment_status": PaymentStatus.APPROVED})
+    db_session.query(PaymentModel).filter_by(id=payment.id).update({"payment_status": PaymentStatus.APPROVED})
     db_session.flush()
     assert payment.payment_status == PaymentStatus.APPROVED
 
     # Delete
     db_session.delete(payment)
     db_session.flush()
-    result = db_session.query(Payment).filter_by(id=payment.id).first()
+    result = db_session.query(PaymentModel).filter_by(id=payment.id).first()
     assert result is None
 
 def test_product_model(db_session, stock_product_db):
@@ -251,19 +251,19 @@ def test_product_model(db_session, stock_product_db):
     assert float(stock_product.price) == 25.50
 
     # Read
-    read = db_session.query(StockProduct).filter_by(id=stock_product.id).first()
+    read = db_session.query(StockProductModel).filter_by(id=stock_product.id).first()
     assert read is not None
     assert read.id == stock_product.id
 
     # Update
-    db_session.query(StockProduct).filter_by(id=stock_product.id).update({"product_name": "Test Product Updated"})
+    db_session.query(StockProductModel).filter_by(id=stock_product.id).update({"product_name": "Test Product Updated"})
     db_session.flush()
     assert stock_product.product_name == "Test Product Updated"
 
     # Delete
     db_session.delete(stock_product)
     db_session.flush()
-    result = db_session.query(StockProduct).filter_by(id=stock_product.id).first()
+    result = db_session.query(StockProductModel).filter_by(id=stock_product.id).first()
     assert result is None
 
 def test_movement_product_model(db_session, stock_movement_db):
@@ -279,19 +279,19 @@ def test_movement_product_model(db_session, stock_movement_db):
     assert stock_movement.date == datetime(2030, 1, 2, 15, 0, 0)
 
     # Read
-    read = db_session.query(StockMovement).filter_by(id=stock_movement.id).first()
+    read = db_session.query(StockMovementModel).filter_by(id=stock_movement.id).first()
     assert read is not None
     assert read.id == stock_movement.id
 
     # Update
-    db_session.query(StockMovement).filter_by(id=stock_movement.id).update({"quantity": 75})
+    db_session.query(StockMovementModel).filter_by(id=stock_movement.id).update({"quantity": 75})
     db_session.flush()
     assert stock_movement.quantity == 75
 
     # Delete
     db_session.delete(stock_movement)
     db_session.flush()
-    result = db_session.query(StockMovement).filter_by(id=stock_movement.id).first()
+    result = db_session.query(StockMovementModel).filter_by(id=stock_movement.id).first()
     assert result is None
 
 def test_service_model(db_session, service_db):
@@ -309,19 +309,19 @@ def test_service_model(db_session, service_db):
     assert service.active is True
 
     # Read
-    read = db_session.query(Service).filter_by(id=service.id).first()
+    read = db_session.query(ServiceModel).filter_by(id=service.id).first()
     assert read is not None
     assert read.id == service.id
 
     # Update
-    db_session.query(Service).filter_by(id=service.id).update({"service_name": "Test Service Update"})
+    db_session.query(ServiceModel).filter_by(id=service.id).update({"service_name": "Test Service Update"})
     db_session.flush()
     assert service.service_name == "Test Service Update"
 
     # Delete
     db_session.delete(service)
     db_session.flush()
-    result = db_session.query(Service).filter_by(id=service.id).first()
+    result = db_session.query(ServiceModel).filter_by(id=service.id).first()
     assert result is None
 
 def test_scheduling_model(db_session, scheduling_db):
@@ -340,17 +340,17 @@ def test_scheduling_model(db_session, scheduling_db):
     assert scheduling.notification_sent is False
 
     # Read
-    read = db_session.query(Scheduling).filter_by(id=scheduling.id).first()
+    read = db_session.query(SchedulingModel).filter_by(id=scheduling.id).first()
     assert read is not None
     assert read.id == scheduling.id
 
     # Update
-    db_session.query(Scheduling).filter_by(id=scheduling.id).update({"appointment_status": AppointmentStatus.CONFIRMED})
+    db_session.query(SchedulingModel).filter_by(id=scheduling.id).update({"appointment_status": AppointmentStatus.CONFIRMED})
     db_session.flush()
     assert scheduling.appointment_status == AppointmentStatus.CONFIRMED
 
     # Delete
     db_session.delete(scheduling)
     db_session.flush()
-    result = db_session.query(Scheduling).filter_by(id=scheduling.id).first()
+    result = db_session.query(SchedulingModel).filter_by(id=scheduling.id).first()
     assert result is None

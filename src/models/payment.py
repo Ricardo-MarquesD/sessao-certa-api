@@ -15,7 +15,7 @@ class PaymentType(enum):
     MONTHLY_SUBSCRIPTION = "MONTHLY_SUBSCRIPTION"
     ANNUAL_SUBSCRIPTION = "ANNUAL_SUBSCRIPTION"
 
-class Payment(Base):
+class PaymentModel(Base):
     __tablename__ = "payments"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
@@ -27,7 +27,7 @@ class Payment(Base):
     payment_type = Column(Enum(PaymentType), nullable = False)
     employee_quantity = Column(Integer, nullable = False)
     gateway_transaction_id = Column(String(100), nullable = False)
-    establishment = relationship("Establishment", backref = "payments", foreign_keys = [establishments_id])
+    establishment = relationship("EstablishmentModel", backref = "payments", foreign_keys = [establishments_id])
 
     def __repr__(self):
         return (

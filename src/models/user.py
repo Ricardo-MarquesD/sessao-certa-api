@@ -10,7 +10,7 @@ class UserRole(enum):
     EMPLOYEE = "EMPLOYEE"
     ADMIN = "ADMIN"
 
-class User(Base):
+class UserModel(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key = True, autoincrement = True,nullable = False)

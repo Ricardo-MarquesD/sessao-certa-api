@@ -2,14 +2,14 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from config import Base
 
-class Client(Base):
+class ClientModel(Base):
     __tablename__ = "clients"
     
     id = Column(Integer, primary_key = True, autoincrement = True, nullable= False)
     users_id = Column(Integer, ForeignKey("users.id", ondelete = "CASCADE", onupdate = "CASCADE"), nullable = False)
     plans_id = Column(Integer, ForeignKey("plans.id", ondelete = "RESTRICT", onupdate = "CASCADE"), nullable = False)
-    user = relationship("User", backref = "client", uselist = False, foreign_keys = [users_id])
-    plan = relationship("Plan", backref = "clients", foreign_keys = [plans_id])
+    user = relationship("UserModel", backref = "client", uselist = False, foreign_keys = [users_id])
+    plan = relationship("PlanModel", backref = "clients", foreign_keys = [plans_id])
 
     def __repr__(self):
         user_name = self.user.user_name if self.user else None

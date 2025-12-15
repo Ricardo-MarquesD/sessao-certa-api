@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
 
-class Service(Base):
+class ServiceModel(Base):
     __tablename__ = "services"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
@@ -15,7 +15,7 @@ class Service(Base):
     time_duration = Column(Integer, nullable = False)
     price = Column(Numeric(10,2), nullable = False)
     active = Column(Boolean, nullable = False, server_default = "1")
-    establishment = relationship("Establishment", backref = "services", foreign_keys = [establishments_id])
+    establishment = relationship("EstablishmentModel", backref = "services", foreign_keys = [establishments_id])
 
     def __repr__(self):
         return (

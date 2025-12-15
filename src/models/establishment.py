@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mysql import CHAR
 from config import Base
 import uuid
 
-class Establishment(Base):
+class EstablishmentModel(Base):
     __tablename__ = "establishments"
 
     id = Column(Integer, primary_key = True, autoincrement = True, nullable = False)
@@ -17,7 +17,7 @@ class Establishment(Base):
     subscription_date = Column(DateTime, server_default = func.current_timestamp())
     due_date = Column(DateTime, nullable = False)
     trial_active = Column(Boolean, nullable = False, server_default = "0")
-    client = relationship("Client", backref = "establishment", foreign_keys = [clients_id], uselist = False)
+    client = relationship("ClientModel", backref = "establishment", foreign_keys = [clients_id], uselist = False)
 
     def __repr__(self):
         return (

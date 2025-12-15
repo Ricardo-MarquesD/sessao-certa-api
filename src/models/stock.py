@@ -7,7 +7,7 @@ class MovementType(enum):
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
 
-class StockProduct(Base):
+class StockProductModel(Base):
     __tablename__ = "stock_products"
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
@@ -15,7 +15,7 @@ class StockProduct(Base):
     product_name = Column(String(150), nullable=False)
     quantity = Column(Integer, nullable=False)
     price = Column(Numeric(10, 2), nullable=False)
-    establishment = relationship("Establishment", backref="stock_products", foreign_keys=[establishments_id])
+    establishment = relationship("EstablishmentModel", backref="stock_products", foreign_keys=[establishments_id])
 
     def __repr__(self):
         return (
@@ -32,7 +32,7 @@ class StockProduct(Base):
             "establishment": self.establishment.to_dict() if self.establishment else None
         }
     
-class StockMovement(Base):
+class StockMovementModel(Base):
     __tablename__ = "stock_movements"
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
@@ -40,7 +40,7 @@ class StockMovement(Base):
     movement_type = Column(Enum(MovementType), nullable=False)
     quantity = Column(Integer, nullable=False)
     date = Column(DateTime, server_default=func.current_timestamp())
-    stock_product = relationship("StockProduct", backref="stock_movements", foreign_keys=[stock_products_id])
+    stock_product = relationship("StockProductModel", backref="stock_movements", foreign_keys=[stock_products_id])
 
     def __repr__(self):
         return (

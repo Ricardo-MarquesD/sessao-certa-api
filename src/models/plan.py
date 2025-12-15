@@ -8,7 +8,7 @@ class TypePlan(enum):
     SILVER = "SILVER"
     GOLD = "GOLD"
 
-class Plan(Base):
+class PlanModel(Base):
     __tablename__ = "plans"
 
     id = Column(Integer, primary_key = True, autoincrement = True,nullable = False)
