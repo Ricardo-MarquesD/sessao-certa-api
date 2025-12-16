@@ -1,12 +1,7 @@
 from sqlalchemy import Column, Integer, Boolean, Numeric, Enum
 from sqlalchemy.orm import validates
-from enum import Enum as enum
 from config import Base
-
-class TypePlan(enum):
-    BRONZE = "BRONZE"
-    SILVER = "SILVER"
-    GOLD = "GOLD"
+from utils.enum import TypePlan
 
 class PlanModel(Base):
     __tablename__ = "plans"

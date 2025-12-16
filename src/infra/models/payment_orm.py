@@ -2,18 +2,8 @@ from sqlalchemy import Column, Integer, String, DateTime, Numeric, Enum, Foreign
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
-from enum import Enum as enum
+from utils.enum import PaymentStatus, PaymentType
 import uuid
-
-class PaymentStatus(enum):
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REFUSED = "REFUSED"
-    REFUND = "REFUND"
-
-class PaymentType(enum):
-    MONTHLY_SUBSCRIPTION = "MONTHLY_SUBSCRIPTION"
-    ANNUAL_SUBSCRIPTION = "ANNUAL_SUBSCRIPTION"
 
 class PaymentModel(Base):
     __tablename__ = "payments"

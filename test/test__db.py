@@ -1,24 +1,26 @@
 from datetime import datetime
+from utils.enum import (
+    UserRole, 
+    TypePlan, 
+    PaymentStatus, 
+    PaymentType, 
+    AppointmentStatus, 
+    MovementType
+    )
 from infra.models import (
-    AppointmentStatus,
     ClientModel,
     CustomerModel,
     EmployeeModel,
     EstablishmentModel,
     MarketingMessageModel,
-    MovementType,
     PaymentModel,
-    PaymentStatus,
-    PaymentType,
     PlanModel,
     SchedulingModel,
     ServiceModel,
     StockMovementModel,
     StockProductModel,
-    TypePlan,
     UserModel,
-    UserRole,
-)
+    )
 
 def test_user_model(db_session, user_db):
     #Create

@@ -1,17 +1,10 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, Enum, ForeignKey, func
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
-from config import Base
-from enum import Enum as enum
 from datetime import datetime
+from config import Base
+from utils.enum import AppointmentStatus
 import uuid
-
-class AppointmentStatus(enum):
-    SCHEDULED = "SCHEDULED"
-    CONFIRMED = "CONFIRMED"
-    CANCELED = "CANCELED"
-    COMPLETED = "COMPLETED"
-    NO_SHOW = "NO_SHOW"
 
 class SchedulingModel(Base):
     __tablename__ = "schedulings"

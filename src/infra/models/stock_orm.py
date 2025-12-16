@@ -1,11 +1,7 @@
 from sqlalchemy import Column, Integer, String, Numeric, Enum, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship, validates
-from enum import Enum as enum
 from config import Base
-
-class MovementType(enum):
-    INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
+from utils.enum import MovementType
 
 class StockProductModel(Base):
     __tablename__ = "stock_products"
@@ -31,6 +27,18 @@ class StockProductModel(Base):
             "price": float(self.price) if self.price is not None else None,
             "establishment": self.establishment.to_dict() if self.establishment else None
         }
+    
+    @validates('quantity')
+    def validate_quantity(self, key, quantity):
+        if quantity < 0:
+            raise ValueError("Quantity must be non-negative")
+        return quantity
+    
+    @validates('price')
+    def validate_price(self, key, price):
+        if price < 0:
+            raise ValueError("Price must be non-negative")
+        return price
     
 class StockMovementModel(Base):
     __tablename__ = "stock_movements"
