@@ -1,5 +1,5 @@
 from datetime import datetime
-from models import (
+from infra.models import (
     AppointmentStatus,
     ClientModel,
     CustomerModel,

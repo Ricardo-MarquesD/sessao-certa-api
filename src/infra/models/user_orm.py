@@ -19,6 +19,7 @@ class UserModel(Base):
     password_hash = Column(String(255), nullable = False)
     phone_number = Column(String(30), nullable = False)
     email = Column(String(320), nullable = False)
+    img_url = Column(String(500), nullable=True)
     role = Column(Enum(UserRole), nullable = False)
     active_status = Column(Boolean, nullable = False, server_default = "0")
     create_in = Column(DateTime, server_default = func.current_timestamp())

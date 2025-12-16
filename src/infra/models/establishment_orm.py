@@ -14,6 +14,7 @@ class EstablishmentModel(Base):
     cnpj = Column(String(18), nullable = False)
     chatbot_phone_number = Column(String(30), nullable = False)
     address = Column(String(255), nullable = False)
+    img_url = Column(String(500), nullable=True)
     subscription_date = Column(DateTime, server_default = func.current_timestamp())
     due_date = Column(DateTime, nullable = False)
     trial_active = Column(Boolean, nullable = False, server_default = "0")
