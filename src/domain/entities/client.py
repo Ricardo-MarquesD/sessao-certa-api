@@ -31,5 +31,5 @@ class Client:
         return Client(
             id=data.get("id"),
             user=User.from_dict(user_data) if isinstance(user_data, dict) else user_data,
-            plan=Plan.from_dict(plan_data) if isinstance(plan_data, dict) else plan_data,
+            plan=Plan.from_dict(plan_data) if isinstance(plan_data, dict) else plan_data
         )
