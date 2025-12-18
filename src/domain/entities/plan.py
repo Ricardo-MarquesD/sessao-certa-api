@@ -16,7 +16,7 @@ class Plan():
 
     def __post_init__(self):
         if not self.type_plan or not isinstance(self.type_plan, TypePlan):
-            raise ValueError("Type Plan is incorrect, must be a BRONZE, SILVER or GOLD. ")
+            raise ValueError("Type Plan is incorrect, must be a BRONZE, SILVER or GOLD")
         
     def to_dict(self) -> dict[str, Any]:
         return {

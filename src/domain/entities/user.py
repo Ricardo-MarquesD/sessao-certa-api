@@ -20,15 +20,15 @@ class User:
     
     def __post_init__(self):
         if not self.user_name or not isinstance(self.user_name, str):
-            raise ValueError("User name is incorrect, must to be String. ")
+            raise ValueError("User name is incorrect, must to be String")
         if not self.email or len(self.email) < 10:
-            raise ValueError("Email is incorrect, is too short. ")
+            raise ValueError("Email is incorrect, is too short")
         if not self.email or '@' not in self.email:
-            raise ValueError("Email is incorrect, must be have '@'. ")
+            raise ValueError("Email is incorrect, must be have '@'")
         if not self.phone_number or len(self.phone_number) < 8:
-            raise ValueError("Phone number is incorrect, is too short. ")
+            raise ValueError("Phone number is incorrect, is too short")
         if not isinstance(self.role, UserRole):
-            raise ValueError("User Role is incorrect, must be a ADMIN, CLIENT or EMPLOYEE. ")
+            raise ValueError("User Role is incorrect, must be a ADMIN, CLIENT or EMPLOYEE")
 
     def to_dict(self) -> dict[str, Any]:
         return {
