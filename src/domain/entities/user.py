@@ -12,6 +12,7 @@ class User:
     user_name: str
     email: str
     phone_number: str
+    password_hash: str
     role: UserRole
     active_status: bool | None
     img_url: str | None
@@ -36,6 +37,7 @@ class User:
             "user_name": self.user_name,
             "email": self.email,
             "phone_number": self.phone_number,
+            "password_hash": self.password_hash,
             "role": self.role.value,
             "active_status": self.active_status,
             "img_url": self.img_url,
@@ -58,6 +60,7 @@ class User:
             user_name=data.get("user_name"),
             email=data.get("email"),
             phone_number=data.get("phone_number"),
+            password_hash=data.get("password_hash"),
             role=role,
             active_status=data.get("active_status"),
             img_url=data.get("img_url"),

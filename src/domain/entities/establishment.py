@@ -8,6 +8,7 @@ from typing import Any
 class Establishment():
     id: str | None # Lembresse desse id ser o do UUID
     client: Client
+    establishment_name: str
     cnpj: str
     chatbot_phone_number: str | None
     address: str | None
@@ -26,6 +27,7 @@ class Establishment():
         return {
             "id": self.id,
             "client": self.client.to_dict(),
+            "establishment_name": self.establishment_name,
             "cnpj": self.cnpj,
             "chatbot_phone_number": self.chatbot_phone_number,
             "address": self.address,
@@ -42,6 +44,7 @@ class Establishment():
         return Establishment(
             id = data.get("id"),
             client = Client.from_dict(client_data) if isinstance(client_data, dict) else client_data,
+            establishment_name = data.get("establishment_name"),
             cnpj = data.get("cnpj"),
             chatbot_phone_number = data.get("chatbot_phone_number"),
             address = data.get("address"),
