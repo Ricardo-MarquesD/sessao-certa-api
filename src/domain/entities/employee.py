@@ -14,9 +14,9 @@ class Employee():
     available_hours: dict | None
 
     def __post_init__(self):
-        if not self.user or not isinstance(self.user, User):
+        if not isinstance(self.user, User):
             raise ValueError("User must be a User instance")
-        if not self.establishment or not isinstance(self.establishment, Establishment):
+        if not isinstance(self.establishment, Establishment):
             raise ValueError("Establishment must be a Establishment instance")
         
     def to_dict(self)->dict[str, Any]:
