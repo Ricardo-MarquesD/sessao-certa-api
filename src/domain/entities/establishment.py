@@ -19,8 +19,8 @@ class Establishment():
     def __post_init__(self):
         if not isinstance(self.client, Client):
             raise ValueError("Client must be a Client instance")
-        if not self.cnpj or not isinstance(self.cnpj, str):
-            raise ValueError("Cnpj name is incorrect, must to be String")
+        if not isinstance(self.cnpj, str) or len(self.cnpj) != 14:
+            raise ValueError("CNPJ must be a string with 14 characters")
         
     def to_dict(self)->dict[str, Any]:
         return {

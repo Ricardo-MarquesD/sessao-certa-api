@@ -24,7 +24,7 @@ class Employee():
             "id": self.id,
             "user": self.user.to_dict(),
             "establishment": self.establishment.to_dict(),
-            "percentage_commission": self.percentage_commission,
+            "percentage_commission": str(self.percentage_commission) if self.percentage_commission else None,
             "available_hours": self.available_hours
         }
     

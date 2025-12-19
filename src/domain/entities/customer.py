@@ -7,13 +7,15 @@ from typing import Any
 class Customer():
     id: str | None # Lembrar desse id ser o UUID
     establishment: Establishment
-    customer_name: str | None
+    customer_name: str
     phone_number: str
 
     def __post_init__(self):
-        if not self.establishment or not isinstance(self.establishment, Establishment):
+        if not isinstance(self.establishment, Establishment):
             raise ValueError("Establishment must be a Establishment instance")
-        if not self.phone_number or len(self.phone_number) < 8:
+        if not isinstance(self.customer_name, str):
+            raise ValueError("Customer name must be a string")
+        if len(self.phone_number) < 8:
             raise ValueError("Phone Number is incorrect, is too short")
     
     def to_dict(self)->dict[str, Any]:
