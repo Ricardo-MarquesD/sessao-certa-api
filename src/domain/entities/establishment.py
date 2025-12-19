@@ -38,6 +38,7 @@ class Establishment():
     @staticmethod
     def from_dict(data: dict)->Establishment:
         client_data = data.get("client")
+        
         return Establishment(
             id = data.get("id"),
             client = Client.from_dict(client_data) if isinstance(client_data, dict) else client_data,

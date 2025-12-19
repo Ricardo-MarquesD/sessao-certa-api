@@ -45,7 +45,6 @@ class User:
     
     @staticmethod
     def from_dict(data: dict) -> User:
-        # Processar role
         role_data = data.get("role")
         if isinstance(role_data, str):
             role = UserRole(role_data)
