@@ -6,7 +6,7 @@ from typing import Any
 
 @dataclass
 class Service():
-    id: str | None  # UUID
+    id: str | None  # Lembrar de ser um UUID
     establishment: Establishment
     service_name: str
     time_duration: int

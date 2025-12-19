@@ -7,3 +7,4 @@ from .marketing_message import MarketingMessage
 from .payment import Payment
 from .stock import StockProduct, StockMovement
 from .service import Service
+from .scheduling import Scheduling
