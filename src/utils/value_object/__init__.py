@@ -1,1 +1,1 @@
-from commission
+from password import PasswordHasher

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from utils.enum import UserRole
+from utils.value_object import PasswordHasher
 
 
 @dataclass
@@ -30,6 +31,22 @@ class User:
             raise ValueError("Phone number is too short")
         if not isinstance(self.role, UserRole):
             raise ValueError("User Role is incorrect, must be a ADMIN, CLIENT or EMPLOYEE")
+        
+    def is_active(self)->bool:
+        return self.active_status if self.active_status is not None else False
+    
+    def activate(self) -> None:
+        self.active_status = True
+
+    def deactivate(self) -> None:
+        self.active_status = False
+
+    def update_password(self ,new_password: str)->None:
+        if not new_password or not isinstance(new_password, str):
+            raise ValueError("Password must be a non-empty string")
+        if len(new_password) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+        self.password_hash = PasswordHasher.to_hash(new_password)
 
     def to_dict(self) -> dict[str, Any]:
         return {
