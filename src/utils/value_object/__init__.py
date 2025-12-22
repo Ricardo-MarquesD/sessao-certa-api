@@ -1,1 +1,2 @@
-from password import PasswordHasher
+from .password import PasswordHasher
+from .pricing import Pricing
