@@ -22,6 +22,26 @@ class StockProduct():
         if not isinstance(self.quantity, int) or self.quantity < 0:
             raise ValueError("Quantity must be a non-negative integer")
         
+    def is_available(self)->bool:
+        return self.quantity > 0
+    
+    def add_stock(self, quantity: int) -> None:
+        if quantity <= 0:
+            raise ValueError("Quantity must be positive")
+        self.quantity += quantity
+
+    def remove_stock(self, quantity: int) -> None:
+        if quantity <= 0:
+            raise ValueError("Quantity must be positive")
+        if quantity > self.quantity:
+            raise ValueError("Insufficient stock")
+        self.quantity -= quantity
+
+    def set_quantity(self, new_quantity: int) -> None:
+        if new_quantity < 0:
+            raise ValueError("Quantity cannot be negative")
+        self.quantity = new_quantity
+        
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
@@ -58,6 +78,21 @@ class StockMovement():
             raise ValueError("Movement type must be a MovementType enum")
         if self.quantity is not None and (not isinstance(self.quantity, int) or self.quantity <= 0):
             raise ValueError("Quantity must be a positive integer when provided")
+    
+    def is_input(self) -> bool:
+        return self.movement_type == MovementType.INPUT
+    
+    def is_output(self) -> bool:
+        return self.movement_type == MovementType.OUTPUT
+    
+    def apply_to_product(self) -> None:
+        if self.quantity is None:
+            raise ValueError("Quantity must be set to apply movement")
+        
+        if self.is_input():
+            self.stock_product.add_stock(self.quantity)
+        elif self.is_output():
+            self.stock_product.remove_stock(self.quantity)
         
     def to_dict(self) -> dict[str, Any]:
         return {
