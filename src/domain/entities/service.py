@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from .establishment import Establishment
+from utils.value_object import TimeManipulation
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -23,6 +25,20 @@ class Service():
             raise ValueError("Time duration must be a positive integer")
         if self.price is not None and (not isinstance(self.price, Decimal) or self.price < 0):
             raise ValueError("Price must be a non-negative Decimal when provided")
+        
+    def is_active(self)->bool:
+        return self.active if self.active is not None else False
+    
+    def activate(self)->None:
+        self.active = True
+
+    def deactivate(self)->None:
+        self.active = False
+
+    def calculate_end_time(self, start_time: datetime)->datetime:
+        if not isinstance(start_time, datetime):
+            raise ValueError("start_time must be a datetime")
+        return TimeManipulation.time_duration(start_time, self.time_duration)
         
     def to_dict(self) -> dict[str, Any]:
         return {
