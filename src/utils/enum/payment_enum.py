@@ -1,0 +1,11 @@
+from enum import Enum
+
+class PaymentStatus(Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REFUSED = "REFUSED"
+    REFUND = "REFUND"
+
+class PaymentType(Enum):
+    MONTHLY_SUBSCRIPTION = "MONTHLY_SUBSCRIPTION"
+    ANNUAL_SUBSCRIPTION = "ANNUAL_SUBSCRIPTION"

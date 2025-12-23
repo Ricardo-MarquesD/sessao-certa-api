@@ -1,14 +1,9 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, func
 from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.orm import validates
-from enum import Enum as enum
 from config import Base
+from utils.enum import UserRole
 import uuid
-
-class UserRole(enum):
-    CLIENT = "CLIENT"
-    EMPLOYEE = "EMPLOYEE"
-    ADMIN = "ADMIN"
 
 class UserModel(Base):
     __tablename__ = "users"

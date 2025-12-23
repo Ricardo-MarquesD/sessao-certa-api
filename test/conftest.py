@@ -2,26 +2,28 @@ import pytest
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from utils.enum import (
+    UserRole, 
+    TypePlan, 
+    PaymentStatus, 
+    PaymentType, 
+    AppointmentStatus, 
+    MovementType
+    )
 from infra.models import (
-    AppointmentStatus,
     ClientModel,
     CustomerModel,
     EmployeeModel,
     EstablishmentModel,
     MarketingMessageModel,
-    MovementType,
     PaymentModel,
-    PaymentStatus,
-    PaymentType,
     PlanModel,
     SchedulingModel,
     ServiceModel,
     StockMovementModel,
     StockProductModel,
-    TypePlan,
     UserModel,
-    UserRole,
-)
+    )
 
 @pytest.fixture(scope="function")
 def db_session():
