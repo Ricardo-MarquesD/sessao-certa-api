@@ -58,7 +58,6 @@ class Scheduling():
         time_until = (self.appointment_date - datetime.now()).total_seconds()/60
         return 20 <= time_until <= 30
         
-    
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
