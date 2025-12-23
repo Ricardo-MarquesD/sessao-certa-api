@@ -34,6 +34,31 @@ class Scheduling():
         if self.appointment_date is not None and not isinstance(self.appointment_date, datetime):
             raise ValueError("Appointment date must be a datetime when provided")
         
+    def can_cancel(self)->bool:
+        return self.appointment_status in [
+            AppointmentStatus.SCHEDULED,
+            AppointmentStatus.CONFIRMED
+        ]
+    
+    def mark_notification_sent(self)->None:
+        self.notification_sent = True
+
+    def calculate_end_time(self)->datetime:
+        if not isinstance(self.appointment_date, datetime):
+            raise ValueError("appointment_date must be a datetime")
+        
+        return self.service.calculate_end_time(self.appointment_date)
+    
+    def needs_notification(self)->bool:
+        if not isinstance(self.appointment_date, datetime):
+            raise ValueError("appointment_date must be a datetime")
+        if self.notification_sent:
+            return False
+        
+        time_until = (self.appointment_date - datetime.now()).total_seconds()/60
+        return 20 <= time_until <= 30
+        
+    
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
