@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any
 from .user import User
 from .establishment import Establishment
+from utils.value_object import Pricing
 from decimal import Decimal
 
 @dataclass
@@ -18,6 +19,11 @@ class Employee():
             raise ValueError("User must be a User instance")
         if not isinstance(self.establishment, Establishment):
             raise ValueError("Establishment must be a Establishment instance")
+        
+    def commission(self, service_price: Decimal)->Decimal:
+        if self.percentage_commission is None:
+            return Decimal("0.00")
+        return Pricing.calculate_commission(service_price, self.percentage_commission)
         
     def to_dict(self)->dict[str, Any]:
         return {

@@ -13,3 +13,15 @@ class Pricing:
             "decimal": price_tax,
             "cents": int(price_tax*100)
         }
+    
+    @staticmethod
+    def calculate_commission(price: Decimal, percentage: Decimal)->Decimal:
+        if not isinstance(price, Decimal):
+            raise ValueError("price must be a Decimal")
+        if not isinstance(percentage, Decimal):
+            raise ValueError("percentage must be a Decimal")
+        
+        commission_value = price * percentage
+        commission_value = commission_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        
+        return commission_value
