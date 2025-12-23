@@ -27,6 +27,15 @@ class Payment():
         if not isinstance(self.payment_type, PaymentType):
             raise ValueError("Payment type must be a PaymentType enum")
         
+    def can_refund(self)->bool:
+        return self.payment_status == PaymentStatus.APPROVED
+    
+    def can_approve(self)->bool:
+        return self.payment_status == PaymentStatus.PENDING
+    
+    def can_refuse(self)->bool:
+        return self.payment_status == PaymentStatus.PENDING
+        
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
