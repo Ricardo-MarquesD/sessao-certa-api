@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from datetime import datetime
+from utils.value_object import TimeManipulation
+from datetime import datetime, timedelta
 from .client import Client
 from typing import Any
 
@@ -22,6 +23,20 @@ class Establishment():
             raise ValueError("Client must be a Client instance")
         if not isinstance(self.cnpj, str) or len(self.cnpj) != 14:
             raise ValueError("CNPJ must be a string with 14 characters")
+        
+    def is_trial_active(self)->bool:
+        return self.trial_active if self.trial_active is not None else False
+    
+    def is_subscription_valid(self)->bool:
+        if self.due_date is None:
+            return True
+        res = TimeManipulation.time_diference(self.due_date)
+        return res.total_seconds() > 0
+    
+    def time_until_due(self)->timedelta | None:
+        if self.due_date is None:
+            return None
+        return TimeManipulation.time_diference(self.due_date)
         
     def to_dict(self)->dict[str, Any]:
         return {
