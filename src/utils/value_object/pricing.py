@@ -1,7 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 class Pricing:
-    _tax:Decimal = Decimal("15.00")
+    _tax:Decimal = Decimal("5.00")
 
     @staticmethod
     def calculate_price(employee_count:int, count_base:int = None)->dict:
@@ -21,7 +21,7 @@ class Pricing:
         if not isinstance(percentage, Decimal):
             raise ValueError("percentage must be a Decimal")
         
-        commission_value = price * percentage
+        commission_value = price * (percentage / Decimal("100"))
         commission_value = commission_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         
         return commission_value

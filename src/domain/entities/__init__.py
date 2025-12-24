@@ -1,5 +1,6 @@
 from .user import User
 from .plan import Plan
+from .client import Client
 from .establishment import Establishment
 from .customer import Customer
 from .employee import Employee
