@@ -29,7 +29,7 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all_by_active(self, active_status: bool) -> list[User]| list[None]:
+    def list_all_by_active(self, active_status: bool) -> list[User] | list[None]:
         pass
 
     @abstractmethod
