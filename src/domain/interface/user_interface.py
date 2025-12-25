@@ -37,5 +37,9 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
+    def search_by_user_name(self, user_name: str) -> list[User] | list[None]:
+        pass
+
+    @abstractmethod
     def delete(self, user_id: str) -> bool:
         pass

@@ -28,15 +28,15 @@ class EstablishmentInterface(ABC):
         pass
 
     @abstractmethod
-    def list_by_establishment_name(self, establishment_name: str) -> list[Establishment] | list[None]:
-        pass
-
-    @abstractmethod
     def list_all_by_trial_active(self, trial_active: bool) -> list[Establishment] | list[None]:
         pass
 
     @abstractmethod
     def list_with_due_date_expired(self) -> list[Establishment] | None:
+        pass
+
+    @abstractmethod
+    def search_by_establishment_name(self, establishment_name: str) -> list[Establishment] | list[None]:
         pass
 
     @abstractmethod
