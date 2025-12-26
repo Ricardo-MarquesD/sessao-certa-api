@@ -6,3 +6,4 @@ from .customer_interface import CustomerInterface
 from .employee_interface import EmployeeInterface
 from .service_interface import ServiceInterface
 from .payment_interface import PaymentInterface
+from .scheduling_interface import SchedulingInterface
