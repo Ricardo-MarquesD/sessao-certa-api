@@ -4,3 +4,4 @@ from .client_interface import ClientInterface
 from .establishment_interface import EstablishmentInterface
 from .customer_interface import CustomerInterface
 from .employee_interface import EmployeeInterface
+from .service_interface import ServiceInterface
