@@ -7,3 +7,5 @@ from .employee_interface import EmployeeInterface
 from .service_interface import ServiceInterface
 from .payment_interface import PaymentInterface
 from .scheduling_interface import SchedulingInterface
+from .stock_interface import StockProductInterface
+from .stock_interface import StockMovementInterface
