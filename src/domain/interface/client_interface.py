@@ -1,0 +1,32 @@
+from abc import ABC, abstractmethod
+from domain.entities import Client
+
+class ClientInterface(ABC):
+
+    @abstractmethod
+    def create(self, client: Client) -> Client:
+        pass
+
+    @abstractmethod
+    def update(self, client: Client) -> Client:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, client_id: int) -> Client | None:
+        pass
+    
+    @abstractmethod
+    def get_by_user_id(self, user_id: str) -> Client | None:
+        pass
+
+    @abstractmethod
+    def list_all(self) -> list[Client] | list[None]:
+        pass
+    
+    @abstractmethod
+    def list_by_plan_id(self, plan_id: int) -> list[Client] | list[None]:
+        pass
+
+    @abstractmethod
+    def delete(self, client_id: int) -> bool:
+        pass
