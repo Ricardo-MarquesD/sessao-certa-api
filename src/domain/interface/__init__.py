@@ -5,3 +5,4 @@ from .establishment_interface import EstablishmentInterface
 from .customer_interface import CustomerInterface
 from .employee_interface import EmployeeInterface
 from .service_interface import ServiceInterface
+from .payment_interface import PaymentInterface
