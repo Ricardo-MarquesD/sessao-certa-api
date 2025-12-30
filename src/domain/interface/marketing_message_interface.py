@@ -16,11 +16,11 @@ class MarketingMessageInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[MarketingMessage] | list[None]:
+    def list_all(self) -> list[MarketingMessage]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[MarketingMessage] | list[None]:
+    def list_by_establishment_id(self, establishment_id: str) -> list[MarketingMessage]:
         pass
     
     @abstractmethod

@@ -18,19 +18,19 @@ class StockProductInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[StockProduct] | list[None]:
-        pass
-    
-    @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[StockProduct] | list[None]:
-        pass
-    
-    @abstractmethod
-    def list_available_by_establishment_id(self, establishment_id: str) -> list[StockProduct] | list[None]:
-        pass
-    
-    @abstractmethod
     def get_by_name_and_establishment(self, product_name: str, establishment_id: str) -> StockProduct | None:
+        pass
+
+    @abstractmethod
+    def list_all(self) -> list[StockProduct]:
+        pass
+    
+    @abstractmethod
+    def list_by_establishment_id(self, establishment_id: str) -> list[StockProduct]:
+        pass
+    
+    @abstractmethod
+    def list_available_by_establishment_id(self, establishment_id: str) -> list[StockProduct]:
         pass
     
     @abstractmethod
@@ -53,19 +53,19 @@ class StockMovementInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[StockMovement] | list[None]:
+    def list_all(self) -> list[StockMovement]:
         pass
     
     @abstractmethod
-    def list_by_stock_product_id(self, stock_product_id: int) -> list[StockMovement] | list[None]:
+    def list_by_stock_product_id(self, stock_product_id: int) -> list[StockMovement]:
         pass
     
     @abstractmethod
-    def list_by_movement_type(self, movement_type: MovementType) -> list[StockMovement] | list[None]:
+    def list_by_movement_type(self, movement_type: MovementType) -> list[StockMovement]:
         pass
     
     @abstractmethod
-    def list_by_date_range(self, start_date: datetime, end_date: datetime) -> list[StockMovement] | list[None]:
+    def list_by_date_range(self, start_date: datetime, end_date: datetime) -> list[StockMovement]:
         pass
     
     @abstractmethod

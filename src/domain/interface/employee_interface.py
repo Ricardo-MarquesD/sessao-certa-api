@@ -20,11 +20,11 @@ class EmployeeInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Employee] | list[None]:
+    def list_all(self) -> list[Employee]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Employee] | list[None]:
+    def list_by_establishment_id(self, establishment_id: str) -> list[Employee]:
         pass
     
     @abstractmethod

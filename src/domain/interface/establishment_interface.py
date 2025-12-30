@@ -24,19 +24,19 @@ class EstablishmentInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[Establishment] | list[None]:
+    def list_all(self) -> list[Establishment]:
         pass
 
     @abstractmethod
-    def list_all_by_trial_active(self, trial_active: bool) -> list[Establishment] | list[None]:
+    def list_all_by_trial_active(self, trial_active: bool) -> list[Establishment]:
         pass
 
     @abstractmethod
-    def list_with_due_date_expired(self) -> list[Establishment] | None:
+    def list_with_due_date_expired(self) -> list[Establishment]:
         pass
 
     @abstractmethod
-    def search_by_establishment_name(self, establishment_name: str) -> list[Establishment] | list[None]:
+    def search_by_establishment_name(self, establishment_name: str) -> list[Establishment]:
         pass
 
     @abstractmethod

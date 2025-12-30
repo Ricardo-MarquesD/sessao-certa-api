@@ -16,15 +16,15 @@ class ServiceInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Service] | list[None]:
+    def list_all(self) -> list[Service]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Service] | list[None]:
+    def list_by_establishment_id(self, establishment_id: str) -> list[Service]:
         pass
     
     @abstractmethod
-    def list_active_by_establishment_id(self, active: bool, establishment_id: str) -> list[Service] | list[None]:
+    def list_active_by_establishment_id(self, active: bool, establishment_id: str) -> list[Service]:
         pass
     
     @abstractmethod

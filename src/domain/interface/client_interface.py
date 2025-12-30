@@ -20,11 +20,11 @@ class ClientInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[Client] | list[None]:
+    def list_all(self) -> list[Client]:
         pass
     
     @abstractmethod
-    def list_by_plan_id(self, plan_id: int) -> list[Client] | list[None]:
+    def list_by_plan_id(self, plan_id: int) -> list[Client]:
         pass
 
     @abstractmethod

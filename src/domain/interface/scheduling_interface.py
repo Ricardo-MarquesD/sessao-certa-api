@@ -18,27 +18,27 @@ class SchedulingInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Scheduling] | list[None]:
+    def list_all(self) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Scheduling] | list[None]:
+    def list_by_establishment_id(self, establishment_id: str) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_employee_id(self, employee_id: str) -> list[Scheduling] | list[None]:
+    def list_by_employee_id(self, employee_id: str) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_customer_id(self, customer_id: str) -> list[Scheduling] | list[None]:
+    def list_by_customer_id(self, customer_id: str) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_date_range(self, start_date: datetime, end_date: datetime) -> list[Scheduling] | list[None]:
+    def list_by_date_range(self, start_date: datetime, end_date: datetime) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_status(self, status: AppointmentStatus) -> list[Scheduling] | list[None]:
+    def list_by_status(self, status: AppointmentStatus) -> list[Scheduling]:
         pass
     
     @abstractmethod

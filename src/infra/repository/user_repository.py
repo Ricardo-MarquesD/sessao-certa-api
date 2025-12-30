@@ -52,7 +52,20 @@ class UserRepository(UserInterface):
 
     def get_by_id(self, user_id: str) -> User | None:
         stmt = select(UserModel).where(UserModel.uuid == user_id)
+        result = self.db_session.scalar(stmt)
+        
+        return self._to_entity(result) if result else None
+    
+    def get_by_email(self, email:str) -> User | None:
+        stmt = select(UserModel).where(UserModel.email == email)
+        result = self.db_session.scalar(stmt)
 
-        return self._to_entity(self.db_session.scalars(stmt).first())
+        return self._to_entity(result) if result else None
+    
+    def get_by_phone_number(self, phone_number:str) -> User | None:
+        stmt = select(UserModel).where(UserModel.phone_number == phone_number)
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
     
     

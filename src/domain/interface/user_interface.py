@@ -25,19 +25,19 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[User] | list[None]:
+    def list_all(self) -> list[User]:
         pass
 
     @abstractmethod
-    def list_all_by_active(self, active_status: bool) -> list[User] | list[None]:
+    def list_all_by_active(self, active_status: bool) -> list[User]:
         pass
 
     @abstractmethod
-    def list_by_role(self, role: UserRole) -> list[User] | list[None]:
+    def list_by_role(self, role: UserRole) -> list[User]:
         pass
 
     @abstractmethod
-    def search_by_user_name(self, user_name: str) -> list[User] | list[None]:
+    def search_by_user_name(self, user_name: str) -> list[User]:
         pass
 
     @abstractmethod

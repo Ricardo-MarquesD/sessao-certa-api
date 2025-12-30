@@ -22,23 +22,23 @@ class PlanInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[Plan] | list[None]:
+    def list_all(self) -> list[Plan]:
         pass
 
     @abstractmethod
-    def list_by_type(self, type_plan: TypePlan) -> list[Plan] | list[None]:
+    def list_by_type(self, type_plan: TypePlan) -> list[Plan]:
         pass
 
     @abstractmethod
-    def list_by_allow_stock(self, allow_stock: bool) -> list[Plan] | list[None]:
+    def list_by_allow_stock(self, allow_stock: bool) -> list[Plan]:
         pass
 
     @abstractmethod
-    def list_by_allow_advanced_analysis(self, allow_advanced_analysis: bool) -> list[Plan] | list[None]:
+    def list_by_allow_advanced_analysis(self, allow_advanced_analysis: bool) -> list[Plan]:
         pass
 
     @abstractmethod
-    def list_by_max_employee(self, max_employee: int) -> list[Plan] | list[None]:
+    def list_by_max_employee(self, max_employee: int) -> list[Plan]:
         pass
 
     @abstractmethod

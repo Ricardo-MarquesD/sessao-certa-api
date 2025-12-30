@@ -20,15 +20,15 @@ class CustomerInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Customer] | list[None]:
+    def list_all(self) -> list[Customer]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Customer] | list[None]:
+    def list_by_establishment_id(self, establishment_id: str) -> list[Customer]:
         pass
     
     @abstractmethod
-    def search_by_name(self, name: str, establishment_id: str) -> list[Customer] | list[None]:
+    def search_by_name(self, name: str, establishment_id: str) -> list[Customer]:
         pass
     
     @abstractmethod
