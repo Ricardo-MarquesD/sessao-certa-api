@@ -8,7 +8,7 @@ from decimal import Decimal
 
 @dataclass
 class Employee():
-    id: str | None
+    id: int | None
     user: User
     establishment: Establishment
     percentage_commission: Decimal | None

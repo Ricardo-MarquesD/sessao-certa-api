@@ -7,10 +7,11 @@ from .service import Service
 from datetime import datetime
 from utils.enum import AppointmentStatus
 from typing import Any
+from uuid import UUID
 
 @dataclass
 class Scheduling():
-    id: str | None  # Lembrar de ser um UUID
+    id: UUID | None
     establishment: Establishment
     employee: Employee
     customer: Customer

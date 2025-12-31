@@ -5,10 +5,11 @@ from utils.value_object import TimeManipulation
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
+from uuid import UUID
 
 @dataclass
 class Service():
-    id: str | None  # Lembrar de ser um UUID
+    id: UUID | None
     establishment: Establishment
     service_name: str
     time_duration: int

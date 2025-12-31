@@ -2,12 +2,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from utils.value_object import TimeManipulation
 from datetime import datetime, timedelta
+from uuid import UUID
 from .client import Client
 from typing import Any
 
 @dataclass
 class Establishment():
-    id: str | None # Lembresse desse id ser o do UUID
+    id: UUID | None 
     client: Client
     establishment_name: str
     cnpj: str
