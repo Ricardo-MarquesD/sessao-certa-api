@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from domain.entities.scheduling import Scheduling
 from utils.enum.appointment_enum import AppointmentStatus
 from datetime import datetime
+from uuid import UUID
 
 class SchedulingInterface(ABC):
     
@@ -14,7 +15,7 @@ class SchedulingInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_id(self, scheduling_id: str) -> Scheduling | None:
+    def get_by_id(self, scheduling_id: UUID) -> Scheduling | None:
         pass
     
     @abstractmethod
@@ -22,15 +23,15 @@ class SchedulingInterface(ABC):
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Scheduling]:
+    def list_by_establishment_id(self, establishment_id: UUID) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_employee_id(self, employee_id: str) -> list[Scheduling]:
+    def list_by_employee_id(self, employee_id: int) -> list[Scheduling]:
         pass
     
     @abstractmethod
-    def list_by_customer_id(self, customer_id: str) -> list[Scheduling]:
+    def list_by_customer_id(self, customer_id: UUID) -> list[Scheduling]:
         pass
     
     @abstractmethod
@@ -42,5 +43,5 @@ class SchedulingInterface(ABC):
         pass
     
     @abstractmethod
-    def delete(self, scheduling_id: str) -> bool:
+    def delete(self, scheduling_id: UUID) -> bool:
         pass

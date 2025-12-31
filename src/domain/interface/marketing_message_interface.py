@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from domain.entities.marketing_message import MarketingMessage
+from uuid import UUID
 
 class MarketingMessageInterface(ABC):
     
@@ -20,7 +21,7 @@ class MarketingMessageInterface(ABC):
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[MarketingMessage]:
+    def list_by_establishment_id(self, establishment_id: UUID) -> list[MarketingMessage]:
         pass
     
     @abstractmethod

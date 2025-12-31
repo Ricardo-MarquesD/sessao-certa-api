@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from domain.entities.customer import Customer
+from uuid import UUID
 
 class CustomerInterface(ABC):
     
@@ -12,11 +13,11 @@ class CustomerInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_id(self, customer_id: str) -> Customer | None:
+    def get_by_id(self, customer_id: UUID) -> Customer | None:
         pass
     
     @abstractmethod
-    def get_by_phone_number(self, phone_number: str, establishment_id: str) -> Customer | None:
+    def get_by_phone_number(self, phone_number: str, establishment_id: UUID) -> Customer | None:
         pass
     
     @abstractmethod
@@ -24,13 +25,13 @@ class CustomerInterface(ABC):
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Customer]:
+    def list_by_establishment_id(self, establishment_id: UUID) -> list[Customer]:
         pass
     
     @abstractmethod
-    def search_by_name(self, name: str, establishment_id: str) -> list[Customer]:
+    def search_by_name(self, name: str, establishment_id: UUID) -> list[Customer]:
         pass
     
     @abstractmethod
-    def delete(self, customer_id: str) -> bool:
+    def delete(self, customer_id: UUID) -> bool:
         pass

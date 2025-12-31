@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from domain.entities import Client
+from uuid import UUID
 
 class ClientInterface(ABC):
 
@@ -16,7 +17,7 @@ class ClientInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_user_id(self, user_id: str) -> Client | None:
+    def get_by_user_id(self, user_id: UUID) -> Client | None:
         pass
 
     @abstractmethod

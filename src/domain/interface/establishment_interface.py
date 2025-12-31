@@ -1,5 +1,6 @@
 from abc import  ABC, abstractmethod
 from domain.entities import Establishment
+from uuid import UUID
 
 class EstablishmentInterface(ABC):
 
@@ -12,7 +13,7 @@ class EstablishmentInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, establishment_id: str) -> Establishment | None:
+    def get_by_id(self, establishment_id: UUID) -> Establishment | None:
         pass
 
     @abstractmethod
@@ -36,9 +37,9 @@ class EstablishmentInterface(ABC):
         pass
 
     @abstractmethod
-    def search_by_establishment_name(self, establishment_name: str) -> list[Establishment]:
+    def search_by_establishment_name(self, establishment_name: UUID) -> list[Establishment]:
         pass
 
     @abstractmethod
-    def delete(self, establishment_id: str) -> bool:
+    def delete(self, establishment_id: UUID) -> bool:
         pass

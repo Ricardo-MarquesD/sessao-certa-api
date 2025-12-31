@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from domain.entities import User
 from utils.enum import UserRole
+from uuid import UUID
 
 class UserInterface(ABC):
 
@@ -13,7 +14,7 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, user_id: str) -> User | None:
+    def get_by_id(self, user_id: UUID) -> User | None:
         pass
 
     @abstractmethod
@@ -41,5 +42,5 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def delete(self, user_id: str) -> bool:
+    def delete(self, user_id: UUID) -> bool:
         pass

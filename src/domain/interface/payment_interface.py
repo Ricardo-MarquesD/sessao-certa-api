@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from domain.entities.payment import Payment
 from utils.enum.payment_enum import PaymentStatus, PaymentType
 from datetime import datetime
+from uuid import UUID
 
 class PaymentInterface(ABC):
     
@@ -14,7 +15,7 @@ class PaymentInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_id(self, payment_id: str) -> Payment | None:
+    def get_by_id(self, payment_id: UUID) -> Payment | None:
         pass
     
     @abstractmethod
@@ -22,7 +23,7 @@ class PaymentInterface(ABC):
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Payment]:
+    def list_by_establishment_id(self, establishment_id: UUID) -> list[Payment]:
         pass
     
     @abstractmethod
@@ -38,5 +39,5 @@ class PaymentInterface(ABC):
         pass
     
     @abstractmethod
-    def delete(self, payment_id: str) -> bool:
+    def delete(self, payment_id: UUID) -> bool:
         pass
