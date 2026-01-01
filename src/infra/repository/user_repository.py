@@ -4,6 +4,7 @@ from domain.entities import User
 from domain.interface import UserInterface
 from infra.models import UserModel
 from utils.enum import UserRole
+from uuid import UUID
 
 class UserRepository(UserInterface):
 
@@ -50,7 +51,7 @@ class UserRepository(UserInterface):
 
         return self._to_entity(user_orm)
 
-    def get_by_id(self, user_id: str) -> User | None:
+    def get_by_id(self, user_id: UUID) -> User | None:
         stmt = select(UserModel).where(UserModel.uuid == user_id)
         result = self.db_session.scalar(stmt)
         
