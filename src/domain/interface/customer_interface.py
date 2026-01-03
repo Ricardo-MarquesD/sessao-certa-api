@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from domain.entities.customer import Customer
+from domain.entities import Customer
+from utils.value_object import PaginatedResponse
 from uuid import UUID
 
 class CustomerInterface(ABC):
@@ -21,15 +22,15 @@ class CustomerInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Customer]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Customer]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: UUID) -> list[Customer]:
+    def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Customer]:
         pass
     
     @abstractmethod
-    def search_by_name(self, name: str, establishment_id: UUID) -> list[Customer]:
+    def search_by_name(self, name: str, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Customer]:
         pass
     
     @abstractmethod

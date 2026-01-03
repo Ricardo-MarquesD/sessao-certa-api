@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from domain.entities import User
 from utils.enum import UserRole
+from utils.value_object import PaginatedResponse
 from uuid import UUID
 
 class UserInterface(ABC):
@@ -26,19 +27,19 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[User]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def list_all_by_active(self, active_status: bool) -> list[User]:
+    def list_all_by_active(self, active_status: bool, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def list_by_role(self, role: UserRole) -> list[User]:
+    def list_by_role(self, role: UserRole, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def search_by_user_name(self, user_name: str) -> list[User]:
+    def search_by_user_name(self, user_name: str, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod

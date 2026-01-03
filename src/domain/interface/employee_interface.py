@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from domain.entities.employee import Employee
+from domain.entities import Employee
+from utils.value_object import PaginatedResponse
 from uuid import UUID
 
 class EmployeeInterface(ABC):
@@ -21,11 +22,11 @@ class EmployeeInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Employee]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Employee]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: UUID) -> list[Employee]:
+    def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Employee]:
         pass
     
     @abstractmethod

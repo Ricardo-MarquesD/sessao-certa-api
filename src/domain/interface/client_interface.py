@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from domain.entities import Client
 from uuid import UUID
+from utils.value_object.pagination import PaginatedResponse
 
 class ClientInterface(ABC):
 
@@ -21,11 +22,11 @@ class ClientInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[Client]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Client]:
         pass
     
     @abstractmethod
-    def list_by_plan_id(self, plan_id: int) -> list[Client]:
+    def list_by_plan_id(self, plan_id: int, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Client]:
         pass
 
     @abstractmethod

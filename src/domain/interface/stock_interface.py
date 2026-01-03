@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from domain.entities.stock import StockProduct, StockMovement
-from utils.enum.stock_enum import MovementType
+from domain.entities import StockProduct, StockMovement
+from utils.enum import MovementType
+from utils.value_object import PaginatedResponse
 from datetime import datetime
 
 class StockProductInterface(ABC):
@@ -22,15 +23,15 @@ class StockProductInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[StockProduct]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockProduct]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[StockProduct]:
+    def list_by_establishment_id(self, establishment_id: str, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockProduct]:
         pass
     
     @abstractmethod
-    def list_available_by_establishment_id(self, establishment_id: str) -> list[StockProduct]:
+    def list_available_by_establishment_id(self, establishment_id: str, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockProduct]:
         pass
     
     @abstractmethod
@@ -53,19 +54,19 @@ class StockMovementInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[StockMovement]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockMovement]:
         pass
     
     @abstractmethod
-    def list_by_stock_product_id(self, stock_product_id: int) -> list[StockMovement]:
+    def list_by_stock_product_id(self, stock_product_id: int, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockMovement]:
         pass
     
     @abstractmethod
-    def list_by_movement_type(self, movement_type: MovementType) -> list[StockMovement]:
+    def list_by_movement_type(self, movement_type: MovementType, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockMovement]:
         pass
     
     @abstractmethod
-    def list_by_date_range(self, start_date: datetime, end_date: datetime) -> list[StockMovement]:
+    def list_by_date_range(self, start_date: datetime, end_date: datetime, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockMovement]:
         pass
     
     @abstractmethod

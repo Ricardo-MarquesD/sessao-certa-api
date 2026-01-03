@@ -1,5 +1,6 @@
 from abc import  ABC, abstractmethod
 from domain.entities import Establishment
+from utils.value_object import PaginatedResponse
 from uuid import UUID
 
 class EstablishmentInterface(ABC):
@@ -25,19 +26,19 @@ class EstablishmentInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[Establishment]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         pass
 
     @abstractmethod
-    def list_all_by_trial_active(self, trial_active: bool) -> list[Establishment]:
+    def list_all_by_trial_active(self, trial_active: bool, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         pass
 
     @abstractmethod
-    def list_with_due_date_expired(self) -> list[Establishment]:
+    def list_with_due_date_expired(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         pass
 
     @abstractmethod
-    def search_by_establishment_name(self, establishment_name: UUID) -> list[Establishment]:
+    def search_by_establishment_name(self, establishment_name: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         pass
 
     @abstractmethod
