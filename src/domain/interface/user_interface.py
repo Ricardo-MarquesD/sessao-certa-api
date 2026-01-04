@@ -27,19 +27,19 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
+    def list_all(self, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def list_all_by_active(self, active_status: bool, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
+    def list_all_by_active(self, active_status: bool, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def list_by_role(self, role: UserRole, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
+    def list_by_role(self, role: UserRole, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def search_by_user_name(self, user_name: str, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[User]:
+    def search_by_user_name(self, user_name: str, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod

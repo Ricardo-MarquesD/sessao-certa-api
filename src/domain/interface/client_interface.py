@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from domain.entities import Client
+from utils.value_object import PaginatedResponse
 from uuid import UUID
-from utils.value_object.pagination import PaginatedResponse
 
 class ClientInterface(ABC):
 
