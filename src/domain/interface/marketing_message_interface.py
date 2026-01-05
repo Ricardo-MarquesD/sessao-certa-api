@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from domain.entities.marketing_message import MarketingMessage
+from domain.entities import MarketingMessage
+from utils.value_object import PaginatedResponse
+from uuid import UUID
 
 class MarketingMessageInterface(ABC):
     
@@ -16,11 +18,11 @@ class MarketingMessageInterface(ABC):
         pass
     
     @abstractmethod
-    def list_all(self) -> list[MarketingMessage] | list[None]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[MarketingMessage]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[MarketingMessage] | list[None]:
+    def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[MarketingMessage]:
         pass
     
     @abstractmethod

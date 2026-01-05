@@ -33,19 +33,19 @@ def test_user_model(db_session, user_db):
     assert user_db.active_status is True
 
     #Read
-    read = db_session.query(UserModel).filter_by(user_name = "Test User").first()
+    read = db_session.query(UserModel).filter_by(uuid = user_db.uuid).first()
     assert read is not None
     assert read.id == user_db.id
 
     #Update
-    db_session.query(UserModel).filter_by(user_name = "Test User").update({"user_name": "Test User Update"})
+    db_session.query(UserModel).filter_by(uuid = user_db.uuid).update({"user_name": "Test User Update"})
     db_session.flush()
     assert user_db.user_name == "Test User Update"
 
     #Delete
     db_session.delete(user_db)
     db_session.flush()
-    result = db_session.query(UserModel).filter_by(user_name = "Test User Update").first()
+    result = db_session.query(UserModel).filter_by(uuid = user_db.uuid).first()
     assert result is None
 
 def test_plan_model(db_session, plan_db):

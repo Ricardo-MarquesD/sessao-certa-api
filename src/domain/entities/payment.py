@@ -4,11 +4,12 @@ from typing import Any
 from .establishment import Establishment
 from decimal import Decimal
 from datetime import datetime
+from uuid import UUID
 from utils.enum.payment_enum import PaymentStatus, PaymentType
 
 @dataclass
 class Payment():
-    id: str | None # Lembresse de ser o UUID
+    id: UUID | None
     establishment: Establishment
     valor: Decimal
     payment_status: PaymentStatus

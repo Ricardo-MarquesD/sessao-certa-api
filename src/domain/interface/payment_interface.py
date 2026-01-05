@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from domain.entities.payment import Payment
-from utils.enum.payment_enum import PaymentStatus, PaymentType
+from domain.entities import Payment
+from utils.enum import PaymentStatus, PaymentType
+from utils.value_object import PaginatedResponse
 from datetime import datetime
+from uuid import UUID
 
 class PaymentInterface(ABC):
     
@@ -14,29 +16,29 @@ class PaymentInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_id(self, payment_id: str) -> Payment | None:
+    def get_by_id(self, payment_id: UUID) -> Payment | None:
         pass
     
     @abstractmethod
-    def list_all(self) -> list[Payment] | list[None]:
+    def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
         pass
     
     @abstractmethod
-    def list_by_establishment_id(self, establishment_id: str) -> list[Payment] | list[None]:
+    def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
         pass
     
     @abstractmethod
-    def list_by_status(self, status: PaymentStatus) -> list[Payment] | list[None]:
+    def list_by_status(self, status: PaymentStatus, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
         pass
     
     @abstractmethod
-    def list_by_type(self, payment_type: PaymentType) -> list[Payment] | list[None]:
+    def list_by_type(self, payment_type: PaymentType, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
         pass
     
     @abstractmethod
-    def list_by_due_date_range(self, start_date: datetime, end_date: datetime) -> list[Payment] | list[None]:
+    def list_by_due_date_range(self, start_date: datetime, end_date: datetime, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
         pass
     
     @abstractmethod
-    def delete(self, payment_id: str) -> bool:
+    def delete(self, payment_id: UUID) -> bool:
         pass

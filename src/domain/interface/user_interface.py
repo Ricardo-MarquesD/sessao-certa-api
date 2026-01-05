@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from domain.entities import User
 from utils.enum import UserRole
+from utils.value_object import PaginatedResponse
+from uuid import UUID
 
 class UserInterface(ABC):
 
@@ -13,7 +15,7 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, user_id: str) -> User | None:
+    def get_by_id(self, user_id: UUID) -> User | None:
         pass
 
     @abstractmethod
@@ -25,21 +27,21 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> list[User] | list[None]:
+    def list_all(self, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def list_all_by_active(self, active_status: bool) -> list[User] | list[None]:
+    def list_all_by_active(self, active_status: bool, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def list_by_role(self, role: UserRole) -> list[User] | list[None]:
+    def list_by_role(self, role: UserRole, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def search_by_user_name(self, user_name: str) -> list[User] | list[None]:
+    def search_by_user_name(self, user_name: str, cursor: str | None = None, limit: int = 15, total_status: bool = None) -> PaginatedResponse[User]:
         pass
 
     @abstractmethod
-    def delete(self, user_id: str) -> bool:
+    def delete(self, user_id: UUID) -> bool:
         pass

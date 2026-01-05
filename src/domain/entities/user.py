@@ -4,12 +4,12 @@ from datetime import datetime
 from typing import Any
 from utils.enum import UserRole
 from utils.value_object import PasswordHasher
-
+from uuid import UUID
 
 @dataclass
 class User:
     
-    id: str | None # Lembrar de usar o UUID ao invés de id númerico
+    id: UUID | None 
     user_name: str
     email: str
     phone_number: str

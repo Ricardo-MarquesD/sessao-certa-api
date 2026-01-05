@@ -26,9 +26,9 @@ def get_session():
     session = Session()
     try:
         yield session
-        session.commit()  # Commit automático se não houver exceção
+        session.commit()
     except Exception:
-        session.rollback()  # Rollback em caso de erro
+        session.rollback()
         raise
     finally:
         session.close()

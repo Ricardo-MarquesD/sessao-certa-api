@@ -1,11 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from .establishment import Establishment
+from uuid import UUID
 from typing import Any
 
 @dataclass
 class Customer():
-    id: str | None # Lembrar desse id ser o UUID
+    id: UUID | None
     establishment: Establishment
     customer_name: str
     phone_number: str
