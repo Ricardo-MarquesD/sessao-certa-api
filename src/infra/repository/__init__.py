@@ -1,2 +1,12 @@
 from .user_repository import UserRepository
+from .plan_repository import PlanRepository
 from .client_repository import ClientRepository
+from .establishment_repository import EstablishmentRepository
+from .service_repository import ServiceRepository
+from .customer_repository import CustomerRepository
+from .employee_repository import EmployeeRepository
+from .payment_repository import PaymentRepository
+from .marketing_message_repository import MarketingMessageRepository
+from .scheduling_repository import SchedulingRepository
+from .stock_repository import StockProductRepository, StockMovementRepository
+from .entity_mapper import EntityMapper

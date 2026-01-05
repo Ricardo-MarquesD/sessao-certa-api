@@ -1,10 +1,10 @@
+from utils.value_object import PaginatedResponse, CursorEncoder
 from sqlalchemy import select, delete, func
 from sqlalchemy.orm import Session
 from domain.entities import User
 from domain.interface import UserInterface
 from infra.models import UserModel
 from utils.enum import UserRole
-from utils.value_object import PaginatedResponse, CursorEncoder
 from uuid import UUID
 
 class UserRepository(UserInterface):
@@ -110,7 +110,7 @@ class UserRepository(UserInterface):
 
         return PaginatedResponse(
             data= entities,
-            next_cursor = next_cursor,
+            cursor = next_cursor,
             has_more = has_more,
             total_count = total_count
         )
@@ -144,7 +144,7 @@ class UserRepository(UserInterface):
 
         return PaginatedResponse(
             data= entities,
-            next_cursor = next_cursor,
+            cursor = next_cursor,
             has_more = has_more,
             total_count = total_count
         )
@@ -178,7 +178,7 @@ class UserRepository(UserInterface):
 
         return PaginatedResponse(
             data= entities,
-            next_cursor = next_cursor,
+            cursor = next_cursor,
             has_more = has_more,
             total_count = total_count
         )
@@ -210,17 +210,14 @@ class UserRepository(UserInterface):
         
         return PaginatedResponse(
             data=entities,
-            next_cursor=next_cursor,
+            cursor=next_cursor,
             has_more=has_more,
             total_count=total_count
         )
 
     def delete(self, user_id: UUID) -> bool:
         stmt = delete(UserModel).where(UserModel.uuid == user_id, UserModel.active_status == False)
-        self.db_session.execute(stmt)
+        result = self.db_session.execute(stmt)
         self.db_session.commit()
         
-        stmt_verify = select(UserModel).where(UserModel.uuid == user_id)
-        result = self.db_session.scalar(stmt_verify)
-
-        return False if result is not None else True
+        return result.rowcount > 0
