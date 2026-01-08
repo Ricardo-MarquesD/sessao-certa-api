@@ -6,7 +6,13 @@ from .user_schema import (
     UpdateRoleRequest,
     CreateClientRequest,
     UpdateClientRequest,
-    ClientResponse
+    ClientResponse,
+    CreateEmployeeRequest,
+    UpdateEmployeeRequest,
+    EmployeeResponse,
+    EmployeeDetailResponse,
+    EmployeeCommissionResponse,
+    UpdateEmployeeAvailabilityRequest
 )
 
 from .plan_schema import(
