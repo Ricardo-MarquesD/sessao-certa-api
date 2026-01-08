@@ -1,9 +1,11 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
-from domain.entities import User, Client
-from schema import PlanResponse
+from domain.entities import User, Client, Employee
+from schema import PlanResponse, EstablishmentResponse
 from utils.enum import UserRole
 from datetime import datetime
+from decimal import Decimal
+from typing import Dict, List
 
 class _UserBase(BaseModel):
     user_name: str = Field(min_length=1, max_length=150)
@@ -73,3 +75,71 @@ class ClientResponse(BaseModel):
             user=UserResponse.from_entity(client.user),
             plan=PlanResponse.from_entity(client.plan)
         )
+    
+class CreateEmployeeRequest(BaseModel):
+    user_id: str
+    establishment_id: str
+    percentage_commission: Decimal | None = Field(default=None, ge=0, le=100)
+    available_hours: Dict[str, List[str]] | None = None
+    
+    @field_validator('percentage_commission')
+    @classmethod
+    def validate_commission(cls, v: Decimal | None):
+        if v is not None and (v < 0 or v > 100):
+            raise ValueError("Commission must be between 0 and 100")
+        return v
+
+class UpdateEmployeeRequest(BaseModel):
+    percentage_commission: Decimal | None = Field(default=None, ge=0, le=100)
+    available_hours: Dict[str, List[str]] | None = None
+
+class UpdateEmployeeAvailabilityRequest(BaseModel):
+    available_hours: Dict[str, List[str]]
+    # Exemplo: 
+    # {
+    #   "monday": ["09:00-18:00"],
+    #   "tuesday": ["09:00-12:00", "14:00-18:00"],
+    #   "wednesday": [],  # Não trabalha
+    #   "thursday": ["09:00-18:00"],
+    #   "friday": ["09:00-17:00"]
+    # }
+
+class EmployeeResponse(BaseModel):
+    id: int
+    user_id: str
+    establishment_id: str
+    percentage_commission: str | None
+    available_hours: Dict[str, List[str]] | None
+    
+    @classmethod
+    def from_entity(cls, employee: Employee) -> EmployeeResponse:
+        return cls(
+            id=employee.id,
+            user_id=str(employee.user.id),
+            establishment_id=str(employee.establishment.id),
+            percentage_commission=str(employee.percentage_commission) if employee.percentage_commission else None,
+            available_hours=employee.available_hours
+        )
+
+class EmployeeDetailResponse(BaseModel):
+    id: int
+    user: UserResponse
+    establishment: EstablishmentResponse
+    percentage_commission: str | None
+    available_hours: Dict[str, List[str]] | None
+    
+    @classmethod
+    def from_entity(cls, employee: Employee) -> EmployeeDetailResponse:
+        return cls(
+            id=employee.id,
+            user=UserResponse.from_entity(employee.user),
+            establishment=EstablishmentResponse.from_entity(employee.establishment),
+            percentage_commission=str(employee.percentage_commission) if employee.percentage_commission else None,
+            available_hours=employee.available_hours
+        )
+
+class EmployeeCommissionResponse(BaseModel):
+    employee_id: int
+    service_price: str
+    commission_percentage: str
+    commission_value: str
