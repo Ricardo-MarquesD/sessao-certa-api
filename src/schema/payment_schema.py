@@ -3,7 +3,7 @@ from decimal import Decimal
 from datetime import datetime
 from utils.enum import PaymentStatus, PaymentType
 from domain.entities import Payment
-from .establishment_schema import EstablishmentResponse
+from schema import EstablishmentResponse
 
 class CreatePaymentRequest(BaseModel):
     establishment_id: str
@@ -31,7 +31,7 @@ class PaymentResponse(BaseModel):
     can_refund: bool
     
     @classmethod
-    def from_entity(cls, payment: Payment) -> "PaymentResponse":
+    def from_entity(cls, payment: Payment) -> PaymentResponse:
         return cls(
             id=str(payment.id),
             establishment_id=str(payment.establishment.id),
@@ -58,7 +58,7 @@ class PaymentDetailResponse(BaseModel):
     can_refuse: bool
     
     @classmethod
-    def from_entity(cls, payment: Payment) -> "PaymentDetailResponse":
+    def from_entity(cls, payment: Payment) -> PaymentDetailResponse:
         return cls(
             id=str(payment.id),
             establishment=EstablishmentResponse.from_entity(payment.establishment),
