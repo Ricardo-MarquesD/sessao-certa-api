@@ -51,3 +51,20 @@ from .service_schema import(
     ServiceDetailResponse,
     UpdateServiceStatusRequest
 )
+
+from .scheduling_schema import(
+    CreateSchedulingRequest,
+    UpdateSchedulingRequest,
+    SchedulingResponse,
+    SchedulingDetailResponse,
+    SchedulingCalendarResponse,
+    CancelSchedulingRequest,
+    UpdateSchedulingStatusRequest
+)
+
+from .marketing_schema import(
+    CreateMarketingMessageRequest,
+    UpdateMarketingMessageRequest,
+    MarketingMessageResponse,
+    MarketingMessageDetailResponse
+)
