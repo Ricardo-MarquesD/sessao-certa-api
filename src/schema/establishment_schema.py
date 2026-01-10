@@ -2,12 +2,16 @@ from pydantic import BaseModel, Field, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from datetime import datetime
 from domain.entities import Establishment
-from schema import ClientResponse
+from uuid import UUID
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from schema.user_schema import ClientResponse
 
 class CreateEstablishmentRequest(BaseModel):
     client_id: int
     establishment_name: str = Field(min_length=1, max_length=255)
-    cnpj: str = Field(min_length=14, max_length=14)
+    cnpj: str = Field(min_length=14, max_length=18)
     chatbot_phone_number: PhoneNumber | None = Field(default=None, default_region='BR')
     address: str | None = Field(default=None, max_length=500)
     trial_active: bool = True
@@ -31,7 +35,7 @@ class UpdateEstablishmentImgRequest(BaseModel):
     img_url: str = Field(max_length=500)
 
 class EstablishmentResponse(BaseModel):
-    id: str
+    id: UUID
     client_id: int
     establishment_name: str
     cnpj: str
@@ -46,7 +50,7 @@ class EstablishmentResponse(BaseModel):
     @classmethod
     def from_entity(cls, establishment: Establishment) -> EstablishmentResponse:
         return cls(
-            id=str(establishment.id),
+            id=establishment.id,
             client_id=establishment.client.id,
             establishment_name=establishment.establishment_name,
             cnpj=establishment.cnpj,
@@ -60,7 +64,7 @@ class EstablishmentResponse(BaseModel):
         )
 
 class EstablishmentDetailResponse(BaseModel):
-    id: str
+    id: UUID
     client: ClientResponse
     establishment_name: str
     cnpj: str
@@ -75,10 +79,11 @@ class EstablishmentDetailResponse(BaseModel):
     
     @classmethod
     def from_entity(cls, establishment: Establishment) -> EstablishmentDetailResponse:
+        from schema import ClientResponse
         time_until_due = establishment.time_until_due()
         
         return cls(
-            id=str(establishment.id),
+            id=establishment.id,
             client=ClientResponse.from_entity(establishment.client),
             establishment_name=establishment.establishment_name,
             cnpj=establishment.cnpj,

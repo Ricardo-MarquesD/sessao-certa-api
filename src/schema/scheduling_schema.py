@@ -1,19 +1,18 @@
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from utils.enum import AppointmentStatus
-from domain import Scheduling
-from schema import (
-    EstablishmentResponse,
-    EmployeeResponse,
-    CustomerResponse,
-    ServiceResponse
-)
+from domain.entities import Scheduling
+from uuid import UUID
+from schema.establishment_schema import EstablishmentResponse
+from schema.user_schema import EmployeeResponse
+from schema.customer_schema import CustomerResponse
+from schema.service_schema import ServiceResponse
 
 class CreateSchedulingRequest(BaseModel):
-    establishment_id: str
+    establishment_id: UUID
     employee_id: int
-    customer_id: str
-    service_id: str
+    customer_id: UUID
+    service_id: UUID
     appointment_date: datetime
     
     @field_validator('appointment_date')
@@ -41,11 +40,11 @@ class CancelSchedulingRequest(BaseModel):
     reason: str | None = Field(default=None, max_length=500)
 
 class SchedulingResponse(BaseModel):
-    id: str
-    establishment_id: str
+    id: UUID
+    establishment_id: UUID
     employee_id: int
-    customer_id: str
-    service_id: str
+    customer_id: UUID
+    service_id: UUID
     appointment_date: datetime
     appointment_end_time: datetime
     appointment_status: str
@@ -56,11 +55,11 @@ class SchedulingResponse(BaseModel):
     @classmethod
     def from_entity(cls, scheduling: Scheduling) -> SchedulingResponse:
         return cls(
-            id=str(scheduling.id),
-            establishment_id=str(scheduling.establishment.id),
+            id=scheduling.id,
+            establishment_id=scheduling.establishment.id,
             employee_id=scheduling.employee.id,
-            customer_id=str(scheduling.customer.id),
-            service_id=str(scheduling.service.id),
+            customer_id=scheduling.customer.id,
+            service_id=scheduling.service.id,
             appointment_date=scheduling.appointment_date,
             appointment_end_time=scheduling.calculate_end_time(),
             appointment_status=scheduling.appointment_status.value,
@@ -70,7 +69,7 @@ class SchedulingResponse(BaseModel):
         )
 
 class SchedulingDetailResponse(BaseModel):
-    id: str
+    id: UUID
     establishment: EstablishmentResponse
     employee: EmployeeResponse
     customer: CustomerResponse
@@ -86,7 +85,7 @@ class SchedulingDetailResponse(BaseModel):
     @classmethod
     def from_entity(cls, scheduling: Scheduling) -> SchedulingDetailResponse:
         return cls(
-            id=str(scheduling.id),
+            id=scheduling.id,
             establishment=EstablishmentResponse.from_entity(scheduling.establishment),
             employee=EmployeeResponse.from_entity(scheduling.employee),
             customer=CustomerResponse.from_entity(scheduling.customer),
@@ -101,7 +100,7 @@ class SchedulingDetailResponse(BaseModel):
         )
 
 class SchedulingCalendarResponse(BaseModel):
-    id: str
+    id: UUID
     customer_name: str
     service_name: str
     employee_name: str
@@ -113,7 +112,7 @@ class SchedulingCalendarResponse(BaseModel):
     @classmethod
     def from_entity(cls, scheduling: Scheduling) -> SchedulingCalendarResponse:
         return cls(
-            id=str(scheduling.id),
+            id=scheduling.id,
             customer_name=scheduling.customer.customer_name,
             service_name=scheduling.service.service_name,
             employee_name=scheduling.employee.user.user_name,

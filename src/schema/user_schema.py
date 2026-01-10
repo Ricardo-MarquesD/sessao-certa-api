@@ -1,11 +1,15 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from domain.entities import User, Client, Employee
-from schema import PlanResponse, EstablishmentResponse
 from utils.enum import UserRole
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
+from uuid import UUID
+
+if TYPE_CHECKING:
+    from schema.plan_schema import PlanResponse
+    from schema.establishment_schema import EstablishmentResponse
 
 class _UserBase(BaseModel):
     user_name: str = Field(min_length=1, max_length=150)
@@ -30,7 +34,7 @@ class UpdateUserRequest(BaseModel):
     active_status: bool | None = None
 
 class UserResponse(_UserBase):
-    id: str
+    id: UUID
     active_status: bool
     img_url: str | None
     created_at: datetime | None
@@ -39,7 +43,7 @@ class UserResponse(_UserBase):
     @classmethod
     def from_entity(cls, user: User) -> UserResponse:
         return cls(
-            id=str(user.id),
+            id=user.id,
             user_name=user.user_name,
             email=user.email,
             phone_number=user.phone_number,
@@ -57,7 +61,7 @@ class UpdateRoleRequest(BaseModel):
     role: UserRole
 
 class CreateClientRequest(BaseModel):
-    user_id: str
+    user_id: UUID
     plan_id: int
 
 class UpdateClientRequest(BaseModel):
@@ -70,6 +74,7 @@ class ClientResponse(BaseModel):
     
     @classmethod
     def from_entity(cls, client: Client) -> ClientResponse:
+        from schema import PlanResponse
         return cls(
             id=client.id,
             user=UserResponse.from_entity(client.user),
@@ -77,8 +82,8 @@ class ClientResponse(BaseModel):
         )
     
 class CreateEmployeeRequest(BaseModel):
-    user_id: str
-    establishment_id: str
+    user_id: UUID
+    establishment_id: UUID
     percentage_commission: Decimal | None = Field(default=None, ge=0, le=100)
     available_hours: Dict[str, List[str]] | None = None
     
@@ -106,8 +111,8 @@ class UpdateEmployeeAvailabilityRequest(BaseModel):
 
 class EmployeeResponse(BaseModel):
     id: int
-    user_id: str
-    establishment_id: str
+    user_id: UUID
+    establishment_id: UUID
     percentage_commission: str | None
     available_hours: Dict[str, List[str]] | None
     
@@ -115,8 +120,8 @@ class EmployeeResponse(BaseModel):
     def from_entity(cls, employee: Employee) -> EmployeeResponse:
         return cls(
             id=employee.id,
-            user_id=str(employee.user.id),
-            establishment_id=str(employee.establishment.id),
+            user_id=employee.user.id,
+            establishment_id=employee.establishment.id,
             percentage_commission=str(employee.percentage_commission) if employee.percentage_commission else None,
             available_hours=employee.available_hours
         )
@@ -130,6 +135,7 @@ class EmployeeDetailResponse(BaseModel):
     
     @classmethod
     def from_entity(cls, employee: Employee) -> EmployeeDetailResponse:
+        from schema import EstablishmentResponse
         return cls(
             id=employee.id,
             user=UserResponse.from_entity(employee.user),

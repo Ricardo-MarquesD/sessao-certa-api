@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field
 from decimal import Decimal
 from domain.entities import Service
-from .establishment_schema import EstablishmentResponse
+from uuid import UUID
+from schema.establishment_schema import EstablishmentResponse
 
 class CreateServiceRequest(BaseModel):
-    establishment_id: str
+    establishment_id: UUID
     service_name: str = Field(min_length=1, max_length=255)
     description_service: str | None = Field(default=None, max_length=1000)
     time_duration: int = Field(gt=0)
@@ -21,8 +22,8 @@ class UpdateServiceStatusRequest(BaseModel):
     active: bool
 
 class ServiceResponse(BaseModel):
-    id: str
-    establishment_id: str
+    id: UUID
+    establishment_id: UUID
     service_name: str
     description_service: str | None
     time_duration: int
@@ -30,10 +31,10 @@ class ServiceResponse(BaseModel):
     active: bool
     
     @classmethod
-    def from_entity(cls, service: Service) -> "ServiceResponse":
+    def from_entity(cls, service: Service) -> ServiceResponse:
         return cls(
-            id=str(service.id),
-            establishment_id=str(service.establishment.id),
+            id=service.id,
+            establishment_id=service.establishment.id,
             service_name=service.service_name,
             description_service=service.description_service,
             time_duration=service.time_duration,
@@ -42,7 +43,7 @@ class ServiceResponse(BaseModel):
         )
 
 class ServiceDetailResponse(BaseModel):
-    id: str
+    id: UUID
     establishment: EstablishmentResponse
     service_name: str
     description_service: str | None
@@ -65,7 +66,7 @@ class ServiceDetailResponse(BaseModel):
             duration_formatted = f"{minutes}min"
         
         return cls(
-            id=str(service.id),
+            id=service.id,
             establishment=EstablishmentResponse.from_entity(service.establishment),
             service_name=service.service_name,
             description_service=service.description_service,

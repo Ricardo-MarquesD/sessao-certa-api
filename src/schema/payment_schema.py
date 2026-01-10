@@ -3,10 +3,11 @@ from decimal import Decimal
 from datetime import datetime
 from utils.enum import PaymentStatus, PaymentType
 from domain.entities import Payment
-from schema import EstablishmentResponse
+from uuid import UUID
+from schema.establishment_schema import EstablishmentResponse
 
 class CreatePaymentRequest(BaseModel):
-    establishment_id: str
+    establishment_id: UUID
     valor: Decimal = Field(gt=0)
     payment_type: PaymentType
     employee_quantity: int | None = Field(default=None, ge=0)
@@ -20,8 +21,8 @@ class RefundPaymentRequest(BaseModel):
     reason: str = Field(min_length=10, max_length=500)
 
 class PaymentResponse(BaseModel):
-    id: str
-    establishment_id: str
+    id: UUID
+    establishment_id: UUID
     valor: str
     payment_status: str
     payment_type: str
@@ -33,8 +34,8 @@ class PaymentResponse(BaseModel):
     @classmethod
     def from_entity(cls, payment: Payment) -> PaymentResponse:
         return cls(
-            id=str(payment.id),
-            establishment_id=str(payment.establishment.id),
+            id=payment.id,
+            establishment_id=payment.establishment.id,
             valor=str(payment.valor),
             payment_status=payment.payment_status.value,
             payment_type=payment.payment_type.value,
@@ -45,7 +46,7 @@ class PaymentResponse(BaseModel):
         )
 
 class PaymentDetailResponse(BaseModel):
-    id: str
+    id: UUID
     establishment: EstablishmentResponse
     valor: str
     payment_status: str
@@ -60,7 +61,7 @@ class PaymentDetailResponse(BaseModel):
     @classmethod
     def from_entity(cls, payment: Payment) -> PaymentDetailResponse:
         return cls(
-            id=str(payment.id),
+            id=payment.id,
             establishment=EstablishmentResponse.from_entity(payment.establishment),
             valor=str(payment.valor),
             payment_status=payment.payment_status.value,

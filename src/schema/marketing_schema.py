@@ -1,9 +1,10 @@
 from pydantic import BaseModel, Field
 from domain.entities import MarketingMessage
-from .establishment_schema import EstablishmentResponse
+from uuid import UUID
+from schema.establishment_schema import EstablishmentResponse
 
 class CreateMarketingMessageRequest(BaseModel):
-    establishment_id: str
+    establishment_id: UUID
     title: str | None = Field(default=None, max_length=255)
     content: str | None = Field(default=None, max_length=5000)
 
@@ -13,7 +14,7 @@ class UpdateMarketingMessageRequest(BaseModel):
 
 class MarketingMessageResponse(BaseModel):
     id: int
-    establishment_id: str
+    establishment_id: UUID
     title: str | None
     content: str | None
     
@@ -21,7 +22,7 @@ class MarketingMessageResponse(BaseModel):
     def from_entity(cls, message: MarketingMessage) -> MarketingMessageResponse:
         return cls(
             id=message.id,
-            establishment_id=str(message.establishment.id),
+            establishment_id=message.establishment.id,
             title=message.title,
             content=message.content
         )

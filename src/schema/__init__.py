@@ -68,3 +68,20 @@ from .marketing_schema import(
     MarketingMessageResponse,
     MarketingMessageDetailResponse
 )
+
+from .stock_schema import(
+    CreateStockProductRequest,
+    UpdateStockProductRequest,
+    StockProductResponse,
+    StockProductDetailResponse,
+    AdjustStockRequest,
+    CreateStockMovementRequest,
+    StockMovementResponse,
+    StockMovementDetailResponse
+)
+
+from .upload_schema import(
+    ImageUploadResponse,
+    ImageDeleteResponse,
+    ImageValidationError
+)
