@@ -12,7 +12,7 @@ class CreateEstablishmentRequest(BaseModel):
     client_id: int
     establishment_name: str = Field(min_length=1, max_length=255)
     cnpj: str = Field(min_length=14, max_length=18)
-    chatbot_phone_number: PhoneNumber | None = Field(default=None, default_region='BR')
+    chatbot_phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
     address: str | None = Field(default=None, max_length=500)
     trial_active: bool = True
     
@@ -26,7 +26,7 @@ class CreateEstablishmentRequest(BaseModel):
 
 class UpdateEstablishmentRequest(BaseModel):
     establishment_name: str | None = Field(default=None, min_length=1, max_length=255)
-    chatbot_phone_number: PhoneNumber | None = Field(default=None, default_region='BR')
+    chatbot_phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
     address: str | None = Field(default=None, max_length=500)
     due_date: datetime | None = None
     trial_active: bool | None = None

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class _UserBase(BaseModel):
     user_name: str = Field(min_length=1, max_length=150)
     email: EmailStr
-    phone_number: PhoneNumber = Field(default_region='BR')
+    phone_number: PhoneNumber = Field(json_schema_extra={'default_region': 'BR'})
     role: UserRole
 
     @field_validator('role')
@@ -30,7 +30,7 @@ class CreateUserRequest(_UserBase):
 class UpdateUserRequest(BaseModel):
     user_name: str | None = Field(default=None, min_length=1, max_length=150)
     email: EmailStr | None = None
-    phone_number: PhoneNumber | None = Field(default=None, default_region='BR')
+    phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
     active_status: bool | None = None
 
 class UserResponse(_UserBase):

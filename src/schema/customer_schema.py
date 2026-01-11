@@ -7,11 +7,11 @@ from schema.establishment_schema import EstablishmentResponse
 class CreateCustomerRequest(BaseModel):
     establishment_id: UUID
     customer_name: str = Field(min_length=1, max_length=255)
-    phone_number: PhoneNumber = Field(default_region='BR')
+    phone_number: PhoneNumber = Field(json_schema_extra={'default_region': 'BR'})
 
 class UpdateCustomerRequest(BaseModel):
     customer_name: str | None = Field(default=None, min_length=1, max_length=255)
-    phone_number: PhoneNumber | None = Field(default=None, default_region='BR')
+    phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
 
 class CustomerResponse(BaseModel):
     id: UUID
