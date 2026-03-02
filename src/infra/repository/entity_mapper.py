@@ -46,7 +46,8 @@ class EntityMapper:
         return Client(
             id=client_model.id,
             user=user,
-            plan=plan
+            plan=plan,
+            stripe_customer_id=client_model.stripe_customer_id
         )
     
     @staticmethod
@@ -57,6 +58,13 @@ class EntityMapper:
         return Establishment(
             id=establishment_model.uuid,
             client=client,
+            stripe_subscription_id=establishment_model.stripe_subscription_id,
+            waba_id=establishment_model.waba_id,
+            whatsapp_business_token=establishment_model.whatsapp_business_token,
+            google_calendar_access_token=establishment_model.google_calendar_access_token,
+            google_calendar_refresh_token=establishment_model.google_calendar_refresh_token,
+            google_calendar_expiry=establishment_model.google_calendar_expiry,
+            google_calendar_id=establishment_model.google_calendar_id,
             establishment_name=establishment_model.establishment_name,
             cnpj=establishment_model.cnpj,
             chatbot_phone_number=establishment_model.chatbot_phone_number,

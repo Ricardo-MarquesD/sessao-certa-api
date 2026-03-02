@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, Boolean, Enum, ForeignKey, func
+from sqlalchemy import Column, Integer, DateTime, String,Boolean, Enum, ForeignKey, func
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from datetime import datetime
@@ -15,6 +15,7 @@ class SchedulingModel(Base):
     employees_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
     customers_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
     services_id = Column(Integer, ForeignKey("services.id"), nullable=False)
+    google_calendar_event_id = Column(String(255), nullable=True)
     created_at = Column(DateTime, server_default=func.current_timestamp())
     appointment_date = Column(DateTime, nullable=False)
     appointment_status = Column(Enum(AppointmentStatus), nullable=False)
@@ -37,6 +38,7 @@ class SchedulingModel(Base):
             "employees_id": self.employees_id,
             "customers_id": self.customers_id,
             "services_id": self.services_id,
+            "google_calendar_event_id": self.google_calendar_event_id,
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
             "appointment_date": self.appointment_date.strftime("%Y-%m-%d %H:%M:%S") if self.appointment_date else None,
             "appointment_status": self.appointment_status.value,

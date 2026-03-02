@@ -54,7 +54,8 @@ class SchedulingRepository(SchedulingInterface):
             created_at=scheduling_model.created_at,
             appointment_date=scheduling_model.appointment_date,
             appointment_status=scheduling_model.appointment_status,
-            notification_sent=scheduling_model.notification_sent
+            notification_sent=scheduling_model.notification_sent,
+            google_calendar_event_id=scheduling_model.google_calendar_event_id
         )
     
     def _to_orm(self, scheduling: Scheduling) -> SchedulingModel:
@@ -82,6 +83,7 @@ class SchedulingRepository(SchedulingInterface):
             employees_id=scheduling.employee.id,
             customers_id=customer_internal_id,
             services_id=service_internal_id,
+            google_calendar_event_id=scheduling.google_calendar_event_id,
             created_at=scheduling.created_at,
             appointment_date=scheduling.appointment_date,
             appointment_status=scheduling.appointment_status,
@@ -125,6 +127,7 @@ class SchedulingRepository(SchedulingInterface):
         scheduling_orm.employees_id = scheduling.employee.id
         scheduling_orm.customers_id = customer_internal_id
         scheduling_orm.services_id = service_internal_id
+        scheduling_orm.google_calendar_event_id = scheduling.google_calendar_event_id
         scheduling_orm.appointment_date = scheduling.appointment_date
         scheduling_orm.appointment_status = scheduling.appointment_status
         scheduling_orm.notification_sent = scheduling.notification_sent

@@ -20,6 +20,7 @@ class Scheduling():
     appointment_date: datetime | None
     notification_sent: bool | None
     created_at: datetime | None
+    google_calendar_event_id: str | None = None
 
     def __post_init__(self):
         if not isinstance(self.establishment, Establishment):
@@ -66,6 +67,7 @@ class Scheduling():
             "employee": self.employee.to_dict(),
             "customer": self.customer.to_dict(),
             "service": self.service.to_dict(),
+            "google_calendar_event_id": self.google_calendar_event_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "appointment_date": self.appointment_date.isoformat() if self.appointment_date else None,
             "appointment_status": self.appointment_status.value,
@@ -96,5 +98,6 @@ class Scheduling():
             appointment_status=appointment_status,
             appointment_date=datetime.fromisoformat(data.get("appointment_date")) if data.get("appointment_date") else None,
             notification_sent=data.get("notification_sent"),
-            created_at=datetime.fromisoformat(data.get("created_at")) if data.get("created_at") else None
+            created_at=datetime.fromisoformat(data.get("created_at")) if data.get("created_at") else None,
+            google_calendar_event_id=data.get("google_calendar_event_id")
         )

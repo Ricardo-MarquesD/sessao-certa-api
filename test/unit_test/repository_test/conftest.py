@@ -86,6 +86,8 @@ def sample_establishment(db_session, sample_client):
     """Cria um estabelecimento de exemplo no banco"""
     establishment = EstablishmentModel(
         clients_id=sample_client.id,
+        waba_id="WABA-TEST-001",
+        whatsapp_business_token="whatsapp-token-test-001",
         establishment_name="Salão Teste",
         cnpj="12345678901234",
         chatbot_phone_number="11987654321",
@@ -190,7 +192,7 @@ def sample_scheduling(db_session, sample_establishment, sample_employee, sample_
         employees_id=sample_employee.id,
         customers_id=sample_customer.id,
         services_id=sample_service.id,
-        appointment_date=datetime(2026, 2, 15, 14, 0),
+        appointment_date=datetime(2027, 6, 15, 14, 0),
         appointment_status=AppointmentStatus.SCHEDULED,
         notification_sent=False
     )

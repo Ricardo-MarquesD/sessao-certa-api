@@ -19,7 +19,8 @@ class CustomerRepository(CustomerInterface):
             id=customer_model.uuid,
             customer_name=customer_model.customer_name,
             phone_number=customer_model.phone_number,
-            establishment=establishment
+            establishment=establishment,
+            wa_id=customer_model.wa_id
         )
     
     def _to_orm(self, customer: Customer) -> CustomerModel:
@@ -33,7 +34,8 @@ class CustomerRepository(CustomerInterface):
             uuid=customer.id,
             customer_name=customer.customer_name,
             phone_number=customer.phone_number,
-            establishments_id=establishment_internal_id
+            establishments_id=establishment_internal_id,
+            wa_id=customer.wa_id
         )
     
     def create(self, customer: Customer) -> Customer:
@@ -60,6 +62,7 @@ class CustomerRepository(CustomerInterface):
         customer_orm.customer_name = customer.customer_name
         customer_orm.phone_number = customer.phone_number
         customer_orm.establishments_id = establishment_internal_id
+        customer_orm.wa_id = customer.wa_id
         
         self.db_session.commit()
         self.db_session.refresh(customer_orm)

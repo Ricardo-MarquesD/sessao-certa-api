@@ -25,7 +25,8 @@ class ClientRepository(ClientInterface):
         return ClientModel(
             id=client.id,
             users_id=user_internal_id,
-            plans_id=client.plan.id
+            plans_id=client.plan.id,
+            stripe_customer_id=client.stripe_customer_id
         )
     
     def create(self, client: Client) -> Client:
@@ -51,6 +52,7 @@ class ClientRepository(ClientInterface):
         
         client_orm.users_id = user_internal_id
         client_orm.plans_id = client.plan.id
+        client_orm.stripe_customer_id = client.stripe_customer_id
         
         self.db_session.commit()
         self.db_session.refresh(client_orm)

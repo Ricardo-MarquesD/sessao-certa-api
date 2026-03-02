@@ -10,6 +10,13 @@ from typing import Any
 class Establishment():
     id: UUID | None 
     client: Client
+    stripe_subscription_id: str | None
+    waba_id: str
+    whatsapp_business_token: str
+    google_calendar_access_token: str | None
+    google_calendar_refresh_token: str | None
+    google_calendar_expiry: datetime | None
+    google_calendar_id: str | None
     establishment_name: str
     cnpj: str
     chatbot_phone_number: str | None
@@ -43,6 +50,13 @@ class Establishment():
         return {
             "id": self.id,
             "client": self.client.to_dict(),
+            "stripe_subscription_id": self.stripe_subscription_id,
+            "waba_id": self.waba_id,
+            "whatsapp_business_token": self.whatsapp_business_token,
+            "google_calendar_access_token": self.google_calendar_access_token,
+            "google_calendar_refresh_token": self.google_calendar_refresh_token,
+            "google_calendar_expiry": self.google_calendar_expiry.isoformat(sep=" ") if self.google_calendar_expiry else None,
+            "google_calendar_id": self.google_calendar_id,
             "establishment_name": self.establishment_name,
             "cnpj": self.cnpj,
             "chatbot_phone_number": self.chatbot_phone_number,
@@ -60,6 +74,13 @@ class Establishment():
         return Establishment(
             id = data.get("id"),
             client = Client.from_dict(client_data) if isinstance(client_data, dict) else client_data,
+            stripe_subscription_id = data.get("stripe_subscription_id"),
+            waba_id = data.get("waba_id"),
+            whatsapp_business_token = data.get("whatsapp_business_token"),
+            google_calendar_access_token = data.get("google_calendar_access_token"),
+            google_calendar_refresh_token = data.get("google_calendar_refresh_token"),
+            google_calendar_expiry = datetime.fromisoformat(data.get("google_calendar_expiry")) if data.get("google_calendar_expiry") else None,
+            google_calendar_id = data.get("google_calendar_id"),
             establishment_name = data.get("establishment_name"),
             cnpj = data.get("cnpj"),
             chatbot_phone_number = data.get("chatbot_phone_number"),

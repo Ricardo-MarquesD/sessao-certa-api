@@ -62,6 +62,13 @@ class TestEmployeeEntity:
         establishment = Establishment(
             id="est-123",
             client=client,
+            stripe_subscription_id=None,
+            waba_id="WABA-123",
+            whatsapp_business_token="token-123",
+            google_calendar_access_token=None,
+            google_calendar_refresh_token=None,
+            google_calendar_expiry=None,
+            google_calendar_id=None,
             establishment_name="Barbearia João",
             cnpj="12345678901234",
             chatbot_phone_number="11987654321",

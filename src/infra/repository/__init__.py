@@ -10,3 +10,5 @@ from .marketing_message_repository import MarketingMessageRepository
 from .scheduling_repository import SchedulingRepository
 from .stock_repository import StockProductRepository, StockMovementRepository
 from .entity_mapper import EntityMapper
+from .task_queue_repository import TaskQueueRepository
+from .context_repository import ContextRepository

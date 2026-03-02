@@ -20,6 +20,13 @@ class EstablishmentRepository(EstablishmentInterface):
         return EstablishmentModel(
             uuid=establishment.id,
             clients_id=establishment.client.id,
+            stripe_subscription_id=establishment.stripe_subscription_id,
+            waba_id=establishment.waba_id,
+            whatsapp_business_token=establishment.whatsapp_business_token,
+            google_calendar_access_token=establishment.google_calendar_access_token,
+            google_calendar_refresh_token=establishment.google_calendar_refresh_token,
+            google_calendar_expiry=establishment.google_calendar_expiry,
+            google_calendar_id=establishment.google_calendar_id,
             establishment_name=establishment.establishment_name,
             cnpj=establishment.cnpj,
             chatbot_phone_number=establishment.chatbot_phone_number,
@@ -46,6 +53,13 @@ class EstablishmentRepository(EstablishmentInterface):
             raise ValueError(f"Establishment with id {establishment.id} not found")
         
         establishment_orm.clients_id = establishment.client.id
+        establishment_orm.stripe_subscription_id = establishment.stripe_subscription_id
+        establishment_orm.waba_id = establishment.waba_id
+        establishment_orm.whatsapp_business_token = establishment.whatsapp_business_token
+        establishment_orm.google_calendar_access_token = establishment.google_calendar_access_token
+        establishment_orm.google_calendar_refresh_token = establishment.google_calendar_refresh_token
+        establishment_orm.google_calendar_expiry = establishment.google_calendar_expiry
+        establishment_orm.google_calendar_id = establishment.google_calendar_id
         establishment_orm.establishment_name = establishment.establishment_name
         establishment_orm.cnpj = establishment.cnpj
         establishment_orm.chatbot_phone_number = establishment.chatbot_phone_number

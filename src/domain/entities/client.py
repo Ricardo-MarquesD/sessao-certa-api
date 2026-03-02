@@ -9,6 +9,7 @@ class Client:
     id: int | None
     user: User
     plan: Plan
+    stripe_customer_id: str | None = None
 
     def __post_init__(self):
         if not isinstance(self.user, User):
@@ -20,7 +21,8 @@ class Client:
         return {
             "id": self.id,
             "user": self.user.to_dict(),
-            "plan": self.plan.to_dict()
+            "plan": self.plan.to_dict(),
+            "stripe_customer_id": self.stripe_customer_id
         }
     
     @staticmethod
@@ -31,5 +33,6 @@ class Client:
         return Client(
             id=data.get("id"),
             user=User.from_dict(user_data) if isinstance(user_data, dict) else user_data,
-            plan=Plan.from_dict(plan_data) if isinstance(plan_data, dict) else plan_data
+            plan=Plan.from_dict(plan_data) if isinstance(plan_data, dict) else plan_data,
+            stripe_customer_id=data.get("stripe_customer_id")
         )

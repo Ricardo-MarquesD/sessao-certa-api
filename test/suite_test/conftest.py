@@ -79,6 +79,8 @@ def establishment_db(db_session, client_db):
 
     establishment = EstablishmentModel(
         clients_id = client.id,
+        waba_id = "WABA-TEST-001",
+        whatsapp_business_token = "whatsapp-token-test-001",
         establishment_name = "Test Establishment",
         cnpj = "12123123000122",
         chatbot_phone_number = "+5521990032455",

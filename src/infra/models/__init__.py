@@ -9,3 +9,5 @@ from .payment_orm import PaymentModel, PaymentType, PaymentStatus
 from .service_orm import ServiceModel
 from .scheduling_orm import SchedulingModel, AppointmentStatus
 from .stock_orm import StockProductModel, StockMovementModel, MovementType
+from .task_queue_orm import TaskQueueModel
+from .context_orm import ContextModel

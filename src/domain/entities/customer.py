@@ -10,6 +10,7 @@ class Customer():
     establishment: Establishment
     customer_name: str
     phone_number: str
+    wa_id: str | None = None
 
     def __post_init__(self):
         if not isinstance(self.establishment, Establishment):
@@ -24,7 +25,8 @@ class Customer():
             "id": self.id,
             "establishment": self.establishment.to_dict(),
             "customer_name": self.customer_name,
-            "phone_number": self.phone_number
+            "phone_number": self.phone_number,
+            "wa_id": self.wa_id
         }
     
     @staticmethod
@@ -35,5 +37,6 @@ class Customer():
             id = data.get("id"),
             establishment = Establishment.from_dict(establishment_data) if isinstance(establishment_data, dict) else establishment_data,
             customer_name = data.get("customer_name"),
-            phone_number = data.get("phone_number")
+            phone_number = data.get("phone_number"),
+            wa_id = data.get("wa_id")
         )
