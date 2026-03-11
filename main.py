@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from config import connection_test
-from config import engine
+from controller.whatsapp_controller import router as whatsapp_router
 
 app = FastAPI()
-connection_test(engine)
+
+app.include_router(whatsapp_router)
 
 @app.get("/")
 def root():

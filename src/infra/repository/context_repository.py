@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from domain.entities.context import Context
 from domain.interface.context_interface import ContextInterface
 from infra.models.context_orm import ContextModel
-from infra.models.establishment_orm import EstablishmentModel
 from utils.value_object import PaginatedResponse, CursorEncoder
 from datetime import datetime
 from uuid import UUID
