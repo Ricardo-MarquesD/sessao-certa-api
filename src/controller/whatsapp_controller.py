@@ -49,5 +49,7 @@ async def webhook_verification(hub_mode: str = None, hub_challenge: str = None, 
     raise HTTPException(403, "Token de verificação inválido")
 
 @router.post("/webhook")
-async def aaa():
-    ...
+async def webhook_post(request: Request):
+    data = await request.json()
+    print(data)
+    return 200
