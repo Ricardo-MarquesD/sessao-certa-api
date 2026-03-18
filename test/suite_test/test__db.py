@@ -108,6 +108,7 @@ def test_establishment_model(db_session, establishment_db):
     assert establishment.cnpj == "12123123000122"
     assert establishment.chatbot_phone_number == "+5521990032455"
     assert establishment.address == "Avenida Test Rua Test 1"
+    assert establishment.available_hours == {"monday": ["09:00-18:00"], "tuesday": ["09:00-18:00"]}
     assert establishment.due_date == datetime(2030, 2, 11)
     assert establishment.trial_active == False
 

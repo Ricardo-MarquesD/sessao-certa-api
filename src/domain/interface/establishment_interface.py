@@ -26,6 +26,10 @@ class EstablishmentInterface(ABC):
         pass
 
     @abstractmethod
+    def get_by_internal_id(self, internal_id: int) -> Establishment | None:
+        pass
+
+    @abstractmethod
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         pass
 

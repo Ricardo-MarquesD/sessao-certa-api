@@ -74,6 +74,12 @@ class CustomerRepository(CustomerInterface):
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
+
+    def get_by_internal_id(self, customer_internal_id: int) -> Customer | None:
+        stmt = select(CustomerModel).where(CustomerModel.id == customer_internal_id)
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
     
     def get_by_phone_number(self, phone_number: str, establishment_id: UUID) -> Customer | None:
         stmt = select(CustomerModel).where(

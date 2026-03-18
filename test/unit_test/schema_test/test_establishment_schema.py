@@ -20,11 +20,13 @@ class TestCreateEstablishmentRequest:
             "cnpj": "12345678000190",
             "chatbot_phone_number": "+5511999999999",
             "address": "Rua A, 123",
+            "available_hours": {"monday": ["09:00-18:00"]},
             "trial_active": True
         }
         establishment = CreateEstablishmentRequest(**data)
         assert establishment.establishment_name == "Salão Beauty"
         assert establishment.cnpj == "12345678000190"
+        assert establishment.available_hours == {"monday": ["09:00-18:00"]}
     
     def test_create_establishment_request_cnpj_with_mask(self):
         """Deve aceitar CNPJ com máscara e remover"""
@@ -68,12 +70,14 @@ class TestUpdateEstablishmentRequest:
             "establishment_name": "Novo Nome",
             "chatbot_phone_number": "+5511988888888",
             "address": "Nova Rua, 456",
+            "available_hours": {"friday": ["08:00-16:00"]},
             "due_date": datetime.now(),
             "trial_active": False
         }
         update = UpdateEstablishmentRequest(**data)
         assert update.establishment_name == "Novo Nome"
         assert update.trial_active == False
+        assert update.available_hours == {"friday": ["08:00-16:00"]}
     
     def test_update_establishment_request_partial(self):
         """Deve aceitar atualização parcial"""
@@ -115,6 +119,7 @@ class TestEstablishmentResponse:
             "cnpj": "12345678000190",
             "chatbot_phone_number": "+5511999999999",
             "address": "Rua A, 123",
+            "available_hours": {"tuesday": ["10:00-19:00"]},
             "img_url": "/static/img/establishment/uuid/file.jpg",
             "subscription_date": datetime.now(),
             "due_date": datetime.now(),
@@ -124,3 +129,4 @@ class TestEstablishmentResponse:
         response = EstablishmentResponse(**data)
         assert response.id == establishment_id
         assert response.establishment_name == "Salão Beauty"
+        assert response.available_hours == {"tuesday": ["10:00-19:00"]}

@@ -32,6 +32,7 @@ class EstablishmentRepository(EstablishmentInterface):
             chatbot_phone_number=establishment.chatbot_phone_number,
             address=establishment.address,
             img_url=establishment.img_url,
+            available_hours=establishment.available_hours,
             subscription_date=establishment.subscription_date,
             due_date=establishment.due_date,
             trial_active=establishment.trial_active
@@ -65,6 +66,7 @@ class EstablishmentRepository(EstablishmentInterface):
         establishment_orm.chatbot_phone_number = establishment.chatbot_phone_number
         establishment_orm.address = establishment.address
         establishment_orm.img_url = establishment.img_url
+        establishment_orm.available_hours = establishment.available_hours
         establishment_orm.due_date = establishment.due_date
         establishment_orm.trial_active = establishment.trial_active
         
@@ -87,6 +89,12 @@ class EstablishmentRepository(EstablishmentInterface):
     
     def get_by_cnpj(self, cnpj: str) -> Establishment | None:
         stmt = select(EstablishmentModel).where(EstablishmentModel.cnpj == cnpj)
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
+
+    def get_by_internal_id(self, internal_id: int) -> Establishment | None:
+        stmt = select(EstablishmentModel).where(EstablishmentModel.id == internal_id)
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None

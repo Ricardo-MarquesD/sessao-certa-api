@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func, Text
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func, Text, JSON
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import CHAR
 from config import Base
@@ -22,6 +22,7 @@ class EstablishmentModel(Base):
     chatbot_phone_number = Column(String(30), nullable = False)
     address = Column(String(255), nullable = False)
     img_url = Column(String(500), nullable=False)
+    available_hours = Column(JSON, nullable=True)
     subscription_date = Column(DateTime, server_default = func.current_timestamp())
     due_date = Column(DateTime, nullable = False)
     trial_active = Column(Boolean, nullable = False, server_default = "0")
@@ -31,7 +32,7 @@ class EstablishmentModel(Base):
         return (
             f"<Establishment(id={self.uuid}, establishment_name='{self.establishment_name}', cnpj='{self.cnpj}', "
             f"chatbot_phone_number={self.chatbot_phone_number}, address={self.address}, subscription_date={self.subscription_date}, "
-            f"due_date={self.due_date}, trial_active={self.trial_active})>"
+            f"due_date={self.due_date}, trial_active={self.trial_active}, available_hours={self.available_hours})>"
         )
     
     def to_dict(self):
@@ -49,6 +50,7 @@ class EstablishmentModel(Base):
             "cnpj": self.cnpj,
             "chatbot_phone_number": self.chatbot_phone_number,
             "address": self.address,
+            "available_hours": self.available_hours,
             "subscription_date": self.subscription_date.strftime("%Y-%m-%d %H:%M:%S") if self.subscription_date else None,
             "due_date": self.due_date.strftime("%Y-%m-%d %H:%M:%S") if self.due_date else None,
             "trial_active": self.trial_active,

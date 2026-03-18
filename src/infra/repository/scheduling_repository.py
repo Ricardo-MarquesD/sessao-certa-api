@@ -7,7 +7,7 @@ from utils.enum import AppointmentStatus
 from utils.value_object import PaginatedResponse, CursorEncoder
 from .entity_mapper import EntityMapper
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date, time
 
 class SchedulingRepository(SchedulingInterface):
 
@@ -305,9 +305,71 @@ class SchedulingRepository(SchedulingInterface):
             total_count=None
         )
 
+    def get_last_active_by_customer_internal_id(self, customer_internal_id: int) -> Scheduling | None:
+        stmt = (
+            select(SchedulingModel)
+            .where(
+                SchedulingModel.customers_id == customer_internal_id,
+                SchedulingModel.appointment_status.in_([
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                ]),
+            )
+            .order_by(SchedulingModel.appointment_date.desc())
+            .limit(1)
+        )
+
+        result = self.db_session.scalar(stmt)
+        return self._to_entity(result) if result else None
+
+    def list_active_by_customer_internal_id(self, customer_internal_id: int) -> list[Scheduling]:
+        stmt = (
+            select(SchedulingModel)
+            .where(
+                SchedulingModel.customers_id == customer_internal_id,
+                SchedulingModel.appointment_status.in_([
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                ]),
+            )
+            .order_by(SchedulingModel.appointment_date.asc())
+        )
+
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(scheduling) for scheduling in results]
+
     def delete(self, scheduling_id: UUID) -> bool:
         stmt = delete(SchedulingModel).where(SchedulingModel.uuid == scheduling_id)
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         
         return result.rowcount > 0
+
+    def list_active_by_day_and_scope(
+        self,
+        day: date,
+        establishment_internal_id: int,
+        employee_id: int | None = None,
+    ) -> list[Scheduling]:
+        day_start = datetime.combine(day, time.min)
+        day_end = datetime.combine(day, time.max)
+
+        stmt = (
+            select(SchedulingModel)
+            .where(
+                SchedulingModel.establishments_id == establishment_internal_id,
+                SchedulingModel.appointment_date >= day_start,
+                SchedulingModel.appointment_date <= day_end,
+                SchedulingModel.appointment_status.in_([
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                ]),
+            )
+            .order_by(SchedulingModel.appointment_date)
+        )
+
+        if employee_id is not None:
+            stmt = stmt.where(SchedulingModel.employees_id == employee_id)
+
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(scheduling) for scheduling in results]

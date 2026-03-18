@@ -40,9 +40,31 @@ class WhatsappService():
                     raise ValueError(f"Meta API error: {data['error'].get('message')}")
                 
     @staticmethod
-    async def process_menssage():
+    async def process_message():
         ...
 
     @staticmethod
-    async def send_menssage():
-        ...
+    async def send_message(chatbot_phone_number: str, wa_id: str, message: str, token: str):
+        if not all([chatbot_phone_number, wa_id, message, token]):
+            raise ValueError("Parâmetros obrigatórios não fornecidos")
+        
+        url = f"https://graph.facebook.com/{settings.whatsapp_app_version}/{chatbot_phone_number}/messages"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": wa_id,
+            "type": "text",
+            "text": message
+        }
+        
+        timeout = aiohttp.ClientTimeout(total = 4)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, json=payload, headers=headers) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                if "error" in data:
+                    raise ValueError(f"Meta API error: {data['error'].get('message')}")
+                return data

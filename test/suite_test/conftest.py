@@ -86,6 +86,7 @@ def establishment_db(db_session, client_db):
         chatbot_phone_number = "+5521990032455",
         address = "Avenida Test Rua Test 1",
         img_url = "/uploads/test.png",
+        available_hours = {"monday": ["09:00-18:00"], "tuesday": ["09:00-18:00"]},
         due_date = datetime(2030, 2, 11),
         trial_active = False
     )

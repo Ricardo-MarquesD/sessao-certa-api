@@ -162,6 +162,18 @@ class ServiceRepository(ServiceInterface):
             total_count=None
         )
 
+    def list_active_by_establishment_internal_id(self, establishment_id: int) -> list[Service]:
+        stmt = (
+            select(ServiceModel)
+            .where(
+                ServiceModel.establishments_id == establishment_id,
+                ServiceModel.active == True,
+            )
+            .order_by(ServiceModel.id)
+        )
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(service) for service in results]
+
     def delete(self, service_id: UUID) -> bool:
         stmt = delete(ServiceModel).where(ServiceModel.uuid == service_id)
         result = self.db_session.execute(stmt)

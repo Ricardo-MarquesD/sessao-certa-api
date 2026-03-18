@@ -153,9 +153,18 @@ class EmployeeRepository(EmployeeInterface):
         count = self.db_session.scalar(stmt)
         return count if count else 0
 
+    def list_by_establishment_internal_id(self, establishment_id: int) -> list[Employee]:
+        stmt = (
+            select(EmployeeModel)
+            .where(EmployeeModel.establishments_id == establishment_id)
+            .order_by(EmployeeModel.id)
+        )
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(employee) for employee in results]
+
     def delete(self, employee_id: UUID) -> bool:
         stmt = delete(EmployeeModel).where(EmployeeModel.id == employee_id)
         result = self.db_session.execute(stmt)
         self.db_session.commit()
-        
+
         return result.rowcount > 0
