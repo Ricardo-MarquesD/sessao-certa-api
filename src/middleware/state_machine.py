@@ -112,7 +112,7 @@ class StateMachine:
                 anwser=(
                     f"Tem preferência por algum de nossos funcionários?\n"
                     f"{options}\n"
-                    f"{no_option} - Não"
+                    f"{no_option} - Sem preferência"
                 ),
                 next_state=FlowState.employeee_message,
                 is_end=False,

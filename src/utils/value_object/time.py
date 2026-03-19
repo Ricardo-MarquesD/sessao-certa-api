@@ -42,10 +42,7 @@ class SchedulingHelper:
         return f"{minute // 60:02d}:{minute % 60:02d}"
 
     @staticmethod
-    def get_work_window_for_day(
-        available_hours: dict | None,
-        day_iso: str,
-    ) -> tuple[int, int] | None:
+    def get_work_window_for_day(available_hours: dict | None, day_iso: str) -> tuple[int, int] | None:
         if not isinstance(available_hours, dict):
             return None
 
