@@ -98,6 +98,12 @@ class EstablishmentRepository(EstablishmentInterface):
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
+
+    def get_internal_id_by_chatbot_phone_number(self, chatbot_phone_number: str) -> int | None:
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.chatbot_phone_number == chatbot_phone_number)
+        result = self.db_session.scalar(stmt)
+
+        return result
     
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         stmt = select(EstablishmentModel).order_by(EstablishmentModel.id)

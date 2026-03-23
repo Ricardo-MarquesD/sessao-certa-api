@@ -101,3 +101,41 @@ class TestWhatsappRegister:
         assert mock_establishment.waba_id == "waba-test-001"
         assert mock_establishment.chatbot_phone_number == "phone-test-001"
         assert mock_establishment.whatsapp_business_token == "perm-token-xyz"
+
+
+class TestWhatsappWebhook:
+
+    def test_webhook_returns_ok_and_enqueues_task_in_background(self, client, monkeypatch):
+        payload = {
+            "entry": [
+                {
+                    "changes": [
+                        {
+                            "value": {
+                                "metadata": {"phone_number_id": "phone-test-001"},
+                                "messages": [
+                                    {
+                                        "from": "5511999999999",
+                                        "id": "wamid-001",
+                                        "text": {"body": "Oi"},
+                                    }
+                                ],
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+
+        calls = []
+
+        def fake_enqueue(webhook_payload):
+            calls.append(webhook_payload)
+
+        monkeypatch.setattr("controller.whatsapp_controller.WhatsappWebhookHelper.enqueue_process_message", fake_enqueue)
+
+        resp = client.post("/whatsapp/webhook", json=payload)
+
+        assert resp.status_code == 200
+        assert resp.json() == {"status": "ok"}
+        assert calls == [payload]

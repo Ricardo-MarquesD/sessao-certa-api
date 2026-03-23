@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 from infra.repository import EstablishmentRepository
@@ -6,6 +6,7 @@ from domain.service import WhatsappService
 from config.db import get_session
 from config import settings
 import aiohttp
+from utils.value_object.whatsapp_webhook import WhatsappWebhookHelper
 
 router =  APIRouter(prefix="/whatsapp")
 
@@ -49,7 +50,9 @@ async def webhook_verification(hub_mode: str = None, hub_challenge: str = None, 
     raise HTTPException(403, "Token de verificação inválido")
 
 @router.post("/webhook")
-async def webhook_post(request: Request):
+async def webhook_post(request: Request, background_tasks: BackgroundTasks):
     data = await request.json()
-    print(data)
-    return 200
+
+    background_tasks.add_task(WhatsappWebhookHelper.enqueue_process_message, data)
+
+    return {"status": "ok"}
