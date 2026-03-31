@@ -94,6 +94,9 @@ def build_worker(monkeypatch, session_contexts, tasks, process_result=None, send
     monkeypatch.setattr("middleware.task_worker.TaskQueueRepository", FakeTaskQueueRepository)
     monkeypatch.setattr("middleware.task_worker.ContextRepository", FakeContextRepository)
 
+    async def fake_sync_scheduling(scheduling_id, action, db):
+        return {"scheduling_id": str(scheduling_id), "action": action, "status": "synced"}
+
     async def fake_process_message(context, message, db):
         return process_result or {"answer": message, "context_id": str(context.id)}
 
@@ -102,6 +105,7 @@ def build_worker(monkeypatch, session_contexts, tasks, process_result=None, send
 
     monkeypatch.setattr("middleware.task_worker.WhatsappService.process_message", staticmethod(fake_process_message))
     monkeypatch.setattr("middleware.task_worker.WhatsappService.send_message", staticmethod(fake_send_message))
+    monkeypatch.setattr("middleware.task_worker.GoogleCalendarService.sync_scheduling", staticmethod(fake_sync_scheduling))
 
     def make_session():
         session = FakeSession()
@@ -169,3 +173,20 @@ def test_run_once_marks_failed_tasks_and_skips_future_retry(monkeypatch):
     assert stored_failed_task.error_mensage == "send_mensage task payload missing required fields"
     assert FakeTaskQueueRepository.store[future_retry_task.id].status == TaskStatus.FAILED
     assert FakeTaskQueueRepository.store[future_retry_task.id].retry_count == 1
+
+
+def test_run_once_processes_google_calendar_sync_task(monkeypatch):
+    sync_task = make_task(
+        task_type=TaskType.SYNC_CALENDAR,
+        payload={"scheduling_id": str(uuid4()), "action": "create"},
+        priority=3,
+    )
+
+    worker = build_worker(monkeypatch, {}, [sync_task])
+
+    processed = worker.run_once()
+
+    assert len(processed) == 1
+    stored_task = FakeTaskQueueRepository.store[sync_task.id]
+    assert stored_task.status == TaskStatus.COMPLETED
+    assert stored_task.result_data["status"] == "synced"

@@ -73,3 +73,24 @@ class TaskQueueFactory:
             priority=priority,
             max_retry=max_retry,
         )
+
+    @staticmethod
+    def sync_calendar(
+        *,
+        establishments_id: int,
+        scheduling_id: str,
+        action: str,
+        priority: int = DEFAULT_PRIORITY,
+        max_retry: int = DEFAULT_MAX_RETRY,
+    ) -> TaskQueue:
+        payload = {
+            "scheduling_id": scheduling_id,
+            "action": action,
+        }
+        return TaskQueueFactory._build_task(
+            establishments_id=establishments_id,
+            task_type=TaskType.SYNC_CALENDAR,
+            payload=payload,
+            priority=priority,
+            max_retry=max_retry,
+        )

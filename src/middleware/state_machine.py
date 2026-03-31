@@ -2,8 +2,9 @@ from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
 from uuid import UUID, uuid4
 from domain.entities import Context, Scheduling
-from infra.repository import ServiceRepository, EmployeeRepository, EstablishmentRepository, SchedulingRepository, CustomerRepository
+from infra.repository import ServiceRepository, EmployeeRepository, EstablishmentRepository, SchedulingRepository, CustomerRepository, TaskQueueRepository
 from utils.enum import FlowState, MachineAnwser, AppointmentStatus
+from middleware.task_queue import TaskQueueFactory
 from utils.value_object import SchedulingHelper
 
 class StateMachine:
@@ -24,6 +25,25 @@ class StateMachine:
         merged = dict(self.context.context_data or {})
         merged.update(new_data)
         return merged
+
+    def _enqueue_calendar_sync(self, *, scheduling_id: UUID, action: str) -> None:
+        try:
+            establishment = self.establishment_repository.get_by_internal_id(self.context.establishments_id)
+        except Exception:
+            return
+
+        if establishment is None:
+            return
+
+        if not establishment.google_calendar_access_token and not establishment.google_calendar_refresh_token:
+            return
+
+        task = TaskQueueFactory.sync_calendar(
+            establishments_id=self.context.establishments_id,
+            scheduling_id=str(scheduling_id),
+            action=action,
+        )
+        TaskQueueRepository(self.db).create(task)
 
     def _get_work_window_for_day(self, *, day_iso: str, employee_id: int | None) -> tuple[int, int] | None:
         if employee_id is not None:
@@ -473,7 +493,8 @@ class StateMachine:
                 return self.error_message()
 
             scheduling.appointment_status = AppointmentStatus.CANCELED
-            self.scheduling_repository.update(scheduling)
+            updated_scheduling = self.scheduling_repository.update(scheduling)
+            self._enqueue_calendar_sync(scheduling_id=updated_scheduling.id or scheduling.id, action="cancel")
 
             return self.unmarked_message()
 
@@ -568,7 +589,8 @@ class StateMachine:
                 notification_sent=False,
                 created_at=datetime.now(),
             )
-            self.scheduling_repository.create(new_scheduling)
+            created_scheduling = self.scheduling_repository.create(new_scheduling)
+            self._enqueue_calendar_sync(scheduling_id=created_scheduling.id or new_scheduling.id, action="create")
             return self.complete_message()
 
         # Usuário optou por desmarcar na tela de confirmação (2 - Desmarcar)
