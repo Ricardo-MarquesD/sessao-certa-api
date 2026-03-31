@@ -67,6 +67,45 @@ def test_connect_establishment_updates_google_fields(monkeypatch, google_setting
     assert result.google_calendar_id == "primary"
 
 
+def test_disconnect_establishment_revokes_and_clears_tokens(monkeypatch, google_settings):
+    establishment_id = uuid4()
+    fake_establishment = SimpleNamespace(
+        id=establishment_id,
+        google_calendar_access_token="access-123",
+        google_calendar_refresh_token="refresh-123",
+        google_calendar_expiry=datetime(2026, 3, 27, 10, 30),
+        google_calendar_id="primary",
+    )
+
+    class FakeRepository:
+        def __init__(self, db):
+            self.db = db
+
+        def get_by_id(self, establishment_uuid):
+            return fake_establishment if establishment_uuid == establishment_id else None
+
+        def update(self, establishment):
+            return establishment
+
+    revoked_tokens = []
+
+    async def fake_revoke_token(token):
+        revoked_tokens.append(token)
+
+    monkeypatch.setattr(google_calendar_service_module, "EstablishmentRepository", FakeRepository)
+    monkeypatch.setattr(GoogleCalendarService, "_revoke_token", staticmethod(fake_revoke_token))
+
+    result = asyncio.run(GoogleCalendarService.disconnect_establishment(establishment_id, db=object()))
+
+    assert result["disconnected"] is True
+    assert result["revoked"] is True
+    assert revoked_tokens == ["refresh-123"]
+    assert fake_establishment.google_calendar_access_token is None
+    assert fake_establishment.google_calendar_refresh_token is None
+    assert fake_establishment.google_calendar_expiry is None
+    assert fake_establishment.google_calendar_id is None
+
+
 def test_sync_scheduling_creates_google_event_and_persists_event_id(monkeypatch, google_settings):
     scheduling_id = uuid4()
     appointment_date = datetime(2026, 3, 27, 10, 30, tzinfo=timezone.utc)

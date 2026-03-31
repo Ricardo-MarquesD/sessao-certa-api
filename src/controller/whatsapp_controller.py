@@ -42,6 +42,30 @@ async def register_whatsapp(request: Request, db: Session = Depends(get_session)
 
     return {"status": "connected"}
 
+
+@router.delete("/disconnect/{establishment_id}")
+async def disconnect_whatsapp(establishment_id: int, db: Session = Depends(get_session)):
+    repo = EstablishmentRepository(db)
+    establishment = repo.get_by_id(establishment_id=establishment_id)
+
+    if not establishment:
+        raise HTTPException(status_code=404, detail="Establishment não encontrado")
+
+    try:
+        if establishment.waba_id and establishment.whatsapp_business_token:
+            await WhatsappService.unsubscribe_webhook(establishment.waba_id, establishment.whatsapp_business_token)
+    except aiohttp.ClientResponseError as e:
+        raise HTTPException(status_code=502, detail=f"Erro na comunicação com a Meta: {e.status}")
+    except ValueError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    establishment.waba_id = None
+    establishment.chatbot_phone_number = None
+    establishment.whatsapp_business_token = None
+    repo.update(establishment=establishment)
+
+    return {"status": "disconnected"}
+
 @router.get("/webhook")
 async def webhook_verification(hub_mode: str = None, hub_challenge: str = None, hub_verify_token: str = None):
     if hub_mode == "subscribe" and hub_verify_token == settings.webhook_verify_token:

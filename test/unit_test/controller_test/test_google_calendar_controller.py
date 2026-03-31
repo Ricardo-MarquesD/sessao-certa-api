@@ -55,3 +55,33 @@ def test_callback_returns_connected(monkeypatch):
         "establishment_id": str(establishment_id),
         "google_calendar_id": "primary",
     }
+
+
+def test_disconnect_returns_disconnected(monkeypatch):
+    establishment_id = uuid4()
+
+    async def fake_disconnect_establishment(establishment_uuid, db):
+        return {
+            "establishment_id": str(establishment_uuid),
+            "disconnected": True,
+            "revoked": True,
+        }
+
+    monkeypatch.setattr(
+        google_calendar_controller_module.GoogleCalendarService,
+        "disconnect_establishment",
+        staticmethod(fake_disconnect_establishment),
+    )
+
+    client = TestClient(app)
+    response = client.delete(f"/google-calendar/disconnect/{establishment_id}")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "disconnected",
+        "result": {
+            "establishment_id": str(establishment_id),
+            "disconnected": True,
+            "revoked": True,
+        },
+    }

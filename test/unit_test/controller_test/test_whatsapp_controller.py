@@ -103,6 +103,93 @@ class TestWhatsappRegister:
         assert mock_establishment.whatsapp_business_token == "perm-token-xyz"
 
 
+class TestWhatsappDisconnect:
+
+    def test_establishment_not_found_returns_404(self, client):
+        with patch("controller.whatsapp_controller.EstablishmentRepository") as MockRepo:
+            MockRepo.return_value.get_by_id.return_value = None
+            resp = client.delete("/whatsapp/disconnect/1")
+
+        assert resp.status_code == 404
+        assert "Establishment" in resp.json()["detail"]
+
+    def test_meta_http_error_returns_502(self, client):
+        mock_establishment = MagicMock()
+        mock_establishment.waba_id = "waba-test-001"
+        mock_establishment.whatsapp_business_token = "token-xyz"
+
+        error = aiohttp.ClientResponseError(
+            request_info=MagicMock(), history=(), status=401
+        )
+        with (
+            patch("controller.whatsapp_controller.EstablishmentRepository") as MockRepo,
+            patch(
+                "controller.whatsapp_controller.WhatsappService.unsubscribe_webhook",
+                new=AsyncMock(side_effect=error),
+            ),
+        ):
+            MockRepo.return_value.get_by_id.return_value = mock_establishment
+            resp = client.delete("/whatsapp/disconnect/1")
+
+        assert resp.status_code == 502
+        assert "Meta" in resp.json()["detail"]
+
+    def test_meta_value_error_returns_502(self, client):
+        mock_establishment = MagicMock()
+        mock_establishment.waba_id = "waba-test-001"
+        mock_establishment.whatsapp_business_token = "token-xyz"
+
+        with (
+            patch("controller.whatsapp_controller.EstablishmentRepository") as MockRepo,
+            patch(
+                "controller.whatsapp_controller.WhatsappService.unsubscribe_webhook",
+                new=AsyncMock(side_effect=ValueError("Meta API error: Invalid token")),
+            ),
+        ):
+            MockRepo.return_value.get_by_id.return_value = mock_establishment
+            resp = client.delete("/whatsapp/disconnect/1")
+
+        assert resp.status_code == 502
+        assert "Meta API error" in resp.json()["detail"]
+
+    def test_successful_disconnect_with_credentials(self, client):
+        mock_establishment = MagicMock()
+        mock_establishment.waba_id = "waba-test-001"
+        mock_establishment.chatbot_phone_number = "phone-test-001"
+        mock_establishment.whatsapp_business_token = "token-xyz"
+
+        with (
+            patch("controller.whatsapp_controller.EstablishmentRepository") as MockRepo,
+            patch(
+                "controller.whatsapp_controller.WhatsappService.unsubscribe_webhook",
+                new=AsyncMock(),
+            ),
+        ):
+            MockRepo.return_value.get_by_id.return_value = mock_establishment
+            MockRepo.return_value.update.return_value = None
+            resp = client.delete("/whatsapp/disconnect/1")
+
+        assert resp.status_code == 200
+        assert resp.json() == {"status": "disconnected"}
+        assert mock_establishment.waba_id is None
+        assert mock_establishment.chatbot_phone_number is None
+        assert mock_establishment.whatsapp_business_token is None
+
+    def test_successful_disconnect_without_credentials(self, client):
+        mock_establishment = MagicMock()
+        mock_establishment.waba_id = None
+        mock_establishment.chatbot_phone_number = None
+        mock_establishment.whatsapp_business_token = None
+
+        with patch("controller.whatsapp_controller.EstablishmentRepository") as MockRepo:
+            MockRepo.return_value.get_by_id.return_value = mock_establishment
+            MockRepo.return_value.update.return_value = None
+            resp = client.delete("/whatsapp/disconnect/1")
+
+        assert resp.status_code == 200
+        assert resp.json() == {"status": "disconnected"}
+
+
 class TestWhatsappWebhook:
 
     def test_webhook_returns_ok_and_enqueues_task_in_background(self, client, monkeypatch):

@@ -15,6 +15,7 @@ from utils.value_object import GoogleCalendarHelper
 
 class GoogleCalendarService:
     API_BASE_URI = "https://www.googleapis.com/calendar/v3"
+    TOKEN_REVOKE_URI = "https://oauth2.googleapis.com/revoke"
     TOKEN_REFRESH_BUFFER_SECONDS = 60
 
     @staticmethod
@@ -100,6 +101,15 @@ class GoogleCalendarService:
                 if response.status == 204 or response.content_length == 0:
                     return None
                 return await response.json()
+
+    @staticmethod
+    async def _revoke_token(token: str) -> None:
+        payload = {"token": token}
+
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(GoogleCalendarService.TOKEN_REVOKE_URI, data=payload) as response:
+                response.raise_for_status()
 
     @staticmethod
     def _build_schedule_payload(scheduling: Scheduling) -> dict:
@@ -192,6 +202,36 @@ class GoogleCalendarService:
         establishment.google_calendar_id = token_data.get("google_calendar_id") or "primary"
 
         return repository.update(establishment)
+
+    @staticmethod
+    async def disconnect_establishment(establishment_id: UUID, db: Session) -> dict:
+        repository = EstablishmentRepository(db)
+        establishment = repository.get_by_id(establishment_id)
+
+        if establishment is None:
+            raise ValueError("Establishment not found")
+
+        token_to_revoke = establishment.google_calendar_refresh_token or establishment.google_calendar_access_token
+        revoked = False
+
+        if token_to_revoke:
+            try:
+                await GoogleCalendarService._revoke_token(token_to_revoke)
+                revoked = True
+            except Exception:
+                revoked = False
+
+        establishment.google_calendar_access_token = None
+        establishment.google_calendar_refresh_token = None
+        establishment.google_calendar_expiry = None
+        establishment.google_calendar_id = None
+        repository.update(establishment)
+
+        return {
+            "establishment_id": str(establishment.id),
+            "disconnected": True,
+            "revoked": revoked,
+        }
 
     @staticmethod
     async def sync_scheduling(scheduling_id: UUID, action: str, db: Session) -> dict:

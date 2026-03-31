@@ -71,6 +71,25 @@ class WhatsappService:
                     raise ValueError(f"Meta API error: {data['error'].get('message')}")
 
     @staticmethod
+    async def unsubscribe_webhook(waba_id: str, token: str):
+        url = f"https://graph.facebook.com/{settings.whatsapp_app_version}/{waba_id}/subscribed_apps"
+        headers = {"Authorization": f"Bearer {token}"}
+
+        timeout = aiohttp.ClientTimeout(total=30)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.delete(url, headers=headers) as resp:
+                resp.raise_for_status()
+
+                if resp.content_length == 0 or resp.status == 204:
+                    return None
+
+                data = await resp.json()
+                if "error" in data:
+                    raise ValueError(f"Meta API error: {data['error'].get('message')}")
+
+                return data
+
+    @staticmethod
     async def process_message(context: Context, message: str, db: Session) -> MachineAnwser:
         state_machine = StateMachine(context=context, message=message, db=db)
         answer = WhatsappProcessHelper.dispatch_answer(state_machine, context)

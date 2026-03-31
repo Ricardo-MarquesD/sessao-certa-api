@@ -185,3 +185,82 @@ def test_process_message_falls_back_to_initial_state(monkeypatch):
 
     assert result.anwser == "Menu inicial"
     assert sent_messages == ["Menu inicial"]
+
+
+def test_unsubscribe_webhook_success(monkeypatch):
+    called = {}
+
+    class FakeResponse:
+        status = 200
+        content_length = 0
+
+        def raise_for_status(self):
+            return None
+
+        async def json(self):
+            return {"success": True}
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return None
+
+    class FakeSession:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return None
+
+        def delete(self, url, headers):
+            called["url"] = url
+            called["headers"] = headers
+            return FakeResponse()
+
+    monkeypatch.setattr(whatsapp_service_module.aiohttp, "ClientSession", FakeSession)
+
+    result = asyncio.run(WhatsappService.unsubscribe_webhook("waba-123", "token-xyz"))
+
+    assert result is None
+    assert called["url"].endswith("/waba-123/subscribed_apps")
+    assert called["headers"]["Authorization"] == "Bearer token-xyz"
+
+
+def test_unsubscribe_webhook_meta_error(monkeypatch):
+    class FakeResponse:
+        status = 200
+        content_length = 10
+
+        def raise_for_status(self):
+            return None
+
+        async def json(self):
+            return {"error": {"message": "Invalid token"}}
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return None
+
+    class FakeSession:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return None
+
+        def delete(self, url, headers):
+            return FakeResponse()
+
+    monkeypatch.setattr(whatsapp_service_module.aiohttp, "ClientSession", FakeSession)
+
+    with pytest.raises(ValueError, match="Meta API error"):
+        asyncio.run(WhatsappService.unsubscribe_webhook("waba-123", "token-xyz"))

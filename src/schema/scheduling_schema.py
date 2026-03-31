@@ -25,6 +25,7 @@ class CreateSchedulingRequest(BaseModel):
 class UpdateSchedulingRequest(BaseModel):
     appointment_date: datetime | None = None
     employee_id: int | None = None
+    service_id: UUID | None = None
     
     @field_validator('appointment_date')
     @classmethod

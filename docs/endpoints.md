@@ -65,11 +65,11 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /appointments | Lista agendamentos (calendário, filtros) (RF004, RF017, RF018, UC004). Requer role `client` ou `employee` (próprios). | `date_start`, `date_end`, `employee_id`, `status`, `page`, `limit` | - | 200: `[{ "id": "uuid", "date": "datetime", "customer_name": "string", "service_name": "string", "status": "enum" }]` |
-| GET | /appointments/{id} | Obtém detalhes de agendamento (RF004). Requer role `client` ou `employee`. | - | - | 200: `{ "id": "uuid", ... }` |
-| POST | /appointments | Cria agendamento manual (RF004, RF003 via internal). Verifica conflitos. Requer role `client` ou `employee`. | - | `{ "customer_id": "uuid", "service_id": "uuid", "employee_id": "uuid", "date": "datetime" }` | 201: `{ "id": "uuid" }` <br> 409: Conflito de horário |
-| PUT | /appointments/{id} | Atualiza agendamento (RF004). Requer role `client` ou `employee`. | - | `{ "date": "datetime" }` | 200: `{ "message": "Atualizado" }` |
-| DELETE | /appointments/{id} | Cancela agendamento, envia notificação (RF004, RF010). Requer role `client` ou `employee`. | - | - | 204: No content |
+| GET | /appointments | Lista agendamentos do estabelecimento em formato de calendário (RF004, RF017, RF018, UC004). | `establishment_id` (obrigatório), `cursor`, `limit` | - | 200: `[{ "id": "uuid", "customer_name": "string", "service_name": "string", "employee_name": "string", "appointment_date": "datetime" }]` |
+| GET | /appointments/{id} | Obtém detalhes completos de um agendamento (RF004). | - | - | 200: `{ "id": "uuid", "establishment": { ... }, "employee": { ... }, "customer": { ... }, "service": { ... } }` |
+| POST | /appointments | Cria agendamento manual e enfileira sincronização com Google Calendar quando conectado. Verifica conflitos. | - | `{ "establishment_id": "uuid", "customer_id": "uuid", "service_id": "uuid", "employee_id": "int", "appointment_date": "datetime" }` | 201: `{ "id": "uuid", ... }` <br> 409: Conflito de horário |
+| PUT | /appointments/{id} | Atualiza agendamento e enfileira sync de atualização quando houver mudança de data, funcionário ou serviço. | - | `{ "appointment_date": "datetime", "employee_id": "int", "service_id": "uuid" }` | 200: `{ "id": "uuid", ... }` |
+| DELETE | /appointments/{id} | Cancela agendamento e enfileira sync de cancelamento com o Google Calendar. | - | - | 200: `{ "success": true, "message": "Agendamento cancelado com sucesso" }` |
 | GET | /appointments/export | Exporta agendamentos (CSV/PDF) (RF016). Requer role `client`. | `format` (csv/pdf), `date_start`, `date_end` | - | 200: Arquivo binário |
 
 ## Clientes Finais (Costumers)
@@ -115,6 +115,23 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 |--------|---------|-----------|---------------------|---------------------|----------|
 | POST | /integrations/whatsapp/webhook | Webhook para chatbot WhatsApp (RF003, RF012, UC003). Internal. | - | Payload do WhatsApp | 200: Confirmação |
 | POST | /integrations/payment/webhook | Webhook para gateway de pagamento (RF014). Internal. | - | Payload do gateway | 200: Confirmação |
+
+## WhatsApp
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| POST | /whatsapp/register | Conecta o WhatsApp do estabelecimento, salva o token permanente e assina o webhook no WABA. | - | `{ "establishment_id": int, "waba_id": "string", "phone_number_id": "string", "code": "string" }` | 200: `{ "status": "connected" }` |
+| DELETE | /whatsapp/disconnect/{establishment_id} | Remove a inscrição do WABA via Graph API e limpa os campos locais do estabelecimento. | - | - | 200: `{ "status": "disconnected" }` |
+| GET | /whatsapp/webhook | Valida o webhook da Meta. | `hub_mode`, `hub_challenge`, `hub_verify_token` | - | 200: texto de desafio |
+| POST | /whatsapp/webhook | Recebe eventos do WhatsApp e enfileira processamento assíncrono. | - | Payload do WhatsApp | 200: `{ "status": "ok" }` |
+
+## Google Calendar
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| GET | /google-calendar/connect/{establishment_id} | Gera a URL de autorização OAuth do Google Calendar para o estabelecimento. | - | - | 200: `{ "authorization_url": "string" }` |
+| GET | /google-calendar/callback | Recebe o `code` do OAuth e persiste tokens do Google Calendar no estabelecimento. | `code`, `state` | - | 200: `{ "status": "connected" }` |
+| DELETE | /google-calendar/disconnect/{establishment_id} | Revoga o acesso do Google Calendar e limpa os tokens salvos localmente. | - | - | 200: `{ "status": "disconnected" }` |
 
 ## Administração (Admin Only)
 

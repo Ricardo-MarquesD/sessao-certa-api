@@ -99,6 +99,12 @@ class EstablishmentRepository(EstablishmentInterface):
 
         return self._to_entity(result) if result else None
 
+    def get_internal_id_by_id(self, establishment_id: UUID) -> int | None:
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == establishment_id)
+        result = self.db_session.scalar(stmt)
+
+        return result
+
     def get_internal_id_by_chatbot_phone_number(self, chatbot_phone_number: str) -> int | None:
         stmt = select(EstablishmentModel.id).where(EstablishmentModel.chatbot_phone_number == chatbot_phone_number)
         result = self.db_session.scalar(stmt)

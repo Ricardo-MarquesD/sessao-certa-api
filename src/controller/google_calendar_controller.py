@@ -33,3 +33,16 @@ async def google_calendar_callback(code: str, state: str, db: Session = Depends(
         "establishment_id": str(establishment.id),
         "google_calendar_id": establishment.google_calendar_id,
     }
+
+
+@router.delete("/disconnect/{establishment_id}")
+async def google_calendar_disconnect(establishment_id: UUID, db: Session = Depends(get_session)):
+    try:
+        result = await GoogleCalendarService.disconnect_establishment(establishment_id, db)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return {
+        "status": "disconnected",
+        "result": result,
+    }
