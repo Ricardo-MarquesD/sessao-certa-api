@@ -226,7 +226,7 @@ def seed_stores():
 def test_create_appointment_enqueues_calendar_sync(monkeypatch):
     seed_stores()
     client = build_client_app(monkeypatch)
-    payload = {"establishment_id": str(uuid4()), "employee_id": 7, "customer_id": str(uuid4()), "service_id": str(uuid4()), "appointment_date": "2026-04-01T10:00:00"}
+    payload = {"establishment_id": str(uuid4()), "employee_id": 7, "customer_id": str(uuid4()), "service_id": str(uuid4()), "appointment_date": "2099-04-01T10:00:00"}
 
     response = client.post("/appointments", json=payload)
 
@@ -239,7 +239,7 @@ def test_create_appointment_returns_404_on_service_error(monkeypatch):
     FakeAppointmentsService.create_exception = ValueError("Establishment not found")
 
     client = build_client_app(monkeypatch)
-    response = client.post("/appointments", json={"establishment_id": str(uuid4()), "employee_id": 7, "customer_id": str(uuid4()), "service_id": str(uuid4()), "appointment_date": "2026-04-01T10:00:00"})
+    response = client.post("/appointments", json={"establishment_id": str(uuid4()), "employee_id": 7, "customer_id": str(uuid4()), "service_id": str(uuid4()), "appointment_date": "2099-04-01T10:00:00"})
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Establishment not found"
@@ -249,7 +249,7 @@ def test_update_appointment_enqueues_calendar_update(monkeypatch):
     seed_stores()
     client = build_client_app(monkeypatch)
     existing_id = str(uuid4())
-    response = client.put(f"/appointments/{existing_id}", json={"appointment_date": "2026-04-01T11:00:00", "service_id": str(uuid4())})
+    response = client.put(f"/appointments/{existing_id}", json={"appointment_date": "2099-04-01T11:00:00", "service_id": str(uuid4())})
 
     assert response.status_code == 200
     assert response.json()["appointment_status"] == "SCHEDULED"
