@@ -103,9 +103,17 @@ def build_worker(monkeypatch, session_contexts, tasks, process_result=None, send
     async def fake_send_message(chatbot_phone_number, wa_id, message, token):
         return send_result or {"chatbot_phone_number": chatbot_phone_number, "wa_id": wa_id, "message": message, "token": token}
 
+    class FakeGoogleCalendarService:
+        def __init__(self, factory):
+            self.factory = factory
+
+        async def sync_scheduling(self, scheduling_id, action, db):
+            return await fake_sync_scheduling(scheduling_id, action, db)
+
     monkeypatch.setattr("middleware.task_worker.WhatsappService.process_message", staticmethod(fake_process_message))
     monkeypatch.setattr("middleware.task_worker.WhatsappService.send_message", staticmethod(fake_send_message))
-    monkeypatch.setattr("middleware.task_worker.GoogleCalendarService.sync_scheduling", staticmethod(fake_sync_scheduling))
+    monkeypatch.setattr("middleware.task_worker.GoogleCalendarService", FakeGoogleCalendarService)
+    monkeypatch.setattr("middleware.task_worker.get_google_calendar_client_factory", lambda: object())
 
     def make_session():
         session = FakeSession()

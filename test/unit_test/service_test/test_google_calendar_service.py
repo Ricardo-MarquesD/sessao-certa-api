@@ -1,6 +1,7 @@
 import asyncio
 from types import SimpleNamespace
 from datetime import datetime, timedelta, timezone
+from urllib.parse import parse_qs, urlparse
 from uuid import uuid4
 
 import pytest
@@ -22,12 +23,14 @@ def google_settings(monkeypatch):
 def test_build_authorization_url_contains_state_and_redirect_uri(google_settings):
     establishment_id = uuid4()
 
-    url = GoogleCalendarService.build_authorization_url(establishment_id)
+    service = GoogleCalendarService(client_factory=SimpleNamespace())
+    url = service.build_authorization_url(establishment_id)
+    query = parse_qs(urlparse(url).query)
 
-    assert "client_id=client-id-123" in url
-    assert "redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fgoogle-calendar%2Fcallback" in url
-    assert f"state={establishment_id}" in url
-    assert "scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events" in url
+    assert query["client_id"] == ["client-id-123"]
+    assert query["redirect_uri"] == ["http://localhost:8000/google-calendar/callback"]
+    assert query["state"] == [str(establishment_id)]
+    assert query["scope"] == ["https://www.googleapis.com/auth/calendar.events"]
 
 
 def test_connect_establishment_updates_google_fields(monkeypatch, google_settings):
@@ -50,17 +53,21 @@ def test_connect_establishment_updates_google_fields(monkeypatch, google_setting
         def update(self, establishment):
             return establishment
 
-    async def fake_exchange_code_for_tokens(code):
-        return {
-            "access_token": "access-123",
-            "refresh_token": "refresh-123",
-            "expires_in": 3600,
-        }
+    async def fake_to_thread(func, *args, **kwargs):
+        return func(*args, **kwargs)
+
+    fake_credentials = SimpleNamespace(
+        token="access-123",
+        refresh_token="refresh-123",
+        expiry=datetime(2026, 3, 27, 10, 30),
+    )
 
     monkeypatch.setattr(google_calendar_service_module, "EstablishmentRepository", FakeRepository)
-    monkeypatch.setattr(GoogleCalendarService, "exchange_code_for_tokens", staticmethod(fake_exchange_code_for_tokens))
+    monkeypatch.setattr(google_calendar_service_module.asyncio, "to_thread", fake_to_thread)
+    monkeypatch.setattr(GoogleCalendarService, "_exchange_code_for_tokens", lambda self, code: fake_credentials)
 
-    result = asyncio.run(GoogleCalendarService.connect_establishment(establishment_id, "code-123", db=object()))
+    service = GoogleCalendarService(client_factory=SimpleNamespace())
+    result = asyncio.run(service.connect_establishment(establishment_id, "code-123", db=object()))
 
     assert result.google_calendar_access_token == "access-123"
     assert result.google_calendar_refresh_token == "refresh-123"
@@ -95,7 +102,8 @@ def test_disconnect_establishment_revokes_and_clears_tokens(monkeypatch, google_
     monkeypatch.setattr(google_calendar_service_module, "EstablishmentRepository", FakeRepository)
     monkeypatch.setattr(GoogleCalendarService, "_revoke_token", staticmethod(fake_revoke_token))
 
-    result = asyncio.run(GoogleCalendarService.disconnect_establishment(establishment_id, db=object()))
+    service = GoogleCalendarService(client_factory=SimpleNamespace())
+    result = asyncio.run(service.disconnect_establishment(establishment_id, db=object()))
 
     assert result["disconnected"] is True
     assert result["revoked"] is True
@@ -140,43 +148,25 @@ def test_sync_scheduling_creates_google_event_and_persists_event_id(monkeypatch,
             created_events.append(scheduling.google_calendar_event_id)
             return scheduling
 
-    async def fake_get_access_token(establishment_arg, db):
-        return "access-123", establishment_arg
+    async def fake_to_thread(func, *args, **kwargs):
+        return func(*args, **kwargs)
 
-    async def fake_request_json(*, method, url, token, json_payload=None):
-        assert method == "POST"
-        assert token == "access-123"
-        assert json_payload["summary"] == "Corte - Maria (11999999999)"
-        return {"id": "event-123"}
+    class FakeAdapter:
+        def create_event(self, *, calendar_id, payload):
+            assert calendar_id == "primary"
+            assert payload["summary"] == "Corte - Maria (11999999999)"
+            return {"id": "event-123"}
+
+    class FakeFactory:
+        def build_adapter(self, *, establishment, db):
+            return FakeAdapter()
 
     monkeypatch.setattr(google_calendar_service_module, "SchedulingRepository", FakeSchedulingRepository)
-    monkeypatch.setattr(GoogleCalendarService, "_get_access_token", staticmethod(fake_get_access_token))
-    monkeypatch.setattr(GoogleCalendarService, "_request_json", staticmethod(fake_request_json))
+    monkeypatch.setattr(google_calendar_service_module.asyncio, "to_thread", fake_to_thread)
 
-    result = asyncio.run(GoogleCalendarService.sync_scheduling(scheduling_id, "create", db=object()))
+    service = GoogleCalendarService(client_factory=FakeFactory())
+    result = asyncio.run(service.sync_scheduling(scheduling_id, "create", db=object()))
 
     assert result["status"] == "synced"
     assert result["event_id"] == "event-123"
     assert created_events == ["event-123"]
-
-
-def test_sync_scheduling_refreshes_expired_token(monkeypatch, google_settings):
-    establishment = SimpleNamespace(
-        google_calendar_access_token="old-token",
-        google_calendar_refresh_token="refresh-123",
-        google_calendar_expiry=None,
-        google_calendar_id="primary",
-        establishment_name="Barbearia Central",
-    )
-
-    async def fake_refresh_access_token(establishment_arg, db):
-        establishment_arg.google_calendar_access_token = "new-token"
-        return establishment_arg
-
-    monkeypatch.setattr(GoogleCalendarService, "_has_valid_token", staticmethod(lambda establishment_arg: False))
-    monkeypatch.setattr(GoogleCalendarService, "_refresh_access_token", staticmethod(fake_refresh_access_token))
-
-    access_token, refreshed = asyncio.run(GoogleCalendarService._get_access_token(establishment, db=object()))
-
-    assert access_token == "new-token"
-    assert refreshed.google_calendar_access_token == "new-token"

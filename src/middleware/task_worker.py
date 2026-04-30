@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from domain.entities import Context, TaskQueue
 from domain.service.whatsapp_service import WhatsappService
 from domain.service.google_calendar_service import GoogleCalendarService
+from infra.google_calendar import get_google_calendar_client_factory
 from infra.repository import ContextRepository, TaskQueueRepository
 from utils.enum import MachineAnwser, TaskStatus, TaskType
 
@@ -176,4 +177,5 @@ class TaskWorker:
         if action not in {"create", "update", "cancel"}:
             raise ValueError("sync_calendar task payload missing valid action")
 
-        return asyncio.run(GoogleCalendarService.sync_scheduling(UUID(str(scheduling_id)), action, session))
+        service = GoogleCalendarService(get_google_calendar_client_factory())
+        return asyncio.run(service.sync_scheduling(UUID(str(scheduling_id)), action, session))

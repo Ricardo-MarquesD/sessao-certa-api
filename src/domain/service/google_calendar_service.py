@@ -1,106 +1,202 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
-from urllib.parse import urlencode
+import asyncio
+from datetime import datetime
 from uuid import UUID
 
 import aiohttp
+from google.auth.exceptions import GoogleAuthError
+from google_auth_oauthlib.flow import Flow
 from sqlalchemy.orm import Session
 
 from config import settings
 from domain.entities import Establishment, Scheduling
+from infra.google_calendar import GoogleCalendarClientFactory, GoogleCalendarAdapterError
 from infra.repository import EstablishmentRepository, SchedulingRepository
 from utils.value_object import GoogleCalendarHelper
 
 
 class GoogleCalendarService:
-    API_BASE_URI = "https://www.googleapis.com/calendar/v3"
     TOKEN_REVOKE_URI = "https://oauth2.googleapis.com/revoke"
-    TOKEN_REFRESH_BUFFER_SECONDS = 60
+    DEFAULT_CALENDAR_ID = "primary"
+
+    def __init__(self, client_factory: GoogleCalendarClientFactory):
+        self._client_factory = client_factory
 
     @staticmethod
     def _calendar_id(establishment: Establishment) -> str:
-        return establishment.google_calendar_id or "primary"
+        return establishment.google_calendar_id or GoogleCalendarService.DEFAULT_CALENDAR_ID
 
     @staticmethod
-    def _has_valid_token(establishment: Establishment) -> bool:
-        if not establishment.google_calendar_access_token:
-            return False
-
-        if establishment.google_calendar_expiry is None:
-            return True
-
-        return establishment.google_calendar_expiry > datetime.now() + timedelta(seconds=GoogleCalendarService.TOKEN_REFRESH_BUFFER_SECONDS)
+    def _normalize_expiry(expiry: datetime | None) -> datetime | None:
+        if expiry is None:
+            return None
+        if expiry.tzinfo is not None:
+            return expiry.replace(tzinfo=None)
+        return expiry
 
     @staticmethod
-    async def _refresh_access_token(establishment: Establishment, db: Session) -> Establishment:
-        if not establishment.google_calendar_refresh_token:
-            raise ValueError("Google Calendar refresh token is required")
+    def _split_scopes(value: str) -> list[str]:
+        return [scope for scope in value.split() if scope]
 
-        payload = {
-            "client_id": settings.google_client_id,
-            "client_secret": settings.google_client_secret,
-            "refresh_token": establishment.google_calendar_refresh_token,
-            "grant_type": "refresh_token",
+    def _build_flow(self) -> Flow:
+        if not settings.google_client_id:
+            raise ValueError("GOOGLE_CLIENT_ID is required")
+        if not settings.google_client_secret:
+            raise ValueError("GOOGLE_CLIENT_SECRET is required")
+        if not settings.google_redirect_uri:
+            raise ValueError("GOOGLE_REDIRECT_URI is required")
+
+        client_config = {
+            "web": {
+                "client_id": settings.google_client_id,
+                "client_secret": settings.google_client_secret,
+                "auth_uri": settings.google_auth_uri,
+                "token_uri": settings.google_token_uri,
+                "redirect_uris": [settings.google_redirect_uri],
+            }
         }
 
-        timeout = aiohttp.ClientTimeout(total=30)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(settings.google_token_uri, data=payload) as response:
-                response.raise_for_status()
-                data = await response.json()
+        flow = Flow.from_client_config(
+            client_config,
+            scopes=self._split_scopes(settings.google_calendar_scopes),
+        )
+        flow.redirect_uri = settings.google_redirect_uri
+        return flow
 
-        if "error" in data:
-            error = data["error"]
-            message = error.get("message") if isinstance(error, dict) else str(error)
-            raise ValueError(f"Google OAuth error: {message}")
+    def build_authorization_url(self, establishment_id: UUID) -> str:
+        flow = self._build_flow()
+        authorization_url, _ = flow.authorization_url(
+            access_type="offline",
+            include_granted_scopes="true",
+            prompt="consent",
+            state=str(establishment_id),
+        )
+        return authorization_url
 
-        access_token = data.get("access_token")
-        if not access_token:
-            raise ValueError("Google OAuth did not return an access_token")
+    def _exchange_code_for_tokens(self, code: str):
+        flow = self._build_flow()
+        flow.fetch_token(code=code)
+        credentials = flow.credentials
 
-        establishment.google_calendar_access_token = access_token
-        if data.get("refresh_token"):
-            establishment.google_calendar_refresh_token = data["refresh_token"]
+        if not credentials or not credentials.token:
+            raise ValueError("Google OAuth did not return an access token")
 
-        expires_in = int(data.get("expires_in", 0) or 0)
-        establishment.google_calendar_expiry = datetime.now() + timedelta(seconds=expires_in) if expires_in else None
+        return credentials
 
-        return EstablishmentRepository(db).update(establishment)
+    async def connect_establishment(self, establishment_id: UUID, code: str, db: Session) -> Establishment:
+        repository = EstablishmentRepository(db)
+        establishment = repository.get_by_id(establishment_id)
 
-    @staticmethod
-    async def _get_access_token(establishment: Establishment, db: Session) -> tuple[str, Establishment]:
-        if GoogleCalendarService._has_valid_token(establishment):
-            return establishment.google_calendar_access_token or "", establishment
+        if establishment is None:
+            raise ValueError("Establishment not found")
 
-        refreshed = await GoogleCalendarService._refresh_access_token(establishment, db)
-        access_token = refreshed.google_calendar_access_token or ""
+        try:
+            credentials = await asyncio.to_thread(self._exchange_code_for_tokens, code)
+        except GoogleAuthError as exc:
+            raise ValueError(f"Google OAuth error: {exc}") from exc
 
-        if not access_token:
-            raise ValueError("Google Calendar access token is required")
+        establishment.google_calendar_access_token = credentials.token
+        if credentials.refresh_token:
+            establishment.google_calendar_refresh_token = credentials.refresh_token
+        establishment.google_calendar_expiry = self._normalize_expiry(credentials.expiry)
+        if not establishment.google_calendar_id:
+            establishment.google_calendar_id = self.DEFAULT_CALENDAR_ID
 
-        return access_token, refreshed
+        return repository.update(establishment)
 
-    @staticmethod
-    async def _request_json(
-        *,
-        method: str,
-        url: str,
-        token: str,
-        json_payload: dict | None = None,
-    ) -> dict | None:
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
+    async def disconnect_establishment(self, establishment_id: UUID, db: Session) -> dict:
+        repository = EstablishmentRepository(db)
+        establishment = repository.get_by_id(establishment_id)
+
+        if establishment is None:
+            raise ValueError("Establishment not found")
+
+        token_to_revoke = establishment.google_calendar_refresh_token or establishment.google_calendar_access_token
+        revoked = False
+
+        if token_to_revoke:
+            try:
+                await self._revoke_token(token_to_revoke)
+                revoked = True
+            except Exception:
+                revoked = False
+
+        establishment.google_calendar_access_token = None
+        establishment.google_calendar_refresh_token = None
+        establishment.google_calendar_expiry = None
+        establishment.google_calendar_id = None
+        repository.update(establishment)
+
+        return {
+            "establishment_id": str(establishment.id),
+            "disconnected": True,
+            "revoked": revoked,
         }
 
-        timeout = aiohttp.ClientTimeout(total=30)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.request(method, url, headers=headers, json=json_payload) as response:
-                response.raise_for_status()
-                if response.status == 204 or response.content_length == 0:
-                    return None
-                return await response.json()
+    async def sync_scheduling(self, scheduling_id: UUID, action: str, db: Session) -> dict:
+        scheduling_repository = SchedulingRepository(db)
+        scheduling = scheduling_repository.get_by_id(scheduling_id)
+
+        if scheduling is None:
+            raise ValueError("Scheduling not found")
+
+        establishment = scheduling.establishment
+        if establishment is None:
+            raise ValueError("Establishment not found for scheduling")
+
+        adapter = self._client_factory.build_adapter(establishment=establishment, db=db)
+        calendar_id = self._calendar_id(establishment)
+        event_id = scheduling.google_calendar_event_id
+
+        try:
+            if action == "cancel":
+                if not event_id:
+                    return {
+                        "scheduling_id": str(scheduling.id),
+                        "action": action,
+                        "status": "skipped_no_event_id",
+                    }
+
+                await asyncio.to_thread(adapter.delete_event, calendar_id=calendar_id, event_id=event_id)
+
+                scheduling.google_calendar_event_id = None
+                scheduling_repository.update(scheduling)
+
+                return {
+                    "scheduling_id": str(scheduling.id),
+                    "action": action,
+                    "status": "deleted",
+                }
+
+            payload = self._build_schedule_payload(scheduling)
+
+            if event_id:
+                result = await asyncio.to_thread(
+                    adapter.update_event,
+                    calendar_id=calendar_id,
+                    event_id=event_id,
+                    payload=payload,
+                )
+            else:
+                result = await asyncio.to_thread(
+                    adapter.create_event,
+                    calendar_id=calendar_id,
+                    payload=payload,
+                )
+        except GoogleCalendarAdapterError as exc:
+            raise ValueError(str(exc)) from exc
+
+        if isinstance(result, dict) and result.get("id"):
+            scheduling.google_calendar_event_id = result["id"]
+            scheduling_repository.update(scheduling)
+
+        return {
+            "scheduling_id": str(scheduling.id),
+            "action": action,
+            "status": "synced",
+            "event_id": scheduling.google_calendar_event_id,
+        }
 
     @staticmethod
     async def _revoke_token(token: str) -> None:
@@ -136,167 +232,3 @@ class GoogleCalendarService:
             end=end_date,
             description=description,
         )
-
-    @staticmethod
-    def build_authorization_url(establishment_id: UUID) -> str:
-        if not settings.google_redirect_uri:
-            raise ValueError("GOOGLE_REDIRECT_URI is required")
-
-        params = {
-            "client_id": settings.google_client_id,
-            "redirect_uri": settings.google_redirect_uri,
-            "response_type": "code",
-            "scope": settings.google_calendar_scopes,
-            "access_type": "offline",
-            "prompt": "consent",
-            "include_granted_scopes": "true",
-            "state": str(establishment_id),
-        }
-
-        return f"{settings.google_auth_uri}?{urlencode(params)}"
-
-    @staticmethod
-    async def exchange_code_for_tokens(code: str) -> dict:
-        if not settings.google_redirect_uri:
-            raise ValueError("GOOGLE_REDIRECT_URI is required")
-
-        payload = {
-            "code": code,
-            "client_id": settings.google_client_id,
-            "client_secret": settings.google_client_secret,
-            "redirect_uri": settings.google_redirect_uri,
-            "grant_type": "authorization_code",
-        }
-
-        timeout = aiohttp.ClientTimeout(total=30)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(settings.google_token_uri, data=payload) as response:
-                response.raise_for_status()
-                data = await response.json()
-
-        if "error" in data:
-            error = data["error"]
-            message = error.get("message") if isinstance(error, dict) else str(error)
-            raise ValueError(f"Google OAuth error: {message}")
-
-        if not data.get("access_token"):
-            raise ValueError("Google OAuth did not return an access_token")
-
-        return data
-
-    @staticmethod
-    async def connect_establishment(establishment_id: UUID, code: str, db: Session) -> Establishment:
-        repository = EstablishmentRepository(db)
-        establishment = repository.get_by_id(establishment_id)
-
-        if establishment is None:
-            raise ValueError("Establishment not found")
-
-        token_data = await GoogleCalendarService.exchange_code_for_tokens(code)
-        expires_in = int(token_data.get("expires_in", 0) or 0)
-        expiry_at = datetime.now() + timedelta(seconds=expires_in) if expires_in else None
-
-        establishment.google_calendar_access_token = token_data.get("access_token")
-        establishment.google_calendar_refresh_token = token_data.get("refresh_token")
-        establishment.google_calendar_expiry = expiry_at
-        establishment.google_calendar_id = token_data.get("google_calendar_id") or "primary"
-
-        return repository.update(establishment)
-
-    @staticmethod
-    async def disconnect_establishment(establishment_id: UUID, db: Session) -> dict:
-        repository = EstablishmentRepository(db)
-        establishment = repository.get_by_id(establishment_id)
-
-        if establishment is None:
-            raise ValueError("Establishment not found")
-
-        token_to_revoke = establishment.google_calendar_refresh_token or establishment.google_calendar_access_token
-        revoked = False
-
-        if token_to_revoke:
-            try:
-                await GoogleCalendarService._revoke_token(token_to_revoke)
-                revoked = True
-            except Exception:
-                revoked = False
-
-        establishment.google_calendar_access_token = None
-        establishment.google_calendar_refresh_token = None
-        establishment.google_calendar_expiry = None
-        establishment.google_calendar_id = None
-        repository.update(establishment)
-
-        return {
-            "establishment_id": str(establishment.id),
-            "disconnected": True,
-            "revoked": revoked,
-        }
-
-    @staticmethod
-    async def sync_scheduling(scheduling_id: UUID, action: str, db: Session) -> dict:
-        scheduling_repository = SchedulingRepository(db)
-        scheduling = scheduling_repository.get_by_id(scheduling_id)
-
-        if scheduling is None:
-            raise ValueError("Scheduling not found")
-
-        establishment = scheduling.establishment
-        if establishment is None:
-            raise ValueError("Establishment not found for scheduling")
-
-        access_token, _ = await GoogleCalendarService._get_access_token(establishment, db)
-        calendar_id = GoogleCalendarService._calendar_id(establishment)
-        event_id = scheduling.google_calendar_event_id
-        base_url = f"{GoogleCalendarService.API_BASE_URI}/calendars/{calendar_id}/events"
-
-        if action == "cancel":
-            if not event_id:
-                return {
-                    "scheduling_id": str(scheduling.id),
-                    "action": action,
-                    "status": "skipped_no_event_id",
-                }
-
-            await GoogleCalendarService._request_json(
-                method="DELETE",
-                url=f"{base_url}/{event_id}",
-                token=access_token,
-            )
-
-            scheduling.google_calendar_event_id = None
-            scheduling_repository.update(scheduling)
-
-            return {
-                "scheduling_id": str(scheduling.id),
-                "action": action,
-                "status": "deleted",
-            }
-
-        payload = GoogleCalendarService._build_schedule_payload(scheduling)
-
-        if event_id:
-            result = await GoogleCalendarService._request_json(
-                method="PATCH",
-                url=f"{base_url}/{event_id}",
-                token=access_token,
-                json_payload=payload,
-            )
-        else:
-            result = await GoogleCalendarService._request_json(
-                method="POST",
-                url=base_url,
-                token=access_token,
-                json_payload=payload,
-            )
-
-        if isinstance(result, dict) and result.get("id"):
-            scheduling.google_calendar_event_id = result["id"]
-            scheduling_repository.update(scheduling)
-
-        return {
-            "scheduling_id": str(scheduling.id),
-            "action": action,
-            "status": "synced",
-            "event_id": scheduling.google_calendar_event_id,
-        }
