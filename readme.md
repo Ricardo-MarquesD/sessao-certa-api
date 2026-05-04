@@ -1,6 +1,9 @@
 Para executar o projeto:
 poetry run python -m uvicorn main:app --reload --port 8000 --app-dir src
 
+Workers
+poetry run python scripts/worker_runner.py
+
 ngrok:
 ngrok http 8000
 

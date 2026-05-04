@@ -12,6 +12,10 @@ class ServiceRepository(ServiceInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, service_model: ServiceModel) -> Service:
         establishment = EntityMapper.establishment_to_entity(service_model.establishment)
         
@@ -26,14 +30,16 @@ class ServiceRepository(ServiceInterface):
         )
     
     def _to_orm(self, service: Service) -> ServiceModel:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == service.establishment.id)
+        stmt = select(EstablishmentModel.id).where(
+            EstablishmentModel.uuid == self._normalize_uuid(service.establishment.id)
+        )
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
             raise ValueError(f"Establishment with uuid {service.establishment.id} not found")
         
         return ServiceModel(
-            uuid=service.id,
+            uuid=self._normalize_uuid(service.id) if service.id is not None else None,
             establishments_id=establishment_internal_id,
             service_name=service.service_name,
             description_service=service.description_service,
@@ -51,13 +57,15 @@ class ServiceRepository(ServiceInterface):
         return self._to_entity(service_orm)
     
     def update(self, service: Service) -> Service:
-        stmt = select(ServiceModel).where(ServiceModel.uuid == service.id)
+        stmt = select(ServiceModel).where(ServiceModel.uuid == self._normalize_uuid(service.id))
         service_orm = self.db_session.scalar(stmt)
         
         if not service_orm:
             raise ValueError(f"Service with id {service.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == service.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(
+            EstablishmentModel.uuid == self._normalize_uuid(service.establishment.id)
+        )
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
@@ -76,7 +84,7 @@ class ServiceRepository(ServiceInterface):
         return self._to_entity(service_orm)
 
     def get_by_id(self, service_id: UUID) -> Service | None:
-        stmt = select(ServiceModel).where(ServiceModel.uuid == service_id)
+        stmt = select(ServiceModel).where(ServiceModel.uuid == self._normalize_uuid(service_id))
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
@@ -109,7 +117,9 @@ class ServiceRepository(ServiceInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Service]:
-        stmt = select(ServiceModel).where(ServiceModel.establishment.has(uuid=establishment_id)).order_by(ServiceModel.id)
+        stmt = select(ServiceModel).where(
+            ServiceModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(ServiceModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -136,7 +146,10 @@ class ServiceRepository(ServiceInterface):
         )
 
     def list_active_by_establishment_id(self, active: bool, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Service]:
-        stmt = select(ServiceModel).where(ServiceModel.active == active, ServiceModel.establishment.has(uuid=establishment_id)).order_by(ServiceModel.id)
+        stmt = select(ServiceModel).where(
+            ServiceModel.active == active,
+            ServiceModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(ServiceModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -175,7 +188,7 @@ class ServiceRepository(ServiceInterface):
         return [self._to_entity(service) for service in results]
 
     def delete(self, service_id: UUID) -> bool:
-        stmt = delete(ServiceModel).where(ServiceModel.uuid == service_id)
+        stmt = delete(ServiceModel).where(ServiceModel.uuid == self._normalize_uuid(service_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

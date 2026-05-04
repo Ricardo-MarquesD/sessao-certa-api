@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
 import aiohttp
 from google.auth.exceptions import GoogleAuthError
 from google_auth_oauthlib.flow import Flow
+from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
 from sqlalchemy.orm import Session
 
 from config import settings
@@ -19,6 +20,8 @@ from utils.value_object import GoogleCalendarHelper
 class GoogleCalendarService:
     TOKEN_REVOKE_URI = "https://oauth2.googleapis.com/revoke"
     DEFAULT_CALENDAR_ID = "primary"
+    CODE_VERIFIER_TTL_SECONDS = 600
+    _code_verifier_store: dict[str, tuple[str, datetime]] = {}
 
     def __init__(self, client_factory: GoogleCalendarClientFactory):
         self._client_factory = client_factory
@@ -38,6 +41,19 @@ class GoogleCalendarService:
     @staticmethod
     def _split_scopes(value: str) -> list[str]:
         return [scope for scope in value.split() if scope]
+
+    def _store_code_verifier(self, *, state: str, code_verifier: str) -> None:
+        expires_at = datetime.utcnow() + timedelta(seconds=self.CODE_VERIFIER_TTL_SECONDS)
+        self._code_verifier_store[state] = (code_verifier, expires_at)
+
+    def _pop_code_verifier(self, *, state: str) -> str | None:
+        entry = self._code_verifier_store.pop(state, None)
+        if entry is None:
+            return None
+        code_verifier, expires_at = entry
+        if expires_at < datetime.utcnow():
+            return None
+        return code_verifier
 
     def _build_flow(self) -> Flow:
         if not settings.google_client_id:
@@ -72,11 +88,22 @@ class GoogleCalendarService:
             prompt="consent",
             state=str(establishment_id),
         )
+        if flow.code_verifier:
+            self._store_code_verifier(state=str(establishment_id), code_verifier=flow.code_verifier)
         return authorization_url
 
-    def _exchange_code_for_tokens(self, code: str):
+    def _exchange_code_for_tokens(self, code: str, *, state: str | None = None):
         flow = self._build_flow()
-        flow.fetch_token(code=code)
+        code_verifier = None
+        if state:
+            code_verifier = self._pop_code_verifier(state=state)
+            if code_verifier is None:
+                raise ValueError("Missing code verifier. Generate a new authorization URL and retry.")
+
+        if code_verifier:
+            flow.fetch_token(code=code, code_verifier=code_verifier)
+        else:
+            flow.fetch_token(code=code)
         credentials = flow.credentials
 
         if not credentials or not credentials.token:
@@ -92,8 +119,8 @@ class GoogleCalendarService:
             raise ValueError("Establishment not found")
 
         try:
-            credentials = await asyncio.to_thread(self._exchange_code_for_tokens, code)
-        except GoogleAuthError as exc:
+            credentials = await asyncio.to_thread(self._exchange_code_for_tokens, code, state=str(establishment_id))
+        except (GoogleAuthError, InvalidGrantError, ValueError) as exc:
             raise ValueError(f"Google OAuth error: {exc}") from exc
 
         establishment.google_calendar_access_token = credentials.token

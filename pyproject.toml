@@ -32,6 +32,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
+markers = [
+    "integration: tests that call external services",
+]
 
 [dependency-groups]
 dev = [

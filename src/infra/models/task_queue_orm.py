@@ -8,10 +8,13 @@ import uuid
 class TaskQueueModel(Base):
     __tablename__ = "tasks_queue"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     uuid = Column(CHAR(36), unique=True, default=lambda: str(uuid.uuid4()), nullable=False)
     establishments_id = Column(Integer, ForeignKey("establishments.id", ondelete="CASCADE"), nullable=False)
-    task_type = Column(Enum(TaskType), nullable=False)
+    task_type = Column(
+        Enum(TaskType, values_callable=lambda enum: [item.value for item in enum]),
+        nullable=False,
+    )
     priority = Column(Integer, nullable=False, server_default="0")
     status = Column(Enum(TaskStatus), nullable=False, server_default="PENDING")
     payload = Column(JSON, nullable=False)

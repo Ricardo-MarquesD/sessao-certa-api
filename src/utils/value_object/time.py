@@ -109,6 +109,12 @@ class SchedulingHelper:
         end_dt: datetime,
         appointments: list,
     ) -> bool:
+        def _normalize(value: datetime) -> datetime:
+            return value.replace(tzinfo=None) if value.tzinfo is not None else value
+
+        start_cmp = _normalize(start_dt)
+        end_cmp = _normalize(end_dt)
+
         for appt in appointments:
             appt_start = getattr(appt, "appointment_date", None)
             if appt_start is None:
@@ -120,7 +126,10 @@ class SchedulingHelper:
                 continue
 
             appt_end = appt_start + timedelta(minutes=appt_duration)
-            if start_dt < appt_end and end_dt > appt_start:
+            appt_start_cmp = _normalize(appt_start)
+            appt_end_cmp = _normalize(appt_end)
+
+            if start_cmp < appt_end_cmp and end_cmp > appt_start_cmp:
                 return True
 
         return False

@@ -64,7 +64,7 @@ def test_connect_establishment_updates_google_fields(monkeypatch, google_setting
 
     monkeypatch.setattr(google_calendar_service_module, "EstablishmentRepository", FakeRepository)
     monkeypatch.setattr(google_calendar_service_module.asyncio, "to_thread", fake_to_thread)
-    monkeypatch.setattr(GoogleCalendarService, "_exchange_code_for_tokens", lambda self, code: fake_credentials)
+    monkeypatch.setattr(GoogleCalendarService, "_exchange_code_for_tokens", lambda self, code, state=None: fake_credentials)
 
     service = GoogleCalendarService(client_factory=SimpleNamespace())
     result = asyncio.run(service.connect_establishment(establishment_id, "code-123", db=object()))

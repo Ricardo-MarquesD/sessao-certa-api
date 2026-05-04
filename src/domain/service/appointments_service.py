@@ -35,7 +35,7 @@ class AppointmentsService:
         entity_establishment = getattr(entity, "establishment", None)
         entity_establishment_id = getattr(entity_establishment, "id", None)
 
-        if entity_establishment_id != establishment_id:
+        if str(entity_establishment_id) != str(establishment_id):
             raise ValueError(f"{entity_name} not found for establishment")
 
     @staticmethod

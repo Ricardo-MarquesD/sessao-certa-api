@@ -13,12 +13,16 @@ class EstablishmentRepository(EstablishmentInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, establishment_model: EstablishmentModel) -> Establishment:
         return EntityMapper.establishment_to_entity(establishment_model)
     
     def _to_orm(self, establishment: Establishment) -> EstablishmentModel:
         return EstablishmentModel(
-            uuid=establishment.id,
+            uuid=self._normalize_uuid(establishment.id) if establishment.id is not None else None,
             clients_id=establishment.client.id,
             stripe_subscription_id=establishment.stripe_subscription_id,
             waba_id=establishment.waba_id,
@@ -47,7 +51,7 @@ class EstablishmentRepository(EstablishmentInterface):
         return self._to_entity(establishment_orm)
     
     def update(self, establishment: Establishment) -> Establishment:
-        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == establishment.id)
+        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == self._normalize_uuid(establishment.id))
         establishment_orm = self.db_session.scalar(stmt)
         
         if not establishment_orm:
@@ -76,7 +80,7 @@ class EstablishmentRepository(EstablishmentInterface):
         return self._to_entity(establishment_orm)
 
     def get_by_id(self, establishment_id: UUID) -> Establishment | None:
-        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == establishment_id)
+        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == self._normalize_uuid(establishment_id))
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
@@ -100,7 +104,7 @@ class EstablishmentRepository(EstablishmentInterface):
         return self._to_entity(result) if result else None
 
     def get_internal_id_by_id(self, establishment_id: UUID) -> int | None:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == establishment_id)
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(establishment_id))
         result = self.db_session.scalar(stmt)
 
         return result

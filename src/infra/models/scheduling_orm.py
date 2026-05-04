@@ -47,7 +47,15 @@ class SchedulingModel(Base):
     
     @validates('appointment_date')
     def validate_appointment_date(self, key, appointment_date):
-        if appointment_date < datetime.now():
+        has_tz = appointment_date.tzinfo is not None and appointment_date.utcoffset() is not None
+        if has_tz:
+            now = datetime.now(appointment_date.tzinfo)
+            value = appointment_date
+        else:
+            now = datetime.now()
+            value = appointment_date.replace(tzinfo=None)
+
+        if value < now:
             raise ValueError("Appointment date must be in the future")
         return appointment_date
     
