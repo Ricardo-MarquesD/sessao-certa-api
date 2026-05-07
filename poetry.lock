@@ -1889,6 +1889,18 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-multipart"
+version = "0.0.27"
+description = "A streaming multipart parser for Python"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "python_multipart-0.0.27-py3-none-any.whl", hash = "sha256:6fccfad17a27334bd0193681b369f476eda3409f17381a2d65aa7df3f7275645"},
+    {file = "python_multipart-0.0.27.tar.gz", hash = "sha256:9870a6a8c5a20a5bf4f07c017bd1489006ff8836cff097b6933355ee2b49b602"},
+]
+
+[[package]]
 name = "pywa"
 version = "3.9.0"
 description = "🚀 Build WhatsApp Bots in Python • Fast, Effortless, Powerful"
@@ -2643,4 +2655,8 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14"
+<<<<<<< HEAD
 content-hash = "ea31ad5ccd8c8610ca63794a33045e4fcce78e5457167f9dfe67428f2bea724d"
+=======
+content-hash = "242b8a47daebc586003db253832572b7f2eca599218ee5edfc34f17a80d7c2ac"
+>>>>>>> f1628c8 (imageService)

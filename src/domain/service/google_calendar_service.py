@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 import aiohttp
@@ -43,7 +43,7 @@ class GoogleCalendarService:
         return [scope for scope in value.split() if scope]
 
     def _store_code_verifier(self, *, state: str, code_verifier: str) -> None:
-        expires_at = datetime.utcnow() + timedelta(seconds=self.CODE_VERIFIER_TTL_SECONDS)
+        expires_at = datetime.now(timezone.utc) + timedelta(seconds=self.CODE_VERIFIER_TTL_SECONDS)
         self._code_verifier_store[state] = (code_verifier, expires_at)
 
     def _pop_code_verifier(self, *, state: str) -> str | None:
@@ -51,7 +51,7 @@ class GoogleCalendarService:
         if entry is None:
             return None
         code_verifier, expires_at = entry
-        if expires_at < datetime.utcnow():
+        if expires_at < datetime.now(timezone.utc):
             return None
         return code_verifier
 

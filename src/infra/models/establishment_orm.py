@@ -19,7 +19,7 @@ class EstablishmentModel(Base):
     google_calendar_id = Column(String(255), nullable=True)
     establishment_name = Column(String(150), nullable = False)
     cnpj = Column(String(18), nullable = False)
-    chatbot_phone_number = Column(String(30), nullable = False)
+    chatbot_phone_number = Column(String(30), nullable = True)
     address = Column(String(255), nullable = False)
     img_url = Column(String(500), nullable=False)
     available_hours = Column(JSON, nullable=True)

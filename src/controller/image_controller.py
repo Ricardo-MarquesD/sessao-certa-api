@@ -1,0 +1,28 @@
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile, status
+
+from domain.service.image_service import ImageService
+from schema.upload_schema import ImageDeleteResponse, ImageUploadResponse
+
+
+router = APIRouter(prefix="/images")
+
+
+@router.post("", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED)
+def upload_image(request: Request, file: UploadFile = File(...)):
+    try:
+        base_url = str(request.base_url)
+        result = ImageService.save_upload(file=file, base_url=base_url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return ImageUploadResponse(**result)
+
+
+@router.delete("", response_model=ImageDeleteResponse)
+def delete_image(img_url: str):
+    try:
+        result = ImageService.delete_by_url(img_url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return ImageDeleteResponse(**result)

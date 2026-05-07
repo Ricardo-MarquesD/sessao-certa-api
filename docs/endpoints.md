@@ -41,6 +41,13 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 |--------|---------|-----------|---------------------|---------------------|----------|
 | GET | /establishments | Obtém dados do estabelecimento do cliente (RF002). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", "address": "string", ... }` |
 | PUT | /establishments | Atualiza dados do estabelecimento (RF002). Requer role `client`. | - | `{ "name": "string", "address": "string", "atributos": [array] }` | 200: `{ "message": "Atualizado" }` |
+| PUT | /establishments/{id}/image | Atualiza a imagem do estabelecimento. | - | `{ "img_url": "string" }` | 200: `{ "id": "uuid", "img_url": "string", ... }` |
+
+## Usuarios
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| PUT | /users/{id}/image | Atualiza a imagem do usuario. | - | `{ "img_url": "string" }` | 200: `{ "id": "uuid", "img_url": "string", ... }` |
 
 ## Funcionários (Employees)
 
@@ -61,6 +68,16 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | PUT | /services/{id} | Atualiza serviço (RF015). Requer role `client`. | - | `{ "price": "decimal" }` | 200: `{ "message": "Atualizado" }` |
 | DELETE | /services/{id} | Remove serviço (RF015). Requer role `client`. | - | - | 204: No content |
 
+<<<<<<< HEAD
+=======
+## Imagens
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| POST | /images | Upload de imagem (JPG/PNG/WebP, max 5 MB). Retorna URL absoluta para salvar em `img_url`. | - | `multipart/form-data` com campo `file` | 201: `{ "img_url": "string", "filename": "string", "size": "int", "content_type": "string" }` |
+| DELETE | /images | Remove imagem pelo `img_url` salvo na entidade. | `img_url` (obrigatorio) | - | 200: `{ "message": "Imagem removida", "deleted_path": "string" }` |
+
+>>>>>>> f1628c8 (imageService)
 ## Agendamentos (Scheduling)
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
