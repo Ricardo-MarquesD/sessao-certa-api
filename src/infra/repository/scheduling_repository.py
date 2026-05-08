@@ -235,7 +235,9 @@ class SchedulingRepository(SchedulingInterface):
         )
 
     def list_by_customer_id(self, customer_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Scheduling]:
-        stmt = select(SchedulingModel).where(SchedulingModel.customer.has(uuid=customer_id)).order_by(SchedulingModel.id)
+        stmt = select(SchedulingModel).where(
+            SchedulingModel.customer.has(uuid=self._normalize_uuid(customer_id))
+        ).order_by(SchedulingModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -349,7 +351,7 @@ class SchedulingRepository(SchedulingInterface):
         return [self._to_entity(scheduling) for scheduling in results]
 
     def delete(self, scheduling_id: UUID) -> bool:
-        stmt = delete(SchedulingModel).where(SchedulingModel.uuid == scheduling_id)
+        stmt = delete(SchedulingModel).where(SchedulingModel.uuid == self._normalize_uuid(scheduling_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

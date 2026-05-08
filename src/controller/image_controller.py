@@ -17,7 +17,6 @@ def upload_image(request: Request, file: UploadFile = File(...)):
 
     return ImageUploadResponse(**result)
 
-
 @router.delete("", response_model=ImageDeleteResponse)
 def delete_image(img_url: str):
     try:

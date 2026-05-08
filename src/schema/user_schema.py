@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
+from phonenumbers import NumberParseException, PhoneNumberFormat, parse as parse_phone, is_valid_number, format_number
 from domain.entities import User, Client, Employee
 from utils.enum import UserRole
 from datetime import datetime
@@ -17,6 +18,22 @@ class _UserBase(BaseModel):
     phone_number: PhoneNumber = Field(json_schema_extra={'default_region': 'BR'})
     role: UserRole
 
+    @field_validator('phone_number', mode='before')
+    @classmethod
+    def normalize_phone_number(cls, v: str | PhoneNumber):
+        if v is None:
+            return v
+        if isinstance(v, PhoneNumber):
+            v = str(v)
+        value = str(v).strip()
+        try:
+            parsed = parse_phone(value, 'BR')
+        except NumberParseException as exc:
+            raise ValueError('Invalid phone number') from exc
+        if not is_valid_number(parsed):
+            raise ValueError('Invalid phone number')
+        return format_number(parsed, PhoneNumberFormat.E164)
+
     @field_validator('role')
     @classmethod
     def role_verify(cls, v: UserRole):
@@ -32,6 +49,22 @@ class UpdateUserRequest(BaseModel):
     email: EmailStr | None = None
     phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
     active_status: bool | None = None
+
+    @field_validator('phone_number', mode='before')
+    @classmethod
+    def normalize_phone_number(cls, v: str | PhoneNumber | None):
+        if v is None:
+            return v
+        if isinstance(v, PhoneNumber):
+            v = str(v)
+        value = str(v).strip()
+        try:
+            parsed = parse_phone(value, 'BR')
+        except NumberParseException as exc:
+            raise ValueError('Invalid phone number') from exc
+        if not is_valid_number(parsed):
+            raise ValueError('Invalid phone number')
+        return format_number(parsed, PhoneNumberFormat.E164)
 
 class UserResponse(_UserBase):
     id: UUID

@@ -227,7 +227,7 @@ class EstablishmentRepository(EstablishmentInterface):
         )
 
     def delete(self, establishment_id: UUID) -> bool:
-        stmt = delete(EstablishmentModel).where(EstablishmentModel.uuid == establishment_id)
+        stmt = delete(EstablishmentModel).where(EstablishmentModel.uuid == self._normalize_uuid(establishment_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

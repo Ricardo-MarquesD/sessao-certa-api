@@ -12,6 +12,10 @@ class MarketingMessageRepository(MarketingMessageInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, marketing_message_model: MarketingMessageModel) -> MarketingMessage:
         establishment = EntityMapper.establishment_to_entity(marketing_message_model.establishment)
         
@@ -23,7 +27,7 @@ class MarketingMessageRepository(MarketingMessageInterface):
         )
     
     def _to_orm(self, marketing_message: MarketingMessage) -> MarketingMessageModel:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == marketing_message.establishment.id)
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(marketing_message.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
@@ -51,7 +55,7 @@ class MarketingMessageRepository(MarketingMessageInterface):
         if not marketing_message_orm:
             raise ValueError(f"MarketingMessage with id {marketing_message.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == marketing_message.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(marketing_message.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
@@ -100,7 +104,7 @@ class MarketingMessageRepository(MarketingMessageInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[MarketingMessage]:
-        stmt = select(MarketingMessageModel).where(MarketingMessageModel.establishment.has(uuid=establishment_id)).order_by(MarketingMessageModel.id)
+        stmt = select(MarketingMessageModel).where(MarketingMessageModel.establishment.has(uuid=self._normalize_uuid(establishment_id))).order_by(MarketingMessageModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
