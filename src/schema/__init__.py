@@ -1,4 +1,5 @@
 from .user_schema import (
+    TokenResponse,
     CreateUserRequest,
     UpdateUserRequest,
     UserResponse,

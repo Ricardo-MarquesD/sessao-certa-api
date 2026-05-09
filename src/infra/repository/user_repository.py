@@ -80,6 +80,11 @@ class UserRepository(UserInterface):
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
+
+    def list_by_email(self, email: str) -> list[User]:
+        stmt = select(UserModel).where(UserModel.email == email).order_by(UserModel.id)
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(user) for user in results]
     
     def get_by_phone_number(self, phone_number:str) -> User | None:
         stmt = select(UserModel).where(UserModel.phone_number == phone_number)

@@ -1,10 +1,10 @@
 from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-
 from config.db import get_session
 from domain.service import AppointmentsService
+from utils.enum import UserRole
+from middleware.auth import require_roles
 from schema import (
     CreateSchedulingRequest,
     DeleteResponse,
@@ -14,11 +14,9 @@ from schema import (
     UpdateSchedulingRequest,
 )
 
-
 router = APIRouter(prefix="/appointments")
 
-
-@router.get("", response_model=list[SchedulingCalendarResponse])
+@router.get("", response_model=list[SchedulingCalendarResponse], dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def list_appointments(
     establishment_id: UUID = Query(...),
     cursor: str | None = None,
@@ -33,7 +31,7 @@ def list_appointments(
     return [SchedulingCalendarResponse.from_entity(scheduling) for scheduling in schedulings]
 
 
-@router.get("/{scheduling_id}", response_model=SchedulingDetailResponse)
+@router.get("/{scheduling_id}", response_model=SchedulingDetailResponse, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def get_appointment(scheduling_id: UUID, db: Session = Depends(get_session)):
     try:
         scheduling = AppointmentsService.get_appointment(db=db, scheduling_id=scheduling_id)
@@ -43,7 +41,7 @@ def get_appointment(scheduling_id: UUID, db: Session = Depends(get_session)):
     return SchedulingDetailResponse.from_entity(scheduling)
 
 
-@router.post("", response_model=SchedulingResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=SchedulingResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def create_appointment(payload: CreateSchedulingRequest, db: Session = Depends(get_session)):
     try:
         created = AppointmentsService.create_appointment(db=db, payload=payload)
@@ -56,7 +54,7 @@ def create_appointment(payload: CreateSchedulingRequest, db: Session = Depends(g
     return SchedulingResponse.from_entity(created)
 
 
-@router.put("/{scheduling_id}", response_model=SchedulingResponse)
+@router.put("/{scheduling_id}", response_model=SchedulingResponse, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def update_appointment(scheduling_id: UUID, payload: UpdateSchedulingRequest, db: Session = Depends(get_session)):
     try:
         saved = AppointmentsService.update_appointment(db=db, scheduling_id=scheduling_id, payload=payload)
@@ -71,7 +69,7 @@ def update_appointment(scheduling_id: UUID, payload: UpdateSchedulingRequest, db
     return SchedulingResponse.from_entity(saved)
 
 
-@router.delete("/{scheduling_id}", response_model=DeleteResponse)
+@router.delete("/{scheduling_id}", response_model=DeleteResponse, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def delete_appointment(scheduling_id: UUID, db: Session = Depends(get_session)):
     try:
         saved = AppointmentsService.delete_appointment(db=db, scheduling_id=scheduling_id)

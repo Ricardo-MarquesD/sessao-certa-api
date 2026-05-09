@@ -1,9 +1,9 @@
 from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from config.db import get_session
+from utils.enum import UserRole
+from middleware.auth import require_roles
 from domain.service.google_calendar_service import GoogleCalendarService
 from infra.google_calendar import GoogleCalendarClientFactory, get_google_calendar_client_factory
 
@@ -17,7 +17,7 @@ def get_google_calendar_service(
     return GoogleCalendarService(factory)
 
 
-@router.get("/connect/{establishment_id}")
+@router.get("/connect/{establishment_id}", dependencies=[Depends(require_roles(UserRole.CLIENT))])
 async def get_google_calendar_authorization_url(
     establishment_id: UUID,
     service: GoogleCalendarService = Depends(get_google_calendar_service),
@@ -50,7 +50,7 @@ async def google_calendar_callback(
     }
 
 
-@router.delete("/disconnect/{establishment_id}")
+@router.delete("/disconnect/{establishment_id}", dependencies=[Depends(require_roles(UserRole.CLIENT))])
 async def google_calendar_disconnect(
     establishment_id: UUID,
     db: Session = Depends(get_session),

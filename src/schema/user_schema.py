@@ -39,6 +39,13 @@ class _UserBase(BaseModel):
     def role_verify(cls, v: UserRole):
         if v == UserRole.ADMIN:
             raise ValueError("Request cannot put Admin status")
+        return v
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    role: UserRole
 
 
 class CreateUserRequest(_UserBase):

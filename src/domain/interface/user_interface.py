@@ -23,6 +23,10 @@ class UserInterface(ABC):
         pass
 
     @abstractmethod
+    def list_by_email(self, email:str) -> list[User]:
+        pass
+
+    @abstractmethod
     def get_by_phone_number(self, phone_number:str) -> User | None:
         pass
 

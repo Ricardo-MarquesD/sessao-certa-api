@@ -5,12 +5,14 @@ from infra.repository import EstablishmentRepository
 from domain.service import WhatsappService
 from config.db import get_session
 from config import settings
+from utils.enum import UserRole
+from middleware.auth import require_roles
 import aiohttp
 from utils.value_object.whatsapp_webhook import WhatsappWebhookHelper
 
 router =  APIRouter(prefix="/whatsapp")
 
-@router.post("/register")
+@router.post("/register", dependencies=[Depends(require_roles(UserRole.CLIENT))])
 async def register_whatsapp(request: Request, db: Session = Depends(get_session)):
     data = await request.json()
 
@@ -43,7 +45,7 @@ async def register_whatsapp(request: Request, db: Session = Depends(get_session)
     return {"status": "connected"}
 
 
-@router.delete("/disconnect/{establishment_id}")
+@router.delete("/disconnect/{establishment_id}", dependencies=[Depends(require_roles(UserRole.CLIENT))])
 async def disconnect_whatsapp(establishment_id: int, db: Session = Depends(get_session)):
     repo = EstablishmentRepository(db)
     establishment = repo.get_by_id(establishment_id=establishment_id)
