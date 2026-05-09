@@ -7,7 +7,7 @@ from utils.enum import UserRole
 from middleware.auth import require_roles
 from schema import EstablishmentResponse, UpdateEstablishmentImgRequest
 
-router = APIRouter(prefix="/establishments")
+router = APIRouter(prefix="/establishments", tags=["Establishments"])
 
 @router.put("/{establishment_id}/image", response_model=EstablishmentResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(require_roles(UserRole.CLIENT))])
 def update_establishment_image(

@@ -8,7 +8,7 @@ from infra.repository import UserRepository
 from schema import UpdateImgRequest, UserResponse
 
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.put("/{user_id}/image", response_model=UserResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE, UserRole.ADMIN))])

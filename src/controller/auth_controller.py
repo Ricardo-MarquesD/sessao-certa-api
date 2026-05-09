@@ -7,7 +7,7 @@ from middleware.auth import AuthError, create_access_token
 from schema import ErrorResponse, TokenResponse
 from utils.value_object import PasswordHasher
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post( "/login", response_model=TokenResponse, status_code=status.HTTP_200_OK, responses={
 	401: {"model": ErrorResponse},

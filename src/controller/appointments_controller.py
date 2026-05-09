@@ -14,7 +14,7 @@ from schema import (
     UpdateSchedulingRequest,
 )
 
-router = APIRouter(prefix="/appointments")
+router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 @router.get("", response_model=list[SchedulingCalendarResponse], dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def list_appointments(

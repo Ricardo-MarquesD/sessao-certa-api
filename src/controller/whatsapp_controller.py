@@ -10,7 +10,7 @@ from middleware.auth import require_roles
 import aiohttp
 from utils.value_object.whatsapp_webhook import WhatsappWebhookHelper
 
-router =  APIRouter(prefix="/whatsapp")
+router =  APIRouter(prefix="/whatsapp", tags=["WhatsApp Integration"])
 
 @router.post("/register", dependencies=[Depends(require_roles(UserRole.CLIENT))])
 async def register_whatsapp(request: Request, db: Session = Depends(get_session)):

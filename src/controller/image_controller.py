@@ -5,7 +5,7 @@ from domain.service.image_service import ImageService
 from schema.upload_schema import ImageDeleteResponse, ImageUploadResponse
 
 
-router = APIRouter(prefix="/images")
+router = APIRouter(prefix="/images", tags=["Image Management"])
 
 
 @router.post("", response_model=ImageUploadResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE, UserRole.ADMIN))])

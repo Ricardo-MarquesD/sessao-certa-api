@@ -8,7 +8,7 @@ from domain.service.google_calendar_service import GoogleCalendarService
 from infra.google_calendar import GoogleCalendarClientFactory, get_google_calendar_client_factory
 
 
-router = APIRouter(prefix="/google-calendar")
+router = APIRouter(prefix="/google-calendar", tags=["Google Calendar Integration"])
 
 
 def get_google_calendar_service(
