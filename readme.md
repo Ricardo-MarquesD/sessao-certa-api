@@ -15,6 +15,36 @@ Autenticacao (JWT):
 - Retorno: `{ "access_token": "...", "token_type": "bearer", "role": "CLIENT|EMPLOYEE|ADMIN" }`
 - Header para rotas protegidas: `Authorization: Bearer <token>`
 
+Cadastro (Stripe Checkout):
+- Register: `POST /auth/register`
+- Payload:
+	```json
+	{
+		"user": {
+			"user_name": "Nome",
+			"email": "email@exemplo.com",
+			"phone_number": "+5511999999999",
+			"password": "senha1234"
+		},
+		"establishment": {
+			"establishment_name": "Meu Estabelecimento",
+			"cnpj": "12345678000190",
+			"chatbot_phone_number": "+5511999999999",
+			"address": "Rua X, 123",
+			"available_hours": null,
+			"img_url": "standart_img.png"
+		},
+		"plan": "BRONZE",
+		"employee_count": 3,
+		"billing_cycle": "Mensalmente"
+	}
+	```
+- Retorno: `{ "checkout_url": "...", "session_id": "..." }`
+- Campos para teste:
+	- `billing_cycle`: `Mensalmente` ou `Anualmente`
+	- `employee_count`: inteiro >= 1
+	- Preco mensal/anual usa os `price_id` configurados na Stripe (mensal e anual). Para anual, o cupom `cupom-anual` e aplicado.
+
 RBAC:
 - Roles: `CLIENT`, `EMPLOYEE`, `ADMIN`
 - Ownership: para atualizar imagem de usuario, somente o proprio usuario ou `ADMIN`.

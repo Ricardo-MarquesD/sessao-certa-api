@@ -59,6 +59,91 @@ class Settings(BaseSettings):
         default="",
     )
 
+    stripe_product_id: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRODUCT_ID",
+            "stripe_product_id",
+        ),
+        default="",
+    )
+    stripe_price_id_annual_bronze: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRICE_ID_ANNUAL_BRONZE",
+            "stripe_price_id_annual_bronze",
+        ),
+        default="",
+    )
+    stripe_price_id_annual_silver: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRICE_ID_ANNUAL_SILVER",
+            "stripe_price_id_annual_silver",
+        ),
+        default="",
+    )
+    stripe_price_id_annual_gold: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRICE_ID_ANNUAL_GOLD",
+            "stripe_price_id_annual_gold",
+        ),
+        default="",
+    )
+    stripe_price_id_monthly_bronze: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRICE_ID_MONTHLY_BRONZE",
+            "stripe_price_id_monthly_bronze",
+        ),
+        default="",
+    )
+    stripe_price_id_monthly_silver: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRICE_ID_MONTHLY_SILVER",
+            "stripe_price_id_monthly_silver",
+        ),
+        default="",
+    )
+    stripe_price_id_monthly_gold: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PRICE_ID_MONTHLY_GOLD",
+            "stripe_price_id_monthly_gold",
+        ),
+        default="",
+    )
+    stripe_coupon_annual: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_COUPON_ANNUAL",
+            "stripe_coupon_annual",
+        ),
+        default="",
+    )
+    stripe_success_url: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_SUCCESS_URL",
+            "stripe_success_url",
+        ),
+        default="",
+    )
+    stripe_cancel_url: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_CANCEL_URL",
+            "stripe_cancel_url",
+        ),
+        default="",
+    )
+    stripe_currency: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_CURRENCY",
+            "stripe_currency",
+        ),
+        default="brl",
+    )
+    stripe_payment_methods: str = Field(
+        validation_alias=AliasChoices(
+            "STRIPE_PAYMENT_METHODS",
+            "stripe_payment_methods",
+        ),
+        default="card,boleto,pix",
+    )
+
     token_jwt_secret_key: str = Field(
         validation_alias=AliasChoices(
             "TOKEN_JWT_SECRET_KEY",

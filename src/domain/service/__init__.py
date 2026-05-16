@@ -2,3 +2,4 @@ from .whatsapp_service import WhatsappService
 from .google_calendar_service import GoogleCalendarService
 from .appointments_service import AppointmentsService
 from .image_service import ImageService
+from .stripe_service import StripeService

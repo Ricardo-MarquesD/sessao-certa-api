@@ -1,4 +1,8 @@
 from .user_schema import (
+    RegisterUserRequest,
+    RegisterEstablishmentRequest,
+    RegisterRequest,
+    RegisterResponse,
     TokenResponse,
     CreateUserRequest,
     UpdateUserRequest,

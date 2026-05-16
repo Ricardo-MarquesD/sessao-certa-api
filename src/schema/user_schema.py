@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from phonenumbers import NumberParseException, PhoneNumberFormat, parse as parse_phone, is_valid_number, format_number
 from domain.entities import User, Client, Employee
-from utils.enum import UserRole
+from utils.enum import UserRole, TypePlan
 from datetime import datetime
 from decimal import Decimal
 from typing import Dict, List, TYPE_CHECKING
@@ -46,6 +46,59 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     role: UserRole
+
+
+class RegisterUserRequest(BaseModel):
+    user_name: str = Field(min_length=1, max_length=150)
+    email: EmailStr
+    phone_number: PhoneNumber = Field(json_schema_extra={'default_region': 'BR'})
+    password: str = Field(min_length=8)
+
+    @field_validator('phone_number', mode='before')
+    @classmethod
+    def normalize_phone_number(cls, v: str | PhoneNumber):
+        if v is None:
+            return v
+        if isinstance(v, PhoneNumber):
+            v = str(v)
+        value = str(v).strip()
+        try:
+            parsed = parse_phone(value, 'BR')
+        except NumberParseException as exc:
+            raise ValueError('Invalid phone number') from exc
+        if not is_valid_number(parsed):
+            raise ValueError('Invalid phone number')
+        return format_number(parsed, PhoneNumberFormat.E164)
+
+
+class RegisterEstablishmentRequest(BaseModel):
+    establishment_name: str = Field(min_length=1, max_length=255)
+    cnpj: str = Field(min_length=14, max_length=18)
+    chatbot_phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
+    address: str = Field(min_length=1, max_length=255)
+    available_hours: Dict[str, List[str]] | None = None
+    img_url: str | None = Field(default=None, max_length=500)
+
+    @field_validator('cnpj')
+    @classmethod
+    def validate_cnpj(cls, v: str):
+        cnpj_digits = ''.join(filter(str.isdigit, v))
+        if len(cnpj_digits) != 14:
+            raise ValueError("CNPJ must have exactly 14 digits")
+        return cnpj_digits
+
+
+class RegisterRequest(BaseModel):
+    user: RegisterUserRequest
+    establishment: RegisterEstablishmentRequest
+    plan: TypePlan
+    employee_count: int = Field(ge=1)
+    billing_cycle: str
+
+
+class RegisterResponse(BaseModel):
+    checkout_url: str
+    session_id: str
 
 
 class CreateUserRequest(_UserBase):

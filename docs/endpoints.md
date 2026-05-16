@@ -68,8 +68,6 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | PUT | /services/{id} | Atualiza serviço (RF015). Requer role `client`. | - | `{ "price": "decimal" }` | 200: `{ "message": "Atualizado" }` |
 | DELETE | /services/{id} | Remove serviço (RF015). Requer role `client`. | - | - | 204: No content |
 
-<<<<<<< HEAD
-=======
 ## Imagens
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
@@ -77,7 +75,6 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | POST | /images | Upload de imagem (JPG/PNG/WebP, max 5 MB). Retorna URL absoluta para salvar em `img_url`. | - | `multipart/form-data` com campo `file` | 201: `{ "img_url": "string", "filename": "string", "size": "int", "content_type": "string" }` |
 | DELETE | /images | Remove imagem pelo `img_url` salvo na entidade. | `img_url` (obrigatorio) | - | 200: `{ "message": "Imagem removida", "deleted_path": "string" }` |
 
->>>>>>> f1628c8 (imageService)
 ## Agendamentos (Scheduling)
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
