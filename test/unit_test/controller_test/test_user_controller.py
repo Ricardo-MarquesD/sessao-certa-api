@@ -10,6 +10,7 @@ from config.db import get_session
 from controller import user_controller as user_controller_module
 from controller.user_controller import router
 from domain.entities import User
+from middleware.auth import get_current_user
 from utils.enum import UserRole
 
 
@@ -32,6 +33,7 @@ def build_client(monkeypatch):
     app = FastAPI()
     app.include_router(router)
     app.dependency_overrides[get_session] = lambda: SimpleNamespace()
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=uuid4(), role=UserRole.ADMIN)
     return TestClient(app)
 
 

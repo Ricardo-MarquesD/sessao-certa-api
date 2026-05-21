@@ -94,3 +94,22 @@ class TaskQueueFactory:
             priority=priority,
             max_retry=max_retry,
         )
+
+    @staticmethod
+    def deactivate_establishment(
+        *,
+        establishments_id: int,
+        establishment_id: str | None = None,
+        priority: int = DEFAULT_PRIORITY,
+        max_retry: int = DEFAULT_MAX_RETRY,
+    ) -> TaskQueue:
+        payload = {}
+        if establishment_id:
+            payload["establishment_id"] = establishment_id
+        return TaskQueueFactory._build_task(
+            establishments_id=establishments_id,
+            task_type=TaskType.DEACTIVATE_ESTABLISHMENT,
+            payload=payload,
+            priority=priority,
+            max_retry=max_retry,
+        )

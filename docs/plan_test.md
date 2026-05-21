@@ -222,7 +222,7 @@ Organizados por módulo/endpoint, mapeados a RF/UC/RNF. Cada caso inclui: ID, De
 | ID | Descrição | Pré-condições | Passos | Resultado Esperado | Critério |
 |----|-----------|----------------|--------|---------------------|----------|
 | TC_INT_01 | Webhook WhatsApp (agendamento) | Payload mock válido. | 1. POST /integrations/whatsapp/webhook. | 200, agendamento criado no DB. | RF003. |
-| TC_INT_02 | Webhook pagamento | Payload mock aprovado. | 1. POST /integrations/payment/webhook. | 200, plano ativado. | RF014. |
+| TC_INT_02 | Webhook pagamento | Payload mock aprovado. | 1. POST /stripe/webhook. | 200, plano ativado. | RF014. |
 | TC_INT_03 | Payload inválido | Payload corrompido. | 1. POST webhook. | 400 Inválido. | RNF007. |
 | TC_INT_04 | Segurança: Acesso não internal | Sem auth. | 1. POST. | 401/403. | RNF003. |
 

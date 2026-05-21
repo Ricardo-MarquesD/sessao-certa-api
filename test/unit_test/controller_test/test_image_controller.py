@@ -1,13 +1,19 @@
+from types import SimpleNamespace
+from uuid import uuid4
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from controller import image_controller as image_controller_module
 from controller.image_controller import router
+from middleware.auth import get_current_user
+from utils.enum import UserRole
 
 
 def build_client(monkeypatch):
     app = FastAPI()
     app.include_router(router)
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=uuid4(), role=UserRole.ADMIN)
     return TestClient(app)
 
 

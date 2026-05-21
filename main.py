@@ -9,6 +9,7 @@ from controller.auth_controller import router as auth_router
 from controller.establishment_controller import router as establishment_router
 from controller.google_calendar_controller import router as google_calendar_router
 from controller.image_controller import router as image_router
+from controller.payment_webhook_controller import router as payment_webhook_router
 from controller.user_controller import router as user_router
 from controller.whatsapp_controller import router as whatsapp_router
 from middleware.auth import AuthError
@@ -26,6 +27,7 @@ app.include_router(google_calendar_router)
 app.include_router(image_router)
 app.include_router(user_router)
 app.include_router(auth_router)
+app.include_router(payment_webhook_router)
 
 
 @app.exception_handler(AuthError)

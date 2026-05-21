@@ -1,15 +1,22 @@
 import pytest
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from controller.whatsapp_controller import router
-from config.db import get_session
+
 import aiohttp
+from config.db import get_session
+from controller.whatsapp_controller import router
+from middleware.auth import get_current_user
+from utils.enum import UserRole
 
 # App de teste isolado — não usa main.py para não depender do banco real
 app = FastAPI()
 app.include_router(router)
 app.dependency_overrides[get_session] = lambda: MagicMock()
+app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=uuid4(), role=UserRole.CLIENT)
 
 BASE_PAYLOAD = {
     "establishment_id": 1,

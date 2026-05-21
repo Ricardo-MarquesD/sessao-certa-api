@@ -89,6 +89,12 @@ class PaymentRepository(PaymentInterface):
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
+
+    def get_by_gateway_transaction_id(self, gateway_transaction_id: str) -> Payment | None:
+        stmt = select(PaymentModel).where(PaymentModel.gateway_transaction_id == gateway_transaction_id)
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
     
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
         stmt = select(PaymentModel).order_by(PaymentModel.id)

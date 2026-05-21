@@ -128,7 +128,8 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
 | POST | /integrations/whatsapp/webhook | Webhook para chatbot WhatsApp (RF003, RF012, UC003). Internal. | - | Payload do WhatsApp | 200: Confirmação |
-| POST | /integrations/payment/webhook | Webhook para gateway de pagamento (RF014). Internal. | - | Payload do gateway | 200: Confirmação |
+| POST | /stripe/webhook | Webhook Stripe para pagamentos/assinaturas (RF014). Internal. | - | Payload da Stripe com assinatura | 200: Confirmação |
+| POST | /stripe/portal | Gera URL do Stripe Customer Portal para o cliente. | - | - | 200: `{ "url": "string" }` |
 
 ## WhatsApp
 

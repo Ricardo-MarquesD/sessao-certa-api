@@ -78,9 +78,6 @@ class StripeService:
         ]
         if not payment_methods:
             raise ValueError("STRIPE_PAYMENT_METHODS is required")
-        if cycle in {"monthly", "annual"}:
-            payment_methods = [method for method in payment_methods if method == "card"] or ["card"]
-
         price_id = self._price_id(plan.type_plan, cycle)
 
         line_items = [

@@ -74,6 +74,12 @@ class ClientRepository(ClientInterface):
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
+
+    def get_by_stripe_customer_id(self, stripe_customer_id: str) -> Client | None:
+        stmt = select(ClientModel).where(ClientModel.stripe_customer_id == stripe_customer_id)
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
     
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Client]:
         stmt = select(ClientModel).order_by(ClientModel.id)

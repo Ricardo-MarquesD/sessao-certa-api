@@ -6,11 +6,14 @@ from fastapi.testclient import TestClient
 
 from config.db import get_session
 from controller.google_calendar_controller import router, get_google_calendar_service
+from middleware.auth import get_current_user
+from utils.enum import UserRole
 
 
 app = FastAPI()
 app.include_router(router)
 app.dependency_overrides[get_session] = lambda: SimpleNamespace()
+app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=uuid4(), role=UserRole.CLIENT)
 
 
 def test_get_authorization_url_returns_payload(monkeypatch):

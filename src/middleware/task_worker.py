@@ -13,7 +13,7 @@ from domain.entities import Context, TaskQueue
 from domain.service.whatsapp_service import WhatsappService
 from domain.service.google_calendar_service import GoogleCalendarService
 from infra.google_calendar import get_google_calendar_client_factory
-from infra.repository import ContextRepository, TaskQueueRepository
+from infra.repository import ContextRepository, EstablishmentRepository, TaskQueueRepository, UserRepository
 from utils.enum import MachineAnwser, TaskStatus, TaskType
 
 
@@ -27,6 +27,7 @@ class TaskWorker:
             TaskType.PROCESS_MESSAGE: self._handle_process_message,
             TaskType.SEND_MENSAGE: self._handle_send_message,
             TaskType.SYNC_CALENDAR: self._handle_sync_calendar,
+            TaskType.DEACTIVATE_ESTABLISHMENT: self._handle_deactivate_establishment,
         }
 
     def run_once(self) -> list[TaskQueue]:
@@ -179,3 +180,26 @@ class TaskWorker:
 
         service = GoogleCalendarService(get_google_calendar_client_factory())
         return asyncio.run(service.sync_scheduling(UUID(str(scheduling_id)), action, session))
+
+    def _handle_deactivate_establishment(self, task: TaskQueue, session: Session):
+        establishment_repo = EstablishmentRepository(session)
+        establishment = establishment_repo.get_by_internal_id(task.establishments_id)
+        if establishment is None:
+            raise ValueError(f"Establishment with id {task.establishments_id} not found")
+
+        if establishment.due_date:
+            now = datetime.now(establishment.due_date.tzinfo) if establishment.due_date.tzinfo else datetime.now()
+            if establishment.due_date > now:
+                return {"status": "skipped", "reason": "due_date_not_expired"}
+
+        user_repo = UserRepository(session)
+        user = user_repo.get_by_id(establishment.client.user.id)
+        if user is None:
+            raise ValueError(f"User with id {establishment.client.user.id} not found")
+
+        if not user.is_active():
+            return {"status": "skipped", "reason": "already_inactive"}
+
+        user.active_status = False
+        user_repo.update(user)
+        return {"status": "deactivated", "user_id": str(user.id)}

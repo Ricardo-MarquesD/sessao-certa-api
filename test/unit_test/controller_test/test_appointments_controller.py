@@ -12,6 +12,7 @@ from config.db import get_session
 from controller import appointments_controller as appointments_controller_module
 from controller.appointments_controller import router
 from domain.entities import Client, Customer, Employee, Establishment, Plan, Scheduling, Service, User
+from middleware.auth import get_current_user
 from utils.enum import AppointmentStatus
 from utils.enum import TypePlan, UserRole
 
@@ -157,6 +158,7 @@ def build_client_app(monkeypatch):
     app = FastAPI()
     app.include_router(router)
     app.dependency_overrides[get_session] = lambda: SimpleNamespace()
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=uuid4(), role=UserRole.CLIENT)
 
     monkeypatch.setattr(appointments_controller_module, "AppointmentsService", FakeAppointmentsService)
 
