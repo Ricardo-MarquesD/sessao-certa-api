@@ -28,20 +28,15 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 
 ## Planos e Assinaturas
 
-| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
-|--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /plans | Lista planos disponíveis (Bronze, Prata, Ouro) (RF019, RF025, UC015). | - | - | 200: `[{ "id": "uuid", "name": "string", "price": "decimal", "features": ["array"] }]` |
-| GET | /plans/my-plan | Obtém detalhes do plano atual do cliente (RF019, UC015). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", "employees_limit": "int", ... }` |
-| PUT | /plans/upgrade | Atualiza ou altera plano, processando pagamento recorrente (RF019, RF020, UC015). Requer role `client`. | `plan_id` (novo plano, obrigatório) | - | 200: `{ "message": "Plano atualizado" }` <br> 402: Pagamento falhou |
-| POST | /plans/cancel | Cancela assinatura (RF019, UC015). Requer role `client`. | - | - | 200: `{ "message": "Assinatura cancelada" }` |
+Os planos e assinaturas são gerenciados pela Stripe. Use o endpoint do portal do cliente para que o usuário visualize, atualize ou cancele a assinatura.
 
 ## Estabelecimentos
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
 | GET | /establishments | Obtém dados do estabelecimento do cliente (RF002). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", "address": "string", ... }` |
-| PUT | /establishments | Atualiza dados do estabelecimento (RF002). Requer role `client`. | - | `{ "name": "string", "address": "string", "atributos": [array] }` | 200: `{ "message": "Atualizado" }` |
-| PUT | /establishments/{id}/image | Atualiza a imagem do estabelecimento. | - | `{ "img_url": "string" }` | 200: `{ "id": "uuid", "img_url": "string", ... }` |
+| PUT | /establishments | Atualiza dados do estabelecimento (RF002). Requer role `client`. Campos `due_date` e `trial_active` nao podem ser alterados pelo client. | - | `{ "name": "string", "address": "string", "atributos": [array] }` | 200: `{ "id": "uuid", "name": "string", "address": "string", ... }` |
+| PUT | /establishments/{id}/image | Atualiza a imagem do estabelecimento. Requer role `client` e ownership. | - | `{ "img_url": "string" }` | 200: `{ "id": "uuid", "img_url": "string", ... }` |
 
 ## Usuarios
 

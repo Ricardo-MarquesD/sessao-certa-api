@@ -15,7 +15,7 @@ from controller.whatsapp_controller import router as whatsapp_router
 from middleware.auth import AuthError
 from schema import ErrorResponse
 
-app = FastAPI()
+app = FastAPI(title="API da SessãoCerta", version="1.0.0")
 
 img_dir = Path(__file__).resolve().parent / "src" / "img"
 app.mount("/img", StaticFiles(directory=img_dir), name="img")
