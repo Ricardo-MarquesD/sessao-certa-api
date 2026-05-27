@@ -194,7 +194,7 @@ class FakeAppointmentsService:
     def list_appointments(cls, **kwargs):
         if cls.list_exception:
             raise cls.list_exception
-        return cls.list_result
+        return SimpleNamespace(data=cls.list_result, cursor=None, has_more=False, total_count=None)
 
     @classmethod
     def get_appointment(cls, **kwargs):

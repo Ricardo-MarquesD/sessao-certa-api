@@ -48,11 +48,11 @@ Os planos e assinaturas são gerenciados pela Stripe. Use o endpoint do portal d
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /employees | Lista funcionários do estabelecimento (RF005, RF024, UC005). Requer role `client`. | `search` (filtro por nome), `page`, `limit` | - | 200: `[{ "id": "uuid", "name": "string", "commission": "decimal", "appointments_count": "int" }]` |
-| GET | /employees/{id} | Obtém detalhes de um funcionário (RF005). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", ... }` |
-| POST | /employees | Adiciona novo funcionário, criando conta herdeira (RF005, RF024, UC005). Limite por plano. Requer role `client`. | - | `{ "name": "string", "email": "string", "password": "string", "commission": "decimal", "permissions": ["array"] }` | 201: `{ "id": "uuid" }` <br> 403: Limite de funcionários atingido |
-| PUT | /employees/{id} | Atualiza funcionário (comissões, permissões, horários) (RF005, RF024). Requer role `client`. | - | `{ "commission": "decimal", "permissions": ["array"] }` | 200: `{ "message": "Atualizado" }` |
-| DELETE | /employees/{id} | Remove funcionário, realocando agendamentos (RF005). Requer role `client`. | - | - | 204: No content |
+| GET | /employees | Lista funcionários do estabelecimento (RF005, RF024, UC005). Requer role `client`. | `cursor`, `limit` | - | 200: `{ "data": [{ "id": 1, "user_id": "uuid", "establishment_id": "uuid", "percentage_commission": "10.0", "available_hours": { ... } }], "cursor": "string", "has_more": false }` |
+| GET | /employees/{id} | Obtém detalhes de um funcionário (RF005). Requer role `client` ou `employee` (somente o proprio). | - | - | 200: `{ "id": 1, "user": { ... }, "establishment": { ... }, "percentage_commission": "10.0", "available_hours": { ... } }` |
+| POST | /employees | Adiciona novo funcionário e cria usuario (RF005, RF024, UC005). Limite por plano. Requer role `client`. | - | `{ "user_name": "string", "email": "string", "phone_number": "+5511999999999", "password": "string", "percentage_commission": 10.0, "available_hours": { "monday": ["09:00-18:00"] } }` | 201: `{ "id": 1, "user_id": "uuid", ... }` <br> 403: Limite de funcionários atingido |
+| PUT | /employees/{id} | Atualiza funcionário (comissão e horarios) (RF005, RF024). Requer role `client` ou `employee` (somente o proprio). | - | `{ "percentage_commission": 15.0, "available_hours": { "friday": ["09:00-17:00"] } }` | 200: `{ "id": 1, "user_id": "uuid", ... }` |
+| DELETE | /employees/{id} | Remove funcionário e desativa usuario (RF005). Requer role `client`. | - | - | 200: `{ "success": true, "message": "Funcionario removido com sucesso", "deleted_id": 1 }` |
 
 ## Serviços (Services)
 
@@ -74,7 +74,7 @@ Os planos e assinaturas são gerenciados pela Stripe. Use o endpoint do portal d
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /appointments | Lista agendamentos do estabelecimento em formato de calendário (RF004, RF017, RF018, UC004). | `establishment_id` (obrigatório), `cursor`, `limit` | - | 200: `[{ "id": "uuid", "customer_name": "string", "service_name": "string", "employee_name": "string", "appointment_date": "datetime" }]` |
+| GET | /appointments | Lista agendamentos do estabelecimento em formato de calendário (RF004, RF017, RF018, UC004). | `establishment_id` (obrigatório), `cursor`, `limit` | - | 200: `{ "data": [{ "id": "uuid", "customer_name": "string", "service_name": "string", "employee_name": "string", "appointment_date": "datetime" }], "cursor": "string", "has_more": false }` |
 | GET | /appointments/{id} | Obtém detalhes completos de um agendamento (RF004). | - | - | 200: `{ "id": "uuid", "establishment": { ... }, "employee": { ... }, "customer": { ... }, "service": { ... } }` |
 | POST | /appointments | Cria agendamento manual e enfileira sincronização com Google Calendar quando conectado. Verifica conflitos. | - | `{ "establishment_id": "uuid", "customer_id": "uuid", "service_id": "uuid", "employee_id": "int", "appointment_date": "datetime" }` | 201: `{ "id": "uuid", ... }` <br> 409: Conflito de horário |
 | PUT | /appointments/{id} | Atualiza agendamento e enfileira sync de atualização quando houver mudança de data, funcionário ou serviço. | - | `{ "appointment_date": "datetime", "employee_id": "int", "service_id": "uuid" }` | 200: `{ "id": "uuid", ... }` |

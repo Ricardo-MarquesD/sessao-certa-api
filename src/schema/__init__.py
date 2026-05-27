@@ -12,6 +12,7 @@ from .user_schema import (
     CreateClientRequest,
     UpdateClientRequest,
     ClientResponse,
+    CreateEmployeeUserRequest,
     CreateEmployeeRequest,
     UpdateEmployeeRequest,
     EmployeeResponse,

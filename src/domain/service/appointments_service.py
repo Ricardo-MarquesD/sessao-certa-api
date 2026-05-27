@@ -146,7 +146,7 @@ class AppointmentsService:
         AppointmentsService._ensure_establishment(db, establishment_id)
         repository = SchedulingRepository(db)
         paginated = repository.list_by_establishment_id(establishment_id, cursor=cursor, limit=limit)
-        return paginated.data
+        return paginated
 
     @staticmethod
     def get_appointment(*, db: Session, scheduling_id: UUID):

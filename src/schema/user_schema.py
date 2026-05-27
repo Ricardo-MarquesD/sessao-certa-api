@@ -8,9 +8,10 @@ from decimal import Decimal
 from typing import Dict, List, TYPE_CHECKING
 from uuid import UUID
 
+from schema.establishment_schema import EstablishmentResponse
+
 if TYPE_CHECKING:
     from schema.plan_schema import PlanResponse
-    from schema.establishment_schema import EstablishmentResponse
 
 class _UserBase(BaseModel):
     user_name: str = Field(min_length=1, max_length=150)
@@ -173,6 +174,37 @@ class ClientResponse(BaseModel):
             user=UserResponse.from_entity(client.user),
             plan=PlanResponse.from_entity(client.plan)
         )
+
+class CreateEmployeeUserRequest(BaseModel):
+    user_name: str = Field(min_length=1, max_length=150)
+    email: EmailStr
+    phone_number: PhoneNumber = Field(json_schema_extra={'default_region': 'BR'})
+    password: str = Field(min_length=8)
+    percentage_commission: Decimal | None = Field(default=None, ge=0, le=100)
+    available_hours: Dict[str, List[str]] | None = None
+
+    @field_validator('phone_number', mode='before')
+    @classmethod
+    def normalize_phone_number(cls, v: str | PhoneNumber | None):
+        if v is None:
+            return v
+        if isinstance(v, PhoneNumber):
+            v = str(v)
+        value = str(v).strip()
+        try:
+            parsed = parse_phone(value, 'BR')
+        except NumberParseException as exc:
+            raise ValueError('Invalid phone number') from exc
+        if not is_valid_number(parsed):
+            raise ValueError('Invalid phone number')
+        return format_number(parsed, PhoneNumberFormat.E164)
+
+    @field_validator('percentage_commission')
+    @classmethod
+    def validate_commission(cls, v: Decimal | None):
+        if v is not None and (v < 0 or v > 100):
+            raise ValueError("Commission must be between 0 and 100")
+        return v
     
 class CreateEmployeeRequest(BaseModel):
     user_id: UUID

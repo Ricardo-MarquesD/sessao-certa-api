@@ -8,6 +8,7 @@ from middleware.auth import require_roles
 from schema import (
     CreateSchedulingRequest,
     DeleteResponse,
+    PaginatedResponse,
     SchedulingCalendarResponse,
     SchedulingDetailResponse,
     SchedulingResponse,
@@ -16,7 +17,7 @@ from schema import (
 
 router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
-@router.get("", response_model=list[SchedulingCalendarResponse], dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
+@router.get("", response_model=PaginatedResponse, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])
 def list_appointments(
     establishment_id: UUID = Query(...),
     cursor: str | None = None,
@@ -24,11 +25,16 @@ def list_appointments(
     db: Session = Depends(get_session),
 ):
     try:
-        schedulings = AppointmentsService.list_appointments(db=db, establishment_id=establishment_id, cursor=cursor, limit=limit)
+        paginated = AppointmentsService.list_appointments(db=db, establishment_id=establishment_id, cursor=cursor, limit=limit)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
-    return [SchedulingCalendarResponse.from_entity(scheduling) for scheduling in schedulings]
+    return PaginatedResponse(
+        data=[SchedulingCalendarResponse.from_entity(scheduling) for scheduling in paginated.data],
+        cursor=paginated.cursor,
+        has_more=paginated.has_more,
+        total_count=paginated.total_count,
+    )
 
 
 @router.get("/{scheduling_id}", response_model=SchedulingDetailResponse, dependencies=[Depends(require_roles(UserRole.CLIENT, UserRole.EMPLOYEE))])

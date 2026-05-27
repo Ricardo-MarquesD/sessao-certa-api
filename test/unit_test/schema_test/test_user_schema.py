@@ -8,6 +8,7 @@ from schema.user_schema import (
     UpdateRoleRequest,
     CreateClientRequest,
     UpdateClientRequest,
+    CreateEmployeeUserRequest,
     CreateEmployeeRequest,
     UpdateEmployeeRequest,
     UpdateEmployeeAvailabilityRequest
@@ -186,6 +187,33 @@ class TestCreateEmployeeRequest:
         }
         with pytest.raises(ValidationError):
             CreateEmployeeRequest(**data)
+
+class TestCreateEmployeeUserRequest:
+    """Testes para CreateEmployeeUserRequest"""
+
+    def test_create_employee_user_request_valid(self):
+        data = {
+            "user_name": "Funcionario",
+            "email": "funcionario@example.com",
+            "phone_number": "+5511999999999",
+            "password": "senha123",
+            "percentage_commission": Decimal("20.0"),
+            "available_hours": {"monday": ["09:00-18:00"]},
+        }
+        employee = CreateEmployeeUserRequest(**data)
+        assert employee.user_name == "Funcionario"
+        assert employee.percentage_commission == Decimal("20.0")
+
+    def test_create_employee_user_request_commission_over_100_fails(self):
+        data = {
+            "user_name": "Funcionario",
+            "email": "funcionario@example.com",
+            "phone_number": "+5511999999999",
+            "password": "senha123",
+            "percentage_commission": Decimal("101"),
+        }
+        with pytest.raises(ValidationError):
+            CreateEmployeeUserRequest(**data)
     
     def test_create_employee_request_commission_negative_fails(self):
         """Deve falhar com comissão negativa"""
