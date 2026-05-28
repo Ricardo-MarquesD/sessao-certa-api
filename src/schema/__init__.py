@@ -51,6 +51,7 @@ from .payment_schema import(
 )
 
 from .service_schema import(
+    CreateServiceUserRequest,
     CreateServiceRequest,
     UpdateServiceRequest,
     ServiceResponse,

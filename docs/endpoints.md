@@ -58,10 +58,10 @@ Os planos e assinaturas são gerenciados pela Stripe. Use o endpoint do portal d
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /services | Lista serviços oferecidos (RF015). Requer role `client` ou `employee`. | `page`, `limit` | - | 200: `[{ "id": "uuid", "name": "string", "price": "decimal", "duration": "int" }]` |
-| POST | /services | Adiciona novo serviço (RF015). Requer role `client`. | - | `{ "name": "string", "price": "decimal", "duration": "int" }` | 201: `{ "id": "uuid" }` |
-| PUT | /services/{id} | Atualiza serviço (RF015). Requer role `client`. | - | `{ "price": "decimal" }` | 200: `{ "message": "Atualizado" }` |
-| DELETE | /services/{id} | Remove serviço (RF015). Requer role `client`. | - | - | 204: No content |
+| GET | /services | Lista serviços oferecidos (RF015). Requer role `client` ou `employee`. | `establishment_id` (obrigatorio), `active` (opcional), `cursor`, `limit` | - | 200: `{ "data": [{ "id": "uuid", "establishment_id": "uuid", "service_name": "string", "price": "decimal", "time_duration": "int", "active": true }], "cursor": "string", "has_more": false }` |
+| POST | /services | Adiciona novo serviço (RF015). Requer role `client`. | `establishment_id` (obrigatorio) | `{ "service_name": "string", "description_service": "string", "time_duration": 30, "price": 50.0, "active": true }` | 201: `{ "id": "uuid", "establishment_id": "uuid", ... }` |
+| PUT | /services/{id} | Atualiza serviço (RF015). Requer role `client`. | - | `{ "service_name": "string", "description_service": "string", "time_duration": 30, "price": 50.0 }` | 200: `{ "id": "uuid", ... }` |
+| DELETE | /services/{id} | Remove serviço (RF015). Requer role `client`. | - | - | 200: `{ "success": true, "message": "Servico removido com sucesso", "deleted_id": "uuid" }` |
 
 ## Imagens
 

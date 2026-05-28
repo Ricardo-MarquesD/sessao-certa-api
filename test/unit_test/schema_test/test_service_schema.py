@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
 from schema.service_schema import (
+    CreateServiceUserRequest,
     CreateServiceRequest,
     UpdateServiceRequest,
     UpdateServiceStatusRequest,
@@ -48,6 +49,32 @@ class TestCreateServiceRequest:
         }
         with pytest.raises(ValidationError):
             CreateServiceRequest(**data)
+
+class TestCreateServiceUserRequest:
+    """Testes para CreateServiceUserRequest"""
+
+    def test_create_service_user_request_valid(self):
+        data = {
+            "service_name": "Corte de Cabelo",
+            "description_service": "Corte masculino",
+            "time_duration": 30,
+            "price": Decimal("50.00"),
+            "active": True,
+        }
+        service = CreateServiceUserRequest(**data)
+        assert service.service_name == "Corte de Cabelo"
+        assert service.time_duration == 30
+        assert service.price == Decimal("50.00")
+
+    def test_create_service_user_request_defaults(self):
+        data = {
+            "service_name": "Manicure",
+            "time_duration": 45
+        }
+        service = CreateServiceUserRequest(**data)
+        assert service.active is True
+        assert service.description_service is None
+        assert service.price is None
     
     def test_create_service_request_price_negative_fails(self):
         """Deve falhar com preço negativo"""

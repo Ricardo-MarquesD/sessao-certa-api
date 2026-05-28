@@ -8,6 +8,7 @@ from controller.appointments_controller import router as appointments_router
 from controller.auth_controller import router as auth_router
 from controller.employee_controller import router as employee_router
 from controller.establishment_controller import router as establishment_router
+from controller.service_controller import router as service_router
 from controller.google_calendar_controller import router as google_calendar_router
 from controller.image_controller import router as image_router
 from controller.payment_webhook_controller import router as payment_webhook_router
@@ -25,6 +26,7 @@ app.include_router(whatsapp_router)
 app.include_router(appointments_router)
 app.include_router(employee_router)
 app.include_router(establishment_router)
+app.include_router(service_router)
 app.include_router(google_calendar_router)
 app.include_router(image_router)
 app.include_router(user_router)
