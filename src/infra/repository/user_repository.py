@@ -12,6 +12,10 @@ class UserRepository(UserInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, user_model: UserModel) -> User:
         return User(
             id=user_model.uuid,
@@ -28,7 +32,7 @@ class UserRepository(UserInterface):
     
     def _to_orm(self, user: User) -> UserModel:
         return UserModel(
-            uuid=user.id,
+            uuid=self._normalize_uuid(user.id) if user.id is not None else None,
             user_name=user.user_name,
             email=user.email,
             phone_number=user.phone_number,
@@ -46,7 +50,7 @@ class UserRepository(UserInterface):
         return self._to_entity(user_orm)
     
     def update(self, user: User) -> User:
-        stmt = select(UserModel).where(UserModel.uuid == user.id)
+        stmt = select(UserModel).where(UserModel.uuid == self._normalize_uuid(user.id))
         user_orm = self.db_session.scalar(stmt)
         
         if not user_orm:
@@ -66,7 +70,7 @@ class UserRepository(UserInterface):
         return self._to_entity(user_orm)
 
     def get_by_id(self, user_id: UUID) -> User | None:
-        stmt = select(UserModel).where(UserModel.uuid == user_id)
+        stmt = select(UserModel).where(UserModel.uuid == self._normalize_uuid(user_id))
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
@@ -76,6 +80,11 @@ class UserRepository(UserInterface):
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
+
+    def list_by_email(self, email: str) -> list[User]:
+        stmt = select(UserModel).where(UserModel.email == email).order_by(UserModel.id)
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(user) for user in results]
     
     def get_by_phone_number(self, phone_number:str) -> User | None:
         stmt = select(UserModel).where(UserModel.phone_number == phone_number)
@@ -216,7 +225,10 @@ class UserRepository(UserInterface):
         )
 
     def delete(self, user_id: UUID) -> bool:
-        stmt = delete(UserModel).where(UserModel.uuid == user_id, UserModel.active_status == False)
+        stmt = delete(UserModel).where(
+            UserModel.uuid == self._normalize_uuid(user_id),
+            UserModel.active_status == False
+        )
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

@@ -72,5 +72,6 @@ class EntityMapper:
             img_url=establishment_model.img_url,
             subscription_date=establishment_model.subscription_date,
             due_date=establishment_model.due_date,
-            trial_active=establishment_model.trial_active
+            trial_active=establishment_model.trial_active,
+            available_hours=establishment_model.available_hours
         )

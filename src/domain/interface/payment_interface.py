@@ -18,6 +18,10 @@ class PaymentInterface(ABC):
     @abstractmethod
     def get_by_id(self, payment_id: UUID) -> Payment | None:
         pass
+
+    @abstractmethod
+    def get_by_gateway_transaction_id(self, gateway_transaction_id: str) -> Payment | None:
+        pass
     
     @abstractmethod
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:

@@ -12,6 +12,10 @@ class EmployeeRepository(EmployeeInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, employee_model: EmployeeModel) -> Employee:
         user = EntityMapper.user_to_entity(employee_model.user)
         establishment = EntityMapper.establishment_to_entity(employee_model.establishment)
@@ -25,13 +29,13 @@ class EmployeeRepository(EmployeeInterface):
         )
     
     def _to_orm(self, employee: Employee) -> EmployeeModel:
-        stmt = select(UserModel.id).where(UserModel.uuid == employee.user.id)
+        stmt = select(UserModel.id).where(UserModel.uuid == self._normalize_uuid(employee.user.id))
         user_internal_id = self.db_session.scalar(stmt)
         
         if not user_internal_id:
             raise ValueError(f"User with uuid {employee.user.id} not found")
         
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == employee.establishment.id)
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(employee.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
@@ -60,13 +64,13 @@ class EmployeeRepository(EmployeeInterface):
         if not employee_orm:
             raise ValueError(f"Employee with id {employee.id} not found")
         
-        stmt_user = select(UserModel.id).where(UserModel.uuid == employee.user.id)
+        stmt_user = select(UserModel.id).where(UserModel.uuid == self._normalize_uuid(employee.user.id))
         user_internal_id = self.db_session.scalar(stmt_user)
         
         if not user_internal_id:
             raise ValueError(f"User with uuid {employee.user.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == employee.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(employee.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
@@ -89,7 +93,7 @@ class EmployeeRepository(EmployeeInterface):
         return self._to_entity(result) if result else None
     
     def get_by_user_id(self, user_id: UUID) -> Employee | None:
-        stmt = select(EmployeeModel).where(EmployeeModel.user.has(uuid=user_id))
+        stmt = select(EmployeeModel).where(EmployeeModel.user.has(uuid=self._normalize_uuid(user_id)))
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
@@ -122,7 +126,7 @@ class EmployeeRepository(EmployeeInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Employee]:
-        stmt = select(EmployeeModel).where(EmployeeModel.establishment.has(uuid=establishment_id)).order_by(EmployeeModel.id)
+        stmt = select(EmployeeModel).where(EmployeeModel.establishment.has(uuid=self._normalize_uuid(establishment_id))).order_by(EmployeeModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -149,13 +153,22 @@ class EmployeeRepository(EmployeeInterface):
         )
 
     def count_by_establishment_id(self, establishment_id: UUID) -> int:
-        stmt = select(func.count()).select_from(EmployeeModel).where(EmployeeModel.establishment.has(uuid=establishment_id))
+        stmt = select(func.count()).select_from(EmployeeModel).where(EmployeeModel.establishment.has(uuid=self._normalize_uuid(establishment_id)))
         count = self.db_session.scalar(stmt)
         return count if count else 0
+
+    def list_by_establishment_internal_id(self, establishment_id: int) -> list[Employee]:
+        stmt = (
+            select(EmployeeModel)
+            .where(EmployeeModel.establishments_id == establishment_id)
+            .order_by(EmployeeModel.id)
+        )
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(employee) for employee in results]
 
     def delete(self, employee_id: UUID) -> bool:
         stmt = delete(EmployeeModel).where(EmployeeModel.id == employee_id)
         result = self.db_session.execute(stmt)
         self.db_session.commit()
-        
+
         return result.rowcount > 0

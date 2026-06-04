@@ -28,6 +28,10 @@ class ServiceInterface(ABC):
     @abstractmethod
     def list_active_by_establishment_id(self, active: bool, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Service]:
         pass
+
+    @abstractmethod
+    def list_active_by_establishment_internal_id(self, establishment_id: int) -> list[Service]:
+        pass
     
     @abstractmethod
     def delete(self, service_id: UUID) -> bool:

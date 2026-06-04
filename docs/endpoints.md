@@ -22,54 +22,63 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
 | POST | /auth/register | Registra um novo cliente após compra de plano (RF002, RF014, RF025, UC002). Integra com gateway de pagamento. Coleta dados do cliente e do estabelecimento em um corpo aninhado, refletindo as entidades separadas no modelo de dados (Client e Establishment, com relação 1:1). | `plan_id` (ID do plano, obrigatório) | `{ "client": { "name": "string", "email": "string", "password": "string", "phone": "string" }, "establishment": { "name": "string", "address": "string", "cnpj": "string", "trialActive": bool } }` | 201: `{ "user_id": "uuid", "token": "string" }` <br> 400: Erro de validação <br> 402: Pagamento falhou |
-| POST | /auth/login | Autentica usuário (cliente, funcionário ou admin) (RF022, UC014). | - | `{ "email": "string", "password": "string" }` | 200: `{ "token": "string", "role": "string" }` <br> 401: Credenciais inválidas |
+| POST | /auth/login | Autentica usuário (cliente, funcionário ou admin) (RF022, UC014). | - | `form-data: username (email), password` | 200: `{ "access_token": "string", "token_type": "bearer", "role": "string" }` <br> 401: Credenciais inválidas |
 | POST | /auth/recover-password | Inicia recuperação de senha via e-mail (RF022, UC014). | - | `{ "email": "string" }` | 200: `{ "message": "Código enviado" }` <br> 404: E-mail não encontrado |
 | POST | /auth/reset-password | Reseta senha com código de verificação (RF022, UC014). | `code` (código de verificação, obrigatório) | `{ "new_password": "string" }` | 200: `{ "message": "Senha atualizada" }` <br> 400: Código inválido |
 
 ## Planos e Assinaturas
 
-| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
-|--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /plans | Lista planos disponíveis (Bronze, Prata, Ouro) (RF019, RF025, UC015). | - | - | 200: `[{ "id": "uuid", "name": "string", "price": "decimal", "features": ["array"] }]` |
-| GET | /plans/my-plan | Obtém detalhes do plano atual do cliente (RF019, UC015). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", "employees_limit": "int", ... }` |
-| PUT | /plans/upgrade | Atualiza ou altera plano, processando pagamento recorrente (RF019, RF020, UC015). Requer role `client`. | `plan_id` (novo plano, obrigatório) | - | 200: `{ "message": "Plano atualizado" }` <br> 402: Pagamento falhou |
-| POST | /plans/cancel | Cancela assinatura (RF019, UC015). Requer role `client`. | - | - | 200: `{ "message": "Assinatura cancelada" }` |
+Os planos e assinaturas são gerenciados pela Stripe. Use o endpoint do portal do cliente para que o usuário visualize, atualize ou cancele a assinatura.
 
 ## Estabelecimentos
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
 | GET | /establishments | Obtém dados do estabelecimento do cliente (RF002). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", "address": "string", ... }` |
-| PUT | /establishments | Atualiza dados do estabelecimento (RF002). Requer role `client`. | - | `{ "name": "string", "address": "string", "atributos": [array] }` | 200: `{ "message": "Atualizado" }` |
+| PUT | /establishments | Atualiza dados do estabelecimento (RF002). Requer role `client`. Campos `due_date` e `trial_active` nao podem ser alterados pelo client. | - | `{ "name": "string", "address": "string", "atributos": [array] }` | 200: `{ "id": "uuid", "name": "string", "address": "string", ... }` |
+| PUT | /establishments/{id}/image | Atualiza a imagem do estabelecimento. Requer role `client` e ownership. | - | `{ "img_url": "string" }` | 200: `{ "id": "uuid", "img_url": "string", ... }` |
+
+## Usuarios
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| PUT | /users/{id}/image | Atualiza a imagem do usuario. | - | `{ "img_url": "string" }` | 200: `{ "id": "uuid", "img_url": "string", ... }` |
 
 ## Funcionários (Employees)
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /employees | Lista funcionários do estabelecimento (RF005, RF024, UC005). Requer role `client`. | `search` (filtro por nome), `page`, `limit` | - | 200: `[{ "id": "uuid", "name": "string", "commission": "decimal", "appointments_count": "int" }]` |
-| GET | /employees/{id} | Obtém detalhes de um funcionário (RF005). Requer role `client`. | - | - | 200: `{ "id": "uuid", "name": "string", ... }` |
-| POST | /employees | Adiciona novo funcionário, criando conta herdeira (RF005, RF024, UC005). Limite por plano. Requer role `client`. | - | `{ "name": "string", "email": "string", "password": "string", "commission": "decimal", "permissions": ["array"] }` | 201: `{ "id": "uuid" }` <br> 403: Limite de funcionários atingido |
-| PUT | /employees/{id} | Atualiza funcionário (comissões, permissões, horários) (RF005, RF024). Requer role `client`. | - | `{ "commission": "decimal", "permissions": ["array"] }` | 200: `{ "message": "Atualizado" }` |
-| DELETE | /employees/{id} | Remove funcionário, realocando agendamentos (RF005). Requer role `client`. | - | - | 204: No content |
+| GET | /employees | Lista funcionários do estabelecimento (RF005, RF024, UC005). Requer role `client`. | `cursor`, `limit` | - | 200: `{ "data": [{ "id": 1, "user_id": "uuid", "establishment_id": "uuid", "percentage_commission": "10.0", "available_hours": { ... } }], "cursor": "string", "has_more": false }` |
+| GET | /employees/{id} | Obtém detalhes de um funcionário (RF005). Requer role `client` ou `employee` (somente o proprio). | - | - | 200: `{ "id": 1, "user": { ... }, "establishment": { ... }, "percentage_commission": "10.0", "available_hours": { ... } }` |
+| POST | /employees | Adiciona novo funcionário e cria usuario (RF005, RF024, UC005). Limite por plano. Requer role `client`. | - | `{ "user_name": "string", "email": "string", "phone_number": "+5511999999999", "password": "string", "percentage_commission": 10.0, "available_hours": { "monday": ["09:00-18:00"] } }` | 201: `{ "id": 1, "user_id": "uuid", ... }` <br> 403: Limite de funcionários atingido |
+| PUT | /employees/{id} | Atualiza funcionário (comissão e horarios) (RF005, RF024). Requer role `client` ou `employee` (somente o proprio). | - | `{ "percentage_commission": 15.0, "available_hours": { "friday": ["09:00-17:00"] } }` | 200: `{ "id": 1, "user_id": "uuid", ... }` |
+| DELETE | /employees/{id} | Remove funcionário e desativa usuario (RF005). Requer role `client`. | - | - | 200: `{ "success": true, "message": "Funcionario removido com sucesso", "deleted_id": 1 }` |
 
 ## Serviços (Services)
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /services | Lista serviços oferecidos (RF015). Requer role `client` ou `employee`. | `page`, `limit` | - | 200: `[{ "id": "uuid", "name": "string", "price": "decimal", "duration": "int" }]` |
-| POST | /services | Adiciona novo serviço (RF015). Requer role `client`. | - | `{ "name": "string", "price": "decimal", "duration": "int" }` | 201: `{ "id": "uuid" }` |
-| PUT | /services/{id} | Atualiza serviço (RF015). Requer role `client`. | - | `{ "price": "decimal" }` | 200: `{ "message": "Atualizado" }` |
-| DELETE | /services/{id} | Remove serviço (RF015). Requer role `client`. | - | - | 204: No content |
+| GET | /services | Lista serviços oferecidos (RF015). Requer role `client` ou `employee`. | `establishment_id` (obrigatorio), `active` (opcional), `cursor`, `limit` | - | 200: `{ "data": [{ "id": "uuid", "establishment_id": "uuid", "service_name": "string", "price": "decimal", "time_duration": "int", "active": true }], "cursor": "string", "has_more": false }` |
+| POST | /services | Adiciona novo serviço (RF015). Requer role `client`. | `establishment_id` (obrigatorio) | `{ "service_name": "string", "description_service": "string", "time_duration": 30, "price": 50.0, "active": true }` | 201: `{ "id": "uuid", "establishment_id": "uuid", ... }` |
+| PUT | /services/{id} | Atualiza serviço (RF015). Requer role `client`. | - | `{ "service_name": "string", "description_service": "string", "time_duration": 30, "price": 50.0 }` | 200: `{ "id": "uuid", ... }` |
+| DELETE | /services/{id} | Remove serviço (RF015). Requer role `client`. | - | - | 200: `{ "success": true, "message": "Servico removido com sucesso", "deleted_id": "uuid" }` |
+
+## Imagens
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| POST | /images | Upload de imagem (JPG/PNG/WebP, max 5 MB). Retorna URL absoluta para salvar em `img_url`. | - | `multipart/form-data` com campo `file` | 201: `{ "img_url": "string", "filename": "string", "size": "int", "content_type": "string" }` |
+| DELETE | /images | Remove imagem pelo `img_url` salvo na entidade. | `img_url` (obrigatorio) | - | 200: `{ "message": "Imagem removida", "deleted_path": "string" }` |
 
 ## Agendamentos (Scheduling)
 
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
-| GET | /appointments | Lista agendamentos (calendário, filtros) (RF004, RF017, RF018, UC004). Requer role `client` ou `employee` (próprios). | `date_start`, `date_end`, `employee_id`, `status`, `page`, `limit` | - | 200: `[{ "id": "uuid", "date": "datetime", "customer_name": "string", "service_name": "string", "status": "enum" }]` |
-| GET | /appointments/{id} | Obtém detalhes de agendamento (RF004). Requer role `client` ou `employee`. | - | - | 200: `{ "id": "uuid", ... }` |
-| POST | /appointments | Cria agendamento manual (RF004, RF003 via internal). Verifica conflitos. Requer role `client` ou `employee`. | - | `{ "customer_id": "uuid", "service_id": "uuid", "employee_id": "uuid", "date": "datetime" }` | 201: `{ "id": "uuid" }` <br> 409: Conflito de horário |
-| PUT | /appointments/{id} | Atualiza agendamento (RF004). Requer role `client` ou `employee`. | - | `{ "date": "datetime" }` | 200: `{ "message": "Atualizado" }` |
-| DELETE | /appointments/{id} | Cancela agendamento, envia notificação (RF004, RF010). Requer role `client` ou `employee`. | - | - | 204: No content |
+| GET | /appointments | Lista agendamentos do estabelecimento em formato de calendário (RF004, RF017, RF018, UC004). | `establishment_id` (obrigatório), `cursor`, `limit` | - | 200: `{ "data": [{ "id": "uuid", "customer_name": "string", "service_name": "string", "employee_name": "string", "appointment_date": "datetime" }], "cursor": "string", "has_more": false }` |
+| GET | /appointments/{id} | Obtém detalhes completos de um agendamento (RF004). | - | - | 200: `{ "id": "uuid", "establishment": { ... }, "employee": { ... }, "customer": { ... }, "service": { ... } }` |
+| POST | /appointments | Cria agendamento manual e enfileira sincronização com Google Calendar quando conectado. Verifica conflitos. | - | `{ "establishment_id": "uuid", "customer_id": "uuid", "service_id": "uuid", "employee_id": "int", "appointment_date": "datetime" }` | 201: `{ "id": "uuid", ... }` <br> 409: Conflito de horário |
+| PUT | /appointments/{id} | Atualiza agendamento e enfileira sync de atualização quando houver mudança de data, funcionário ou serviço. | - | `{ "appointment_date": "datetime", "employee_id": "int", "service_id": "uuid" }` | 200: `{ "id": "uuid", ... }` |
+| DELETE | /appointments/{id} | Cancela agendamento e enfileira sync de cancelamento com o Google Calendar. | - | - | 200: `{ "success": true, "message": "Agendamento cancelado com sucesso" }` |
 | GET | /appointments/export | Exporta agendamentos (CSV/PDF) (RF016). Requer role `client`. | `format` (csv/pdf), `date_start`, `date_end` | - | 200: Arquivo binário |
 
 ## Clientes Finais (Costumers)
@@ -114,7 +123,25 @@ A API segue o padrão REST, utiliza JSON para requisições e respostas, e é im
 | Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
 |--------|---------|-----------|---------------------|---------------------|----------|
 | POST | /integrations/whatsapp/webhook | Webhook para chatbot WhatsApp (RF003, RF012, UC003). Internal. | - | Payload do WhatsApp | 200: Confirmação |
-| POST | /integrations/payment/webhook | Webhook para gateway de pagamento (RF014). Internal. | - | Payload do gateway | 200: Confirmação |
+| POST | /stripe/webhook | Webhook Stripe para pagamentos/assinaturas (RF014). Internal. | - | Payload da Stripe com assinatura | 200: Confirmação |
+| POST | /stripe/portal | Gera URL do Stripe Customer Portal para o cliente. | - | - | 200: `{ "url": "string" }` |
+
+## WhatsApp
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| POST | /whatsapp/register | Conecta o WhatsApp do estabelecimento, salva o token permanente e assina o webhook no WABA. | - | `{ "establishment_id": int, "waba_id": "string", "phone_number_id": "string", "code": "string" }` | 200: `{ "status": "connected" }` |
+| DELETE | /whatsapp/disconnect/{establishment_id} | Remove a inscrição do WABA via Graph API e limpa os campos locais do estabelecimento. | - | - | 200: `{ "status": "disconnected" }` |
+| GET | /whatsapp/webhook | Valida o webhook da Meta. | `hub_mode`, `hub_challenge`, `hub_verify_token` | - | 200: texto de desafio |
+| POST | /whatsapp/webhook | Recebe eventos do WhatsApp e enfileira processamento assíncrono. | - | Payload do WhatsApp | 200: `{ "status": "ok" }` |
+
+## Google Calendar
+
+| Método | Caminho | Descrição | Parâmetros de Query | Corpo da Requisição | Resposta |
+|--------|---------|-----------|---------------------|---------------------|----------|
+| GET | /google-calendar/connect/{establishment_id} | Gera a URL de autorização OAuth do Google Calendar para o estabelecimento. | - | - | 200: `{ "authorization_url": "string" }` |
+| GET | /google-calendar/callback | Recebe o `code` do OAuth e persiste tokens do Google Calendar no estabelecimento. | `code`, `state` | - | 200: `{ "status": "connected" }` |
+| DELETE | /google-calendar/disconnect/{establishment_id} | Revoga o acesso do Google Calendar e limpa os tokens salvos localmente. | - | - | 200: `{ "status": "disconnected" }` |
 
 ## Administração (Admin Only)
 

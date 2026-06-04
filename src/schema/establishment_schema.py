@@ -3,7 +3,7 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 from datetime import datetime
 from domain.entities import Establishment
 from uuid import UUID
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
 if TYPE_CHECKING:
     from schema.user_schema import ClientResponse
@@ -14,6 +14,7 @@ class CreateEstablishmentRequest(BaseModel):
     cnpj: str = Field(min_length=14, max_length=18)
     chatbot_phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
     address: str | None = Field(default=None, max_length=500)
+    available_hours: Dict[str, List[str]] | None = None
     trial_active: bool = True
     
     @field_validator('cnpj')
@@ -28,6 +29,7 @@ class UpdateEstablishmentRequest(BaseModel):
     establishment_name: str | None = Field(default=None, min_length=1, max_length=255)
     chatbot_phone_number: PhoneNumber | None = Field(default=None, json_schema_extra={'default_region': 'BR'})
     address: str | None = Field(default=None, max_length=500)
+    available_hours: Dict[str, List[str]] | None = None
     due_date: datetime | None = None
     trial_active: bool | None = None
 
@@ -41,6 +43,7 @@ class EstablishmentResponse(BaseModel):
     cnpj: str
     chatbot_phone_number: str | None
     address: str | None
+    available_hours: Dict[str, List[str]] | None
     img_url: str | None
     subscription_date: datetime | None
     due_date: datetime | None
@@ -56,6 +59,7 @@ class EstablishmentResponse(BaseModel):
             cnpj=establishment.cnpj,
             chatbot_phone_number=establishment.chatbot_phone_number,
             address=establishment.address,
+            available_hours=establishment.available_hours,
             img_url=establishment.img_url,
             subscription_date=establishment.subscription_date,
             due_date=establishment.due_date,
@@ -70,6 +74,7 @@ class EstablishmentDetailResponse(BaseModel):
     cnpj: str
     chatbot_phone_number: str | None
     address: str | None
+    available_hours: Dict[str, List[str]] | None
     img_url: str | None
     subscription_date: datetime | None
     due_date: datetime | None
@@ -89,6 +94,7 @@ class EstablishmentDetailResponse(BaseModel):
             cnpj=establishment.cnpj,
             chatbot_phone_number=establishment.chatbot_phone_number,
             address=establishment.address,
+            available_hours=establishment.available_hours,
             img_url=establishment.img_url,
             subscription_date=establishment.subscription_date,
             due_date=establishment.due_date,

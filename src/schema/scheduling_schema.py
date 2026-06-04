@@ -18,19 +18,23 @@ class CreateSchedulingRequest(BaseModel):
     @field_validator('appointment_date')
     @classmethod
     def validate_future_date(cls, v: datetime):
-        if v <= datetime.now():
+        now = datetime.now(v.tzinfo) if v.tzinfo else datetime.now()
+        if v <= now:
             raise ValueError("Appointment date must be in the future")
         return v
 
 class UpdateSchedulingRequest(BaseModel):
     appointment_date: datetime | None = None
     employee_id: int | None = None
+    service_id: UUID | None = None
     
     @field_validator('appointment_date')
     @classmethod
     def validate_future_date(cls, v: datetime | None):
-        if v is not None and v <= datetime.now():
-            raise ValueError("Appointment date must be in the future")
+        if v is not None:
+            now = datetime.now(v.tzinfo) if v.tzinfo else datetime.now()
+            if v <= now:
+                raise ValueError("Appointment date must be in the future")
         return v
 
 class UpdateSchedulingStatusRequest(BaseModel):

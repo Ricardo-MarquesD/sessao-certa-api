@@ -15,6 +15,7 @@ class TestEstablishmentRepository:
         
         assert found is not None
         assert found.id == sample_establishment.uuid
+        assert found.available_hours == sample_establishment.available_hours
 
     def test_get_by_client_id(self, db_session, sample_establishment, sample_client):
         """Testa busca por client_id"""

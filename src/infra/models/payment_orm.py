@@ -12,11 +12,11 @@ class PaymentModel(Base):
     uuid = Column(CHAR(36), unique=True, default=lambda: str(uuid.uuid4()), nullable=False)
     establishments_id = Column(Integer, ForeignKey("establishments.id"), nullable = False)
     valor = Column(Numeric(10,2), nullable = False)
-    payment_day = Column(DateTime, nullable = False)
+    payment_day = Column(DateTime, nullable = True)
     payment_status = Column(Enum(PaymentStatus), nullable = False)
     payment_type = Column(Enum(PaymentType), nullable = False)
-    employee_quantity = Column(Integer, nullable = False)
-    gateway_transaction_id = Column(String(100), nullable = False)
+    employee_quantity = Column(Integer, nullable = True)
+    gateway_transaction_id = Column(String(100), nullable = True)
     establishment = relationship("EstablishmentModel", backref = "payments", foreign_keys = [establishments_id])
 
     def __repr__(self):

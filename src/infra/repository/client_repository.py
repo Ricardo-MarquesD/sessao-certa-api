@@ -12,11 +12,15 @@ class ClientRepository(ClientInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, client_model: ClientModel) -> Client:
         return EntityMapper.client_to_entity(client_model)
     
     def _to_orm(self, client: Client) -> ClientModel:
-        stmt = select(UserModel.id).where(UserModel.uuid == client.user.id)
+        stmt = select(UserModel.id).where(UserModel.uuid == self._normalize_uuid(client.user.id))
         user_internal_id = self.db_session.scalar(stmt)
         
         if not user_internal_id:
@@ -44,7 +48,7 @@ class ClientRepository(ClientInterface):
         if not client_orm:
             raise ValueError(f"Client with id {client.id} not found")
         
-        stmt_user = select(UserModel.id).where(UserModel.uuid == client.user.id)
+        stmt_user = select(UserModel.id).where(UserModel.uuid == self._normalize_uuid(client.user.id))
         user_internal_id = self.db_session.scalar(stmt_user)
         
         if not user_internal_id:
@@ -66,7 +70,13 @@ class ClientRepository(ClientInterface):
         return self._to_entity(result) if result else None
     
     def get_by_user_id(self, user_id: UUID) -> Client | None:
-        stmt = select(ClientModel).where(ClientModel.user.has(uuid=user_id))
+        stmt = select(ClientModel).where(ClientModel.user.has(uuid=self._normalize_uuid(user_id)))
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
+
+    def get_by_stripe_customer_id(self, stripe_customer_id: str) -> Client | None:
+        stmt = select(ClientModel).where(ClientModel.stripe_customer_id == stripe_customer_id)
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None

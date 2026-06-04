@@ -13,12 +13,16 @@ class EstablishmentRepository(EstablishmentInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, establishment_model: EstablishmentModel) -> Establishment:
         return EntityMapper.establishment_to_entity(establishment_model)
     
     def _to_orm(self, establishment: Establishment) -> EstablishmentModel:
         return EstablishmentModel(
-            uuid=establishment.id,
+            uuid=self._normalize_uuid(establishment.id) if establishment.id is not None else None,
             clients_id=establishment.client.id,
             stripe_subscription_id=establishment.stripe_subscription_id,
             waba_id=establishment.waba_id,
@@ -32,6 +36,7 @@ class EstablishmentRepository(EstablishmentInterface):
             chatbot_phone_number=establishment.chatbot_phone_number,
             address=establishment.address,
             img_url=establishment.img_url,
+            available_hours=establishment.available_hours,
             subscription_date=establishment.subscription_date,
             due_date=establishment.due_date,
             trial_active=establishment.trial_active
@@ -46,7 +51,7 @@ class EstablishmentRepository(EstablishmentInterface):
         return self._to_entity(establishment_orm)
     
     def update(self, establishment: Establishment) -> Establishment:
-        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == establishment.id)
+        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == self._normalize_uuid(establishment.id))
         establishment_orm = self.db_session.scalar(stmt)
         
         if not establishment_orm:
@@ -65,6 +70,7 @@ class EstablishmentRepository(EstablishmentInterface):
         establishment_orm.chatbot_phone_number = establishment.chatbot_phone_number
         establishment_orm.address = establishment.address
         establishment_orm.img_url = establishment.img_url
+        establishment_orm.available_hours = establishment.available_hours
         establishment_orm.due_date = establishment.due_date
         establishment_orm.trial_active = establishment.trial_active
         
@@ -74,7 +80,7 @@ class EstablishmentRepository(EstablishmentInterface):
         return self._to_entity(establishment_orm)
 
     def get_by_id(self, establishment_id: UUID) -> Establishment | None:
-        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == establishment_id)
+        stmt = select(EstablishmentModel).where(EstablishmentModel.uuid == self._normalize_uuid(establishment_id))
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
@@ -90,6 +96,24 @@ class EstablishmentRepository(EstablishmentInterface):
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
+
+    def get_by_internal_id(self, internal_id: int) -> Establishment | None:
+        stmt = select(EstablishmentModel).where(EstablishmentModel.id == internal_id)
+        result = self.db_session.scalar(stmt)
+
+        return self._to_entity(result) if result else None
+
+    def get_internal_id_by_id(self, establishment_id: UUID) -> int | None:
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(establishment_id))
+        result = self.db_session.scalar(stmt)
+
+        return result
+
+    def get_internal_id_by_chatbot_phone_number(self, chatbot_phone_number: str) -> int | None:
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.chatbot_phone_number == chatbot_phone_number)
+        result = self.db_session.scalar(stmt)
+
+        return result
     
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Establishment]:
         stmt = select(EstablishmentModel).order_by(EstablishmentModel.id)
@@ -203,7 +227,7 @@ class EstablishmentRepository(EstablishmentInterface):
         )
 
     def delete(self, establishment_id: UUID) -> bool:
-        stmt = delete(EstablishmentModel).where(EstablishmentModel.uuid == establishment_id)
+        stmt = delete(EstablishmentModel).where(EstablishmentModel.uuid == self._normalize_uuid(establishment_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

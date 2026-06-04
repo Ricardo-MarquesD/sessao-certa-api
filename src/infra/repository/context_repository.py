@@ -13,6 +13,10 @@ class ContextRepository(ContextInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, model: ContextModel) -> Context:
         return Context(
             id=model.uuid,
@@ -30,7 +34,7 @@ class ContextRepository(ContextInterface):
 
     def _to_orm(self, context: Context) -> ContextModel:
         return ContextModel(
-            uuid=context.id,
+            uuid=self._normalize_uuid(context.id) if context.id is not None else None,
             establishments_id=context.establishments_id,
             customers_id=context.customers_id,
             phone_number=context.phone_number,
@@ -49,7 +53,7 @@ class ContextRepository(ContextInterface):
         return self._to_entity(context_orm)
 
     def update(self, context: Context) -> Context:
-        stmt = select(ContextModel).where(ContextModel.uuid == context.id)
+        stmt = select(ContextModel).where(ContextModel.uuid == self._normalize_uuid(context.id))
         context_orm = self.db_session.scalar(stmt)
 
         if not context_orm:
@@ -68,7 +72,7 @@ class ContextRepository(ContextInterface):
         return self._to_entity(context_orm)
 
     def get_by_id(self, context_id: UUID) -> Context | None:
-        stmt = select(ContextModel).where(ContextModel.uuid == context_id)
+        stmt = select(ContextModel).where(ContextModel.uuid == self._normalize_uuid(context_id))
         result = self.db_session.scalar(stmt)
         return self._to_entity(result) if result else None
 
@@ -146,7 +150,7 @@ class ContextRepository(ContextInterface):
         return PaginatedResponse(data=entities, cursor=next_cursor, has_more=has_more, total_count=None)
 
     def delete(self, context_id: UUID) -> bool:
-        stmt = delete(ContextModel).where(ContextModel.uuid == context_id)
+        stmt = delete(ContextModel).where(ContextModel.uuid == self._normalize_uuid(context_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         return result.rowcount > 0

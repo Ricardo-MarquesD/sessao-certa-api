@@ -14,6 +14,10 @@ class PaymentRepository(PaymentInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, payment_model: PaymentModel) -> Payment:
         establishment = EntityMapper.establishment_to_entity(payment_model.establishment)
         
@@ -29,14 +33,14 @@ class PaymentRepository(PaymentInterface):
         )
     
     def _to_orm(self, payment: Payment) -> PaymentModel:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == payment.establishment.id)
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(payment.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
             raise ValueError(f"Establishment with uuid {payment.establishment.id} not found")
         
         return PaymentModel(
-            uuid=payment.id,
+            uuid=self._normalize_uuid(payment.id) if payment.id is not None else None,
             establishments_id=establishment_internal_id,
             valor=payment.valor,
             payment_day=payment.payment_day,
@@ -55,13 +59,13 @@ class PaymentRepository(PaymentInterface):
         return self._to_entity(payment_orm)
     
     def update(self, payment: Payment) -> Payment:
-        stmt = select(PaymentModel).where(PaymentModel.uuid == payment.id)
+        stmt = select(PaymentModel).where(PaymentModel.uuid == self._normalize_uuid(payment.id))
         payment_orm = self.db_session.scalar(stmt)
         
         if not payment_orm:
             raise ValueError(f"Payment with id {payment.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == payment.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(payment.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
@@ -81,9 +85,15 @@ class PaymentRepository(PaymentInterface):
         return self._to_entity(payment_orm)
 
     def get_by_id(self, payment_id: UUID) -> Payment | None:
-        stmt = select(PaymentModel).where(PaymentModel.uuid == payment_id)
+        stmt = select(PaymentModel).where(PaymentModel.uuid == self._normalize_uuid(payment_id))
         result = self.db_session.scalar(stmt)
         
+        return self._to_entity(result) if result else None
+
+    def get_by_gateway_transaction_id(self, gateway_transaction_id: str) -> Payment | None:
+        stmt = select(PaymentModel).where(PaymentModel.gateway_transaction_id == gateway_transaction_id)
+        result = self.db_session.scalar(stmt)
+
         return self._to_entity(result) if result else None
     
     def list_all(self, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
@@ -114,7 +124,9 @@ class PaymentRepository(PaymentInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Payment]:
-        stmt = select(PaymentModel).where(PaymentModel.establishment.has(uuid=establishment_id)).order_by(PaymentModel.id)
+        stmt = select(PaymentModel).where(
+            PaymentModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(PaymentModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -222,7 +234,7 @@ class PaymentRepository(PaymentInterface):
         )
 
     def delete(self, payment_id: UUID) -> bool:
-        stmt = delete(PaymentModel).where(PaymentModel.uuid == payment_id)
+        stmt = delete(PaymentModel).where(PaymentModel.uuid == self._normalize_uuid(payment_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

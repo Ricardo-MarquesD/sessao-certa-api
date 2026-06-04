@@ -11,6 +11,11 @@ class PasswordHasher:
     
     @staticmethod
     def verify_password(password_input:str, hashed_password:str)->bool:
+        if not password_input or not hashed_password:
+            return False
         password_byte = password_input.encode('utf-8')
         hashed_byte = hashed_password.encode('utf-8')
-        return bcrypt.checkpw(password_byte, hashed_byte)
+        try:
+            return bcrypt.checkpw(password_byte, hashed_byte)
+        except ValueError:
+            return False

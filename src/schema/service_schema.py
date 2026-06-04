@@ -12,6 +12,13 @@ class CreateServiceRequest(BaseModel):
     price: Decimal | None = Field(default=None, ge=0)
     active: bool = True
 
+class CreateServiceUserRequest(BaseModel):
+    service_name: str = Field(min_length=1, max_length=255)
+    description_service: str | None = Field(default=None, max_length=1000)
+    time_duration: int = Field(gt=0)
+    price: Decimal | None = Field(default=None, ge=0)
+    active: bool = True
+
 class UpdateServiceRequest(BaseModel):
     service_name: str | None = Field(default=None, min_length=1, max_length=255)
     description_service: str | None = Field(default=None, max_length=1000)

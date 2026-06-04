@@ -93,6 +93,7 @@ def sample_establishment(db_session, sample_client):
         chatbot_phone_number="11987654321",
         address="Rua Teste, 123",
         img_url="/uploads/salao.png",
+        available_hours={"monday": ["09:00-18:00"], "saturday": ["08:00-12:00"]},
         due_date=datetime(2026, 12, 31),
         trial_active=False
     )

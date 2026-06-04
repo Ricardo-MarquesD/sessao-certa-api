@@ -13,6 +13,10 @@ class StockProductRepository(StockProductInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: str) -> str:
+        return str(value)
+
     def _to_entity(self, stock_product_model: StockProductModel) -> StockProduct:
         establishment = EntityMapper.establishment_to_entity(stock_product_model.establishment)
         
@@ -25,7 +29,7 @@ class StockProductRepository(StockProductInterface):
         )
     
     def _to_orm(self, stock_product: StockProduct) -> StockProductModel:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == stock_product.establishment.id)
+        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(stock_product.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
@@ -54,7 +58,7 @@ class StockProductRepository(StockProductInterface):
         if not stock_product_orm:
             raise ValueError(f"StockProduct with id {stock_product.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == stock_product.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == self._normalize_uuid(stock_product.establishment.id))
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
@@ -77,7 +81,10 @@ class StockProductRepository(StockProductInterface):
         return self._to_entity(result) if result else None
     
     def get_by_name_and_establishment(self, product_name: str, establishment_id: str) -> StockProduct | None:
-        stmt = select(StockProductModel).where(StockProductModel.product_name == product_name, StockProductModel.establishment.has(uuid=establishment_id))
+        stmt = select(StockProductModel).where(
+            StockProductModel.product_name == product_name,
+            StockProductModel.establishment.has(uuid=self._normalize_uuid(establishment_id)),
+        )
         result = self.db_session.scalar(stmt)
 
         return self._to_entity(result) if result else None
@@ -110,7 +117,9 @@ class StockProductRepository(StockProductInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: str, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockProduct]:
-        stmt = select(StockProductModel).where(StockProductModel.establishment.has(uuid=establishment_id)).order_by(StockProductModel.id)
+        stmt = select(StockProductModel).where(
+            StockProductModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(StockProductModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -137,7 +146,10 @@ class StockProductRepository(StockProductInterface):
         )
 
     def list_available_by_establishment_id(self, establishment_id: str, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[StockProduct]:
-        stmt = select(StockProductModel).where(StockProductModel.quantity > 0, StockProductModel.establishment.has(uuid=establishment_id)).order_by(StockProductModel.id)
+        stmt = select(StockProductModel).where(
+            StockProductModel.quantity > 0,
+            StockProductModel.establishment.has(uuid=self._normalize_uuid(establishment_id)),
+        ).order_by(StockProductModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)

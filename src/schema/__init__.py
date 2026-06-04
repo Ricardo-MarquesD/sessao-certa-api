@@ -1,4 +1,9 @@
 from .user_schema import (
+    RegisterUserRequest,
+    RegisterEstablishmentRequest,
+    RegisterRequest,
+    RegisterResponse,
+    TokenResponse,
     CreateUserRequest,
     UpdateUserRequest,
     UserResponse,
@@ -7,6 +12,7 @@ from .user_schema import (
     CreateClientRequest,
     UpdateClientRequest,
     ClientResponse,
+    CreateEmployeeUserRequest,
     CreateEmployeeRequest,
     UpdateEmployeeRequest,
     EmployeeResponse,
@@ -45,6 +51,7 @@ from .payment_schema import(
 )
 
 from .service_schema import(
+    CreateServiceUserRequest,
     CreateServiceRequest,
     UpdateServiceRequest,
     ServiceResponse,

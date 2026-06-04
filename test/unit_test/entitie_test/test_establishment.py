@@ -61,12 +61,14 @@ class TestEstablishmentEntity:
             img_url="https://example.com/img.jpg",
             subscription_date=datetime.now(),
             due_date=datetime.now() + timedelta(days=30),
-            trial_active=False
+            trial_active=False,
+            available_hours={"monday": ["09:00-18:00"], "tuesday": ["09:00-18:00"]}
         )
         
         assert establishment.establishment_name == "Barbearia João"
         assert establishment.cnpj == "12345678901234"
         assert establishment.trial_active is False
+        assert establishment.available_hours == {"monday": ["09:00-18:00"], "tuesday": ["09:00-18:00"]}
     
     def test_create_establishment_with_invalid_client_raises_error(self):
         """Testa que client inválido levanta erro"""
@@ -360,7 +362,8 @@ class TestEstablishmentEntity:
             img_url="https://example.com/img.jpg",
             subscription_date=subscription_date,
             due_date=due_date,
-            trial_active=False
+            trial_active=False,
+            available_hours={"monday": ["09:00-18:00"], "wednesday": []}
         )
         
         est_dict = establishment.to_dict()
@@ -369,6 +372,7 @@ class TestEstablishmentEntity:
         assert est_dict["establishment_name"] == "Barbearia João"
         assert est_dict["cnpj"] == "12345678901234"
         assert est_dict["trial_active"] is False
+        assert est_dict["available_hours"] == {"monday": ["09:00-18:00"], "wednesday": []}
         assert "client" in est_dict
     
     def test_from_dict_creates_establishment_correctly(self, mock_client):
@@ -390,7 +394,8 @@ class TestEstablishmentEntity:
             "img_url": "https://example.com/img2.jpg",
             "subscription_date": "2025-12-01 10:00:00",
             "due_date": "2025-12-31 23:59:59",
-            "trial_active": True
+            "trial_active": True,
+            "available_hours": {"friday": ["10:00-19:00"]}
         }
         
         establishment = Establishment.from_dict(data)
@@ -399,3 +404,4 @@ class TestEstablishmentEntity:
         assert establishment.establishment_name == "Salão Maria"
         assert establishment.cnpj == "98765432109876"
         assert establishment.trial_active is True
+        assert establishment.available_hours == {"friday": ["10:00-19:00"]}

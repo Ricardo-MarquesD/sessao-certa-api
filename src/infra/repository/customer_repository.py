@@ -12,6 +12,10 @@ class CustomerRepository(CustomerInterface):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
+
     def _to_entity(self, customer_model: CustomerModel) -> Customer:
         establishment = EntityMapper.establishment_to_entity(customer_model.establishment)
         
@@ -24,14 +28,16 @@ class CustomerRepository(CustomerInterface):
         )
     
     def _to_orm(self, customer: Customer) -> CustomerModel:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == customer.establishment.id)
+        stmt = select(EstablishmentModel.id).where(
+            EstablishmentModel.uuid == self._normalize_uuid(customer.establishment.id)
+        )
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
             raise ValueError(f"Establishment with uuid {customer.establishment.id} not found")
         
         return CustomerModel(
-            uuid=customer.id,
+            uuid=self._normalize_uuid(customer.id) if customer.id is not None else None,
             customer_name=customer.customer_name,
             phone_number=customer.phone_number,
             establishments_id=establishment_internal_id,
@@ -47,13 +53,15 @@ class CustomerRepository(CustomerInterface):
         return self._to_entity(customer_orm)
     
     def update(self, customer: Customer) -> Customer:
-        stmt = select(CustomerModel).where(CustomerModel.uuid == customer.id)
+        stmt = select(CustomerModel).where(CustomerModel.uuid == self._normalize_uuid(customer.id))
         customer_orm = self.db_session.scalar(stmt)
         
         if not customer_orm:
             raise ValueError(f"Customer with id {customer.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == customer.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(
+            EstablishmentModel.uuid == self._normalize_uuid(customer.establishment.id)
+        )
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
@@ -70,15 +78,21 @@ class CustomerRepository(CustomerInterface):
         return self._to_entity(customer_orm)
 
     def get_by_id(self, customer_id: UUID) -> Customer | None:
-        stmt = select(CustomerModel).where(CustomerModel.uuid == customer_id)
+        stmt = select(CustomerModel).where(CustomerModel.uuid == self._normalize_uuid(customer_id))
         result = self.db_session.scalar(stmt)
         
+        return self._to_entity(result) if result else None
+
+    def get_by_internal_id(self, customer_internal_id: int) -> Customer | None:
+        stmt = select(CustomerModel).where(CustomerModel.id == customer_internal_id)
+        result = self.db_session.scalar(stmt)
+
         return self._to_entity(result) if result else None
     
     def get_by_phone_number(self, phone_number: str, establishment_id: UUID) -> Customer | None:
         stmt = select(CustomerModel).where(
             CustomerModel.phone_number == phone_number,
-            CustomerModel.establishment.has(uuid=establishment_id)
+            CustomerModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
         )
         result = self.db_session.scalar(stmt)
 
@@ -112,7 +126,9 @@ class CustomerRepository(CustomerInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Customer]:
-        stmt = select(CustomerModel).where(CustomerModel.establishment.has(uuid=establishment_id)).order_by(CustomerModel.id)
+        stmt = select(CustomerModel).where(
+            CustomerModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(CustomerModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -139,7 +155,10 @@ class CustomerRepository(CustomerInterface):
         )
 
     def search_by_name(self, name: str, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Customer]:
-        stmt = select(CustomerModel).where(CustomerModel.customer_name.ilike(f"%{name}%"),CustomerModel.establishment.has(uuid=establishment_id)).order_by(CustomerModel.id)
+        stmt = select(CustomerModel).where(
+            CustomerModel.customer_name.ilike(f"%{name}%"),
+            CustomerModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(CustomerModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -166,7 +185,7 @@ class CustomerRepository(CustomerInterface):
         )
 
     def delete(self, customer_id: UUID) -> bool:
-        stmt = delete(CustomerModel).where(CustomerModel.uuid == customer_id)
+        stmt = delete(CustomerModel).where(CustomerModel.uuid == self._normalize_uuid(customer_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         

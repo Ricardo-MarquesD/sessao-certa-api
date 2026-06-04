@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from domain.entities import Scheduling
 from utils.enum import AppointmentStatus
 from utils.value_object import PaginatedResponse
-from datetime import datetime
+from datetime import datetime, date
 from uuid import UUID
 
 class SchedulingInterface(ABC):
@@ -43,6 +43,19 @@ class SchedulingInterface(ABC):
     def list_by_status(self, status: AppointmentStatus, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Scheduling]:
         pass
     
+    @abstractmethod
+    def list_active_by_day_and_scope(
+        self,
+        day: date,
+        establishment_id: int,
+        employee_id: int | None = None,
+    ) -> list[Scheduling]:
+        pass
+
+    @abstractmethod
+    def get_last_active_by_customer_internal_id(self, customer_internal_id: int) -> Scheduling | None:
+        pass
+
     @abstractmethod
     def delete(self, scheduling_id: UUID) -> bool:
         pass

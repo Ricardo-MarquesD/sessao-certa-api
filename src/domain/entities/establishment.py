@@ -25,6 +25,7 @@ class Establishment():
     subscription_date: datetime | None
     due_date: datetime | None
     trial_active: bool | None
+    available_hours: dict | None = None
 
     def __post_init__(self):
         if not isinstance(self.client, Client):
@@ -64,7 +65,8 @@ class Establishment():
             "img_url": self.img_url,
             "subscription_date": self.subscription_date.isoformat(sep=" ") if self.subscription_date else None,
             "due_date": self.due_date.isoformat(sep=" ") if self.due_date else None,
-            "trial_active": self.trial_active
+            "trial_active": self.trial_active,
+            "available_hours": self.available_hours
         }
 
     @staticmethod
@@ -88,5 +90,6 @@ class Establishment():
             img_url = data.get("img_url"),
             subscription_date = datetime.fromisoformat(data.get("subscription_date")) if data.get("subscription_date") else None,
             due_date = datetime.fromisoformat(data.get("due_date")) if data.get("due_date") else None,
-            trial_active = data.get("trial_active")
+            trial_active = data.get("trial_active"),
+            available_hours = data.get("available_hours")
         )

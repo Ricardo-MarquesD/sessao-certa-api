@@ -7,12 +7,16 @@ from utils.enum import AppointmentStatus
 from utils.value_object import PaginatedResponse, CursorEncoder
 from .entity_mapper import EntityMapper
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date, time
 
 class SchedulingRepository(SchedulingInterface):
 
     def __init__(self, db_session: Session):
         self.db_session = db_session
+
+    @staticmethod
+    def _normalize_uuid(value: UUID | str) -> str:
+        return str(value)
 
     def _to_entity(self, scheduling_model: SchedulingModel) -> Scheduling:
         from domain.entities import Employee, Customer, Service
@@ -59,26 +63,28 @@ class SchedulingRepository(SchedulingInterface):
         )
     
     def _to_orm(self, scheduling: Scheduling) -> SchedulingModel:
-        stmt = select(EstablishmentModel.id).where(EstablishmentModel.uuid == scheduling.establishment.id)
+        stmt = select(EstablishmentModel.id).where(
+            EstablishmentModel.uuid == self._normalize_uuid(scheduling.establishment.id)
+        )
         establishment_internal_id = self.db_session.scalar(stmt)
         
         if not establishment_internal_id:
             raise ValueError(f"Establishment with uuid {scheduling.establishment.id} not found")
         
-        stmt = select(CustomerModel.id).where(CustomerModel.uuid == scheduling.customer.id)
+        stmt = select(CustomerModel.id).where(CustomerModel.uuid == self._normalize_uuid(scheduling.customer.id))
         customer_internal_id = self.db_session.scalar(stmt)
         
         if not customer_internal_id:
             raise ValueError(f"Customer with uuid {scheduling.customer.id} not found")
         
-        stmt = select(ServiceModel.id).where(ServiceModel.uuid == scheduling.service.id)
+        stmt = select(ServiceModel.id).where(ServiceModel.uuid == self._normalize_uuid(scheduling.service.id))
         service_internal_id = self.db_session.scalar(stmt)
         
         if not service_internal_id:
             raise ValueError(f"Service with uuid {scheduling.service.id} not found")
         
         return SchedulingModel(
-            uuid=scheduling.id,
+            uuid=self._normalize_uuid(scheduling.id) if scheduling.id is not None else None,
             establishments_id=establishment_internal_id,
             employees_id=scheduling.employee.id,
             customers_id=customer_internal_id,
@@ -99,25 +105,27 @@ class SchedulingRepository(SchedulingInterface):
         return self._to_entity(scheduling_orm)
     
     def update(self, scheduling: Scheduling) -> Scheduling:
-        stmt = select(SchedulingModel).where(SchedulingModel.uuid == scheduling.id)
+        stmt = select(SchedulingModel).where(SchedulingModel.uuid == self._normalize_uuid(scheduling.id))
         scheduling_orm = self.db_session.scalar(stmt)
         
         if not scheduling_orm:
             raise ValueError(f"Scheduling with id {scheduling.id} not found")
         
-        stmt_est = select(EstablishmentModel.id).where(EstablishmentModel.uuid == scheduling.establishment.id)
+        stmt_est = select(EstablishmentModel.id).where(
+            EstablishmentModel.uuid == self._normalize_uuid(scheduling.establishment.id)
+        )
         establishment_internal_id = self.db_session.scalar(stmt_est)
         
         if not establishment_internal_id:
             raise ValueError(f"Establishment with uuid {scheduling.establishment.id} not found")
         
-        stmt_cust = select(CustomerModel.id).where(CustomerModel.uuid == scheduling.customer.id)
+        stmt_cust = select(CustomerModel.id).where(CustomerModel.uuid == self._normalize_uuid(scheduling.customer.id))
         customer_internal_id = self.db_session.scalar(stmt_cust)
         
         if not customer_internal_id:
             raise ValueError(f"Customer with uuid {scheduling.customer.id} not found")
         
-        stmt_serv = select(ServiceModel.id).where(ServiceModel.uuid == scheduling.service.id)
+        stmt_serv = select(ServiceModel.id).where(ServiceModel.uuid == self._normalize_uuid(scheduling.service.id))
         service_internal_id = self.db_session.scalar(stmt_serv)
         
         if not service_internal_id:
@@ -138,7 +146,7 @@ class SchedulingRepository(SchedulingInterface):
         return self._to_entity(scheduling_orm)
 
     def get_by_id(self, scheduling_id: UUID) -> Scheduling | None:
-        stmt = select(SchedulingModel).where(SchedulingModel.uuid == scheduling_id)
+        stmt = select(SchedulingModel).where(SchedulingModel.uuid == self._normalize_uuid(scheduling_id))
         result = self.db_session.scalar(stmt)
         
         return self._to_entity(result) if result else None
@@ -171,7 +179,9 @@ class SchedulingRepository(SchedulingInterface):
         )
 
     def list_by_establishment_id(self, establishment_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Scheduling]:
-        stmt = select(SchedulingModel).where(SchedulingModel.establishment.has(uuid=establishment_id)).order_by(SchedulingModel.id)
+        stmt = select(SchedulingModel).where(
+            SchedulingModel.establishment.has(uuid=self._normalize_uuid(establishment_id))
+        ).order_by(SchedulingModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -225,7 +235,9 @@ class SchedulingRepository(SchedulingInterface):
         )
 
     def list_by_customer_id(self, customer_id: UUID, cursor: str | None = None, limit: int = 15) -> PaginatedResponse[Scheduling]:
-        stmt = select(SchedulingModel).where(SchedulingModel.customer.has(uuid=customer_id)).order_by(SchedulingModel.id)
+        stmt = select(SchedulingModel).where(
+            SchedulingModel.customer.has(uuid=self._normalize_uuid(customer_id))
+        ).order_by(SchedulingModel.id)
         
         if cursor:
             cursor_data = CursorEncoder.decode(cursor)
@@ -305,9 +317,71 @@ class SchedulingRepository(SchedulingInterface):
             total_count=None
         )
 
+    def get_last_active_by_customer_internal_id(self, customer_internal_id: int) -> Scheduling | None:
+        stmt = (
+            select(SchedulingModel)
+            .where(
+                SchedulingModel.customers_id == customer_internal_id,
+                SchedulingModel.appointment_status.in_([
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                ]),
+            )
+            .order_by(SchedulingModel.appointment_date.desc())
+            .limit(1)
+        )
+
+        result = self.db_session.scalar(stmt)
+        return self._to_entity(result) if result else None
+
+    def list_active_by_customer_internal_id(self, customer_internal_id: int) -> list[Scheduling]:
+        stmt = (
+            select(SchedulingModel)
+            .where(
+                SchedulingModel.customers_id == customer_internal_id,
+                SchedulingModel.appointment_status.in_([
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                ]),
+            )
+            .order_by(SchedulingModel.appointment_date.asc())
+        )
+
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(scheduling) for scheduling in results]
+
     def delete(self, scheduling_id: UUID) -> bool:
-        stmt = delete(SchedulingModel).where(SchedulingModel.uuid == scheduling_id)
+        stmt = delete(SchedulingModel).where(SchedulingModel.uuid == self._normalize_uuid(scheduling_id))
         result = self.db_session.execute(stmt)
         self.db_session.commit()
         
         return result.rowcount > 0
+
+    def list_active_by_day_and_scope(
+        self,
+        day: date,
+        establishment_internal_id: int,
+        employee_id: int | None = None,
+    ) -> list[Scheduling]:
+        day_start = datetime.combine(day, time.min)
+        day_end = datetime.combine(day, time.max)
+
+        stmt = (
+            select(SchedulingModel)
+            .where(
+                SchedulingModel.establishments_id == establishment_internal_id,
+                SchedulingModel.appointment_date >= day_start,
+                SchedulingModel.appointment_date <= day_end,
+                SchedulingModel.appointment_status.in_([
+                    AppointmentStatus.SCHEDULED,
+                    AppointmentStatus.CONFIRMED,
+                ]),
+            )
+            .order_by(SchedulingModel.appointment_date)
+        )
+
+        if employee_id is not None:
+            stmt = stmt.where(SchedulingModel.employees_id == employee_id)
+
+        results = self.db_session.scalars(stmt).all()
+        return [self._to_entity(scheduling) for scheduling in results]

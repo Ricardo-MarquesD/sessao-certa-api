@@ -32,6 +32,10 @@ class EmployeeInterface(ABC):
     @abstractmethod
     def count_by_establishment_id(self, establishment_id: UUID) -> int:
         pass
+
+    @abstractmethod
+    def list_by_establishment_internal_id(self, establishment_id: int) -> list[Employee]:
+        pass
     
     @abstractmethod
     def delete(self, employee_id: UUID) -> bool:
