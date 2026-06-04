@@ -14,6 +14,7 @@ from controller.image_controller import router as image_router
 from controller.payment_webhook_controller import router as payment_webhook_router
 from controller.user_controller import router as user_router
 from controller.whatsapp_controller import router as whatsapp_router
+from controller.customer_controller import router as customer_router
 from middleware.auth import AuthError
 from schema import ErrorResponse
 
@@ -32,6 +33,7 @@ app.include_router(image_router)
 app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(payment_webhook_router)
+app.include_router(customer_router)
 
 
 @app.exception_handler(AuthError)
